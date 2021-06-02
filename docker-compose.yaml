@@ -1,0 +1,18 @@
+version: "3"
+services:
+
+ django:
+  build:
+   context: ./
+  volumes:
+   - ./django_examples/:/app
+   - ./django_modals/:/modals/django_modals
+   - /var/run/docker.sock:/var/run/docker.sock
+  command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8007"
+  environment:
+   - PYTHONPATH=/modals
+  ports:
+   - 8007:8007
+
+
+
