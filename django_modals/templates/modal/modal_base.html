@@ -1,0 +1,21 @@
+{% load crispy_forms_tags %}
+<div class="{{ css }} show fade" tabindex="-1" role="dialog" aria-hidden="true" data-url="{{ request.path }}">
+    {% block style %}
+    {% endblock %}
+    <div class="{{ css }}-dialog {{ css }}-{% if size %}{{ size }}{% else %}lg{% endif %}" role="document">
+        <div class="modal-content">
+            <input type="hidden" name="modal_name" value="{{ request.path }}">
+            <input type="hidden" name="modal_style" value="{{ slug.modalstyle }}">
+            {% block modal_header %}
+            {% endblock %}
+            <div class="{{ css }}-body">
+                {% block modal_content %}
+                {% endblock %}
+            </div>
+            {% block footer %}
+            {% endblock %}
+        </div>
+    </div>
+    {% block javascript %}
+    {% endblock %}
+</div>

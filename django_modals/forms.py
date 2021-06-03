@@ -9,10 +9,12 @@ from crispy_forms.bootstrap import StrictButton
 
 class CrispyFormMixin(object):
 
-    Meta = None
+   # Meta = None
     instance = None
 
     def post_init(self, *args, **kwargs):
+        if self.modal_config.get('form_setup'):
+            return self.modal_config['form_setup'](self, *args, **kwargs)
         pass
 
     def submit_button(self, **kwargs):
@@ -37,11 +39,16 @@ class CrispyFormMixin(object):
                                 css_class=css_class, **kwargs)
 
     def remove_kwargs(self, kwargs):
-        self.modal_config = kwargs.pop('modal_config', False)
+        self.modal_config = kwargs.pop('modal_config', {})
         self.no_buttons = kwargs.pop('no_buttons', False)
         self.pk = kwargs.pop('pk', None)
         self.readonly = kwargs.pop('readonly', False)
-        self.url = kwargs.pop('url', None)
+        # self.url = kwargs.pop('url', None)
+        if 'modal_title' in self.modal_config:
+            self.modal_title = self.modal_config['modal_title']
+        if 'form_delete' in self.modal_config:
+            self.Meta.delete = self.modal_config['form_delete']
+
 
     def set_title(self, title):
         if isinstance(title, list):
@@ -63,7 +70,7 @@ class CrispyFormMixin(object):
         if not hasattr(self.Meta, 'form_id'):
             self.Meta.form_id = self.helper.form_id = self.__class__.__name__
         self.helper.form_id = self.Meta.form_id
-        self.helper.form_action = self.url
+        # self.helper.form_action = self.url
         self.helper.form_group_wrapper_class = 'mb-2'
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-3'
@@ -91,7 +98,7 @@ class ModelCrispyForm(CrispyFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         Field.template = 'modal_fields/inline.html'
         self.remove_kwargs(kwargs)
-        super(ModelCrispyForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
     @classmethod

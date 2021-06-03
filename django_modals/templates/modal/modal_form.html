@@ -1,0 +1,19 @@
+{% extends 'modal/modal_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block modal_header %}
+    <div class="{{ css }}-header">
+    <span class="{{ css }}-title">
+        {% block header %}
+            <span class="{{ css }}-title">{{ form.modal_title|safe }}</span>
+        {% endblock %}
+    </span>
+        <button type="button" data-dismiss="modal">
+            <i class="fas fa-times pt-1"></i>
+        </button>
+    </div>
+{% endblock %}
+
+{% block modal_content %}
+    {% crispy form %}
+{% endblock %}

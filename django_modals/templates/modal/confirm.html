@@ -1,0 +1,11 @@
+{% extends "modal/modal_base.html" %}
+{% block modal_content %}
+    {{ message }}
+    <br><br>
+    <div style="float: right">
+        <button type="button" class="btn btn-danger px-4"
+                onclick="modal.process_commands([{function: 'post_modal', 'button_name': 'confirm_delete'}])">Yes
+        </button>
+        <button type="button" class="btn btn-success" data-dismiss="modal">Cancel</button>
+    </div>
+{% endblock %}

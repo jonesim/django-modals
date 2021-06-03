@@ -1,0 +1,79 @@
+{% load static crispy_forms_tags modal_tags %}
+
+<html>
+<head>
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+
+    <!-- bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+
+    <!-- select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"
+          integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+
+    <!-- Clipboard -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'crm/css/main-bootstrap.css' %}"/>
+    <script src="{% static 'django_modals/js/modals.js' %}"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'django_modals/css/modals.css' %}"/>
+    <script>
+        //modal.init_modals()
+
+        $(document).ready(function () {
+            form_url = '{{ request.path }}'
+
+            if (form_url.indexOf('modalstyle-page') > -1) {
+                modal.show_modal(form_url.replace('modalstyle-page', 'modaltyle-form'))
+            }
+
+
+        })
+
+    </script>
+    <style>
+/*
+        .window-header {
+            padding-top: .7rem;
+            padding-bottom: .7rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            font-size: 1.5rem;
+            font-weight: 500;
+            border-bottom: 1px solid #e9ecef
+
+        }
+
+        .form-horizontal label {
+            margin-left: 15px;
+        }
+
+        .form-horizontal .form-group {
+            margin-bottom: 0.5rem;
+        }
+
+        .window-body {
+            padding: 1rem;
+        }
+
+*/
+    </style>
+</head>
+
+<body>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% load modal_tags %}
+{% if company.id %}
+    <a class="btn btn-primary" href="{% show_modal 'person_nocompany_modal' 'href' 'company_id-' company.id %}">ADD PERSON</a>
+    <br><br>
+    <table class="table">
+        {% for p in company.person_set.all %}
+            <tr>
+                <td>
+                    {{ p.first_name }}
+                </td>
+                <td>
+                    {{ p.surname }}
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-warning" href="{% show_modal 'person_nocompany_modal' 'href' p.id %}">EDIT PERSON</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}

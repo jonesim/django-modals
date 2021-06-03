@@ -1,12 +1,13 @@
 import json
 from crispy_forms.utils import render_crispy_form
+from django.forms.models import modelform_factory
 from django.http import HttpResponse
 from django.views.generic.edit import FormView
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.views.generic.edit import ProcessFormView, ModelFormMixin
 from django.template.loader import render_to_string
 from django.shortcuts import render
-
+from .forms import ModelCrispyForm
 
 '''
 modalstyle
@@ -102,32 +103,49 @@ class BootstrapModalMixinBase(object):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['modal_config'] = {'slug': self.slug,
-                                  'user': self.request.user}
+        modal_config = {'slug': self.slug,
+                        'user': self.request.user}
+
         if self.request.GET.get('no_buttons'):
             kwargs['no_buttons'] = True
+        if hasattr(self, 'modal_title'):
+            modal_config['modal_title'] = self.modal_title
+        if hasattr(self, 'form_delete'):
+            modal_config['form_delete'] = self.form_delete
+        if hasattr(self, 'form_setup'):
+            modal_config['form_setup'] = self.form_setup
+        kwargs['modal_config'] = modal_config
         return kwargs
 
     def get(self, request, *args, **kwargs):
         if self.slug['modalstyle'] == 'window':
-            return render(request, 'blank_form.html', context={'request': request})
+            return render(request, 'modal/blank_form.html', context={'request': request})
 
         if self.slug['modalstyle'] == 'form':
             return super().get(request, *args, **kwargs)
 
         modal_html = render_to_string(self.template_name, self.get_context_data(**kwargs))
-        return render(request, 'blank_form.html', context={'modal_form': modal_html, 'request': request})
+        return render(request, 'modal/blank_form.html', context={'modal_form': modal_html, 'request': request})
 
 
 class BootstrapModalMixin(BootstrapModalMixinBase, FormView):
 
-    template_name = 'modal_base.html'
+    template_name = 'modal/modal_base.html'
 
 
 class BootstrapModelModalMixin(BootstrapModalMixinBase, SingleObjectTemplateResponseMixin, ModelFormMixin,
                                ProcessFormView):
 
-    template_name = 'modal_base.html'
+    template_name = 'modal/modal_form.html'
+    base_form = ModelCrispyForm
+
+    def __init__(self, *args, **kwargs):
+        if not self.form_class:
+            extra_kwargs = {}
+            if hasattr(self, 'widgets'):
+                extra_kwargs['widgets'] = self.widgets
+            self.form_class = modelform_factory(self.model, form=self.base_form, fields=self.form_fields, **extra_kwargs)
+        super().__init__(*args, **kwargs)
 
     def button_confirm_delete(self, request, *args, **kwargs):
         self.model = self.form_class.get_model(self.slug)
@@ -146,7 +164,8 @@ class BootstrapModelModalMixin(BootstrapModalMixinBase, SingleObjectTemplateResp
                       {'request': request, 'css': 'modal', 'size': 'md', 'message': 'Are you sure you want to delete?'})
 
     def process_slug_kwargs(self):
-        self.model = self.form_class.get_model(self.slug)
+        if self.model is None:
+            self.model = self.form_class.get_model(self.slug)
         if 'pk' in self.kwargs:
             self.object = self.get_object()
         else:
