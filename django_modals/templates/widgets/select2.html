@@ -1,0 +1,72 @@
+<select style="width:{% if widget.attrs.width %}{{ widget.attrs.width }}{% else %}100%{% endif %}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+    {% for group_name, group_choices, group_index in widget.optgroups %}{% if group_name %}
+        <optgroup label="{{ group_name }}">{% endif %}{% for option in group_choices %}
+        {% include option.template_name with widget=option %}{% endfor %}{% if group_name %}
+        </optgroup>{% endif %}{% endfor %}
+</select>
+
+<script>
+    var select2_{{ widget.attrs.id }} = function () {
+        var modal_container = $('#{{ widget.attrs.id }}').closest('.modal-content')
+        if (modal_container.length == 0 )
+        {
+            modal_container = $(document.body)
+        }
+        var data = {};
+        var modal_url = modal_container.find("input[name='modal_name']").val();
+
+        $('#{{ widget.attrs.id }}').select2({
+            theme: 'bootstrap4',
+            dropdownParent: modal_container,
+            allowClear: true,
+            placeholder: '-',
+            {% if widget.attrs.tags %}
+                tags: true,
+                createTag: function (params) {
+                    var term = $.trim(params.term);
+                    if (term === '') {
+                      return null;
+                     }
+                    return {
+                        id: 'new:' + term,
+                        text: term,
+                    }
+                },
+            {% endif %}
+            escapeMarkup: function (text) { return text; },
+            {% if widget.attrs.ajax %}
+                templateResult: function (text) {
+                    return $('<div>' + text.text + '</div>');
+                },
+                ajax: {
+                    url: $(modal_container).attr('data-url'),
+                    method: 'POST',
+                    dataType: 'json',
+                    url: modal_url,
+                    data: function (params) {
+                        data = {};
+                        $($('#{{ widget.attrs.id }}').closest('form')).serializeArray().map(function (x) {
+                            data[x.name] = x.value;
+                        })
+                        data['select2_name'] = '{{ widget.attrs.id|slice:"3:" }}';
+                        data['search'] = params.term;
+                        return data;
+                    }
+                }
+            {% endif %}
+        })
+    }()
+
+ function select2_button(e, modal_url){
+        e.preventDefault();
+        modal.show_modal((modal_url))
+ }
+     var no_open;
+
+
+ $(function ()
+ {
+     $('#id_{{ widget.name }}').change( function() {$('.btn').mousedown(function(e){ e.preventDefault(); no_open= true})})})
+     $('#id_{{ widget.name }}').on('select2:opening', function(e){ if(no_open){e.preventDefault(); no_open=false};})
+</script>
+

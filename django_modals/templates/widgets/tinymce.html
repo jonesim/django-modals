@@ -1,0 +1,14 @@
+<textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+{% if widget.value %}{{ widget.value }}{% endif %}</textarea>
+<script>
+    tinymce.remove('[name={{ widget.name }}]');
+    tinymce.init({
+        selector: '[name={{ widget.name }}]',
+        menubar: false,
+        statusbar: false,
+        plugins: 'textcolor',
+        toolbar: 'undo redo | styleselect | bold  italic | fontselect | fontsizeselect forecolor backcolor',
+    });
+
+
+</script>

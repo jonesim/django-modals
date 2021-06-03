@@ -1,0 +1,10 @@
+<div id="{{ widget.name }}-container" class="input-group-sm">
+    <input data-size="small" {% if widget.attrs.options %}dfs{% endif %}
+           data-toggle="toggle" type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value != None %}
+           value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+</div>
+<script>
+    $(function () {
+        $('#id_{{ widget.name }}').bootstrapToggle();
+    })
+</script>
