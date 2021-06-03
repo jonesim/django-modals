@@ -1,0 +1,16 @@
+{% load crispy_forms_field %}
+{% if group_class %}
+    <div class="{{ group_class }}">
+{% endif %}
+<div class="{{ field_class }}">
+    {% crispy_field field %}
+</div>
+<div class="{{ label_class }}">
+    <div id="div_{{ field.auto_id }}" class="{% if wrapper_class %} {{ wrapper_class }} {% endif %}">
+        <label for="{{ field.id_for_label }}"
+               class="form-control-sm {% if wrapper_class %} {{ wrapper_class }} {% endif %} col-form-label   {% if field.field.required %} requiredField{% endif %}">
+            {{ field.label|safe }}
+        </label>
+    </div>
+</div>
+</div>
