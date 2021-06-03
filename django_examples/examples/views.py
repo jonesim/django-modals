@@ -32,11 +32,9 @@ class Example1(DatatableView):
             ColumnBase(column_name='people', field='people', annotations={'people': Count('person__id')}),
             self.EditColumn(column_name='t'),
         )
-        table.column('name').column_defs['orderable'] = False
-        table.add_plugin(ColourRows, [{'column': 0, 'values': {'1': 'table-danger'}}])
         table.ajax_data = False
         table.add_js_filters('tag', 'Tags')
-        table.add_js_filters('totals', 'people', filter_title='Number of People', collapsed=False)
+        table.add_js_filters('people', filter_title='Number of People', collapsed=False)
 
     def add_to_context(self, **kwargs):
         return {'title': type(self).__name__, 'filter': filter}
