@@ -34,7 +34,6 @@ class Example1(DatatableView):
         )
         table.ajax_data = False
         table.add_js_filters('tag', 'Tags')
-        table.add_js_filters('people', filter_title='Number of People', collapsed=False)
 
     def add_to_context(self, **kwargs):
         return {'title': type(self).__name__, 'filter': filter}
