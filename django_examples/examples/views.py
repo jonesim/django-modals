@@ -1,7 +1,6 @@
 from django.db.models import Count
 from django_datatables.columns import ColumnBase, DatatableColumn
 from django_datatables.datatables import DatatableView
-from django_datatables.colour_rows import ColourRows
 from django_modals.helper import show_modal
 
 from . import models

@@ -2,11 +2,12 @@ import json
 from crispy_forms.utils import render_crispy_form
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
-from django.views.generic.edit import FormView
-from django.views.generic.detail import SingleObjectTemplateResponseMixin
-from django.views.generic.edit import ProcessFormView, ModelFormMixin
+from django.views.generic.base import TemplateResponseMixin
+from django.views.generic.edit import FormMixin, ProcessFormView
+from django.views.generic.detail import SingleObjectMixin
 from django.template.loader import render_to_string
 from django.shortcuts import render
+from django.core.handlers.wsgi import WSGIRequest
 from .forms import ModelCrispyForm
 
 '''
@@ -20,7 +21,9 @@ POST - just return form data
 '''
 
 
-class BootstrapModalMixinBase(object):
+class BootstrapModalMixinBase(ProcessFormView, TemplateResponseMixin):
+    kwargs: dict
+    request: WSGIRequest
 
     def __init__(self):
         super().__init__()
@@ -43,9 +46,6 @@ class BootstrapModalMixinBase(object):
     def process_slug_kwargs(self):
         pass
 
-    def post(self, request, *args, **kwargs):
-        return super().post(self, request, *args, **kwargs)
-
     def dispatch(self, request, *args, **kwargs):
         if request.is_ajax():
             self.slug['modalstyle'] = 'form'
@@ -62,12 +62,6 @@ class BootstrapModalMixinBase(object):
 
         return super().dispatch(request, *args, **self.kwargs)
 
-    def button_refresh_form(self, request, *args, **kwargs):
-        form = self.get_form()
-        form.clear_errors()
-        kwargs['form'] = form
-        return self.render_to_response(self.get_context_data(**kwargs))
-
     def add_command(self, function_name, params=None):
         if params is None:
             params = {}
@@ -80,26 +74,44 @@ class BootstrapModalMixinBase(object):
         return HttpResponse(json.dumps(self.response_commands), content_type='application/json')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {'request': self.request, 'slug': self.slug}
         if self.slug['modalstyle'] == 'windowform':
             context['css'] = 'window'
         else:
             context['css'] = 'modal'
-        context['request'] = self.request
-        context['slug'] = self.slug
         return context
 
-    def form_valid(self, form):
-        form.save()
-        if not self.response_commands:
-            self.add_command('reload')
-        return self.command_response()
+    def get(self, request, *args, **kwargs):
+        if self.slug['modalstyle'] == 'window':
+            return render(request, 'modal/blank_form.html', context={'request': request})
+
+        if self.slug['modalstyle'] == 'form':
+            return super().get(request, *args, **kwargs)
+
+        modal_html = render_to_string(self.template_name, self.get_context_data(**kwargs))
+        return render(request, 'modal/blank_form.html', context={'modal_form': modal_html, 'request': request})
+
+
+class BootstrapModalMixin(BootstrapModalMixinBase, FormMixin):
+
+    template_name = 'modal/modal_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(FormMixin.get_context_data(self, **kwargs))
+        return context
 
     def form_invalid(self, form):
         if self.request.GET.get('formonly', False):
             form = self.get_form()
             return HttpResponse(render_crispy_form(form))
         return super().form_invalid(form)
+
+    def form_valid(self, form):
+        form.save()
+        if not self.response_commands:
+            self.add_command('reload')
+        return self.command_response()
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -117,25 +129,15 @@ class BootstrapModalMixinBase(object):
         kwargs['modal_config'] = modal_config
         return kwargs
 
-    def get(self, request, *args, **kwargs):
-        if self.slug['modalstyle'] == 'window':
-            return render(request, 'modal/blank_form.html', context={'request': request})
-
-        if self.slug['modalstyle'] == 'form':
-            return super().get(request, *args, **kwargs)
-
-        modal_html = render_to_string(self.template_name, self.get_context_data(**kwargs))
-        return render(request, 'modal/blank_form.html', context={'modal_form': modal_html, 'request': request})
+    def button_refresh_form(self, _request, *_args, **kwargs):
+        form = self.get_form()
+        form.clear_errors()
+        kwargs['form'] = form
+        return self.render_to_response(self.get_context_data(**kwargs))
 
 
-class BootstrapModalMixin(BootstrapModalMixinBase, FormView):
-
-    template_name = 'modal/modal_base.html'
-
-
-class BootstrapModelModalMixin(BootstrapModalMixinBase, SingleObjectTemplateResponseMixin, ModelFormMixin,
-                               ProcessFormView):
-
+class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
+    form_fields: list
     template_name = 'modal/modal_form.html'
     base_form = ModelCrispyForm
 
@@ -144,22 +146,27 @@ class BootstrapModelModalMixin(BootstrapModalMixinBase, SingleObjectTemplateResp
             extra_kwargs = {}
             if hasattr(self, 'widgets'):
                 extra_kwargs['widgets'] = self.widgets
-            self.form_class = modelform_factory(self.model, form=self.base_form, fields=self.form_fields, **extra_kwargs)
+            self.form_class = modelform_factory(self.model, form=self.base_form, fields=self.form_fields,
+                                                **extra_kwargs)
         super().__init__(*args, **kwargs)
+        self.object = None
 
-    def button_confirm_delete(self, request, *args, **kwargs):
-        self.model = self.form_class.get_model(self.slug)
-        self.object = self.get_object()
-        if hasattr(self.object, 'can_delete') and not self.object.can_delete():
-            return render(request, 'modal/ok.html', {'css': 'modal', 'size': 'md',
-                                                     'message': self.object.delete_error_message})
-        self.object.delete()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        return kwargs
+
+    def button_confirm_delete(self, _request, *_args, **_kwargs):
+        form = self.get_form()
+        if form.Meta.delete:
+            self.object.delete()
         if not self.response_commands:
             self.add_command('reload')
         return self.command_response()
 
     @staticmethod
-    def button_delete(request, *args, **kwargs):
+    def button_delete(request, *_args, **_kwargs):
         return render(request, 'modal/confirm.html',
                       {'request': request, 'css': 'modal', 'size': 'md', 'message': 'Are you sure you want to delete?'})
 

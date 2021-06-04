@@ -12,10 +12,13 @@ urlpatterns = [
     path('modal/person/<slug:slug>/', modals.ModalPersonForm.as_view(), name='person_modal'),
     path('modal/person1/<slug:slug>/', modals.ModalPersonNoCompanyForm.as_view(), name='person_nocompany_modal'),
 
+    path('modal/hello/<slug:slug>/', modals.HelloModal.as_view(), name='hello_modal'),
+
+    path('modal/form/<slug:slug>/', modals.FormModal.as_view(), name='form_modal'),
+
     path('', views.Example1.as_view()),
     path('<int:pk>', views.CompanyView.as_view(), name='company'),
     path('example-1', views.Example1.as_view(), name='example1'),
     path('example-2/<int:pk>/', views.Example2.as_view(), name='example2'),
     path('example-2/', views.Example2.as_view(), name='example2'),
 ]
-

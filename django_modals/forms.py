@@ -7,9 +7,8 @@ from crispy_forms.layout import HTML, Field, Layout
 from crispy_forms.bootstrap import StrictButton
 
 
-class CrispyFormMixin(object):
+class CrispyFormMixin:
 
-   # Meta = None
     instance = None
 
     def post_init(self, *args, **kwargs):
@@ -49,8 +48,13 @@ class CrispyFormMixin(object):
         if 'form_delete' in self.modal_config:
             self.Meta.delete = self.modal_config['form_delete']
 
-
-    def set_title(self, title):
+    def set_title(self):
+        if hasattr(self, 'modal_title'):
+            title = self.modal_title
+        elif hasattr(self.Meta, 'modal_title'):
+            title = self.Meta.modal_title
+        else:
+            title = ''
         if isinstance(title, list):
             if self.instance.pk is None:
                 self.modal_title = title[0]
@@ -60,20 +64,14 @@ class CrispyFormMixin(object):
             self.modal_title = title
 
     def setup_modal(self, *args, **kwargs):
-        if not hasattr(self, 'modal_title'):
-            if hasattr(self.Meta, 'modal_title'):
-                self.modal_title = self.Meta.modal_title
-            else:
-                self.modal_title = ''
-        self.set_title(self.modal_title)
+        self.set_title()
         self.helper = FormHelper(self)
         if not hasattr(self.Meta, 'form_id'):
             self.Meta.form_id = self.helper.form_id = self.__class__.__name__
         self.helper.form_id = self.Meta.form_id
-        # self.helper.form_action = self.url
         self.helper.form_group_wrapper_class = 'mb-2'
         self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-md-3'
+        self.helper.label_class = 'col-md-3 col-form-label-sm'
         self.helper.field_class = 'col-md-9 col-lg-6 input-group-sm'
         for f in self.fields:
             if type(self.fields[f]) == forms.models.ModelChoiceField:
@@ -96,7 +94,6 @@ class CrispyFormMixin(object):
 class ModelCrispyForm(CrispyFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        Field.template = 'modal_fields/inline.html'
         self.remove_kwargs(kwargs)
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)

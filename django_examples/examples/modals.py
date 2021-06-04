@@ -3,8 +3,8 @@ from django.urls import reverse
 from django.forms.fields import CharField
 from django.template.loader import render_to_string
 from crispy_forms.layout import Field, HTML
-from django_modals.forms import ModelCrispyForm
-from django_modals.view_mixins import BootstrapModelModalMixin
+from django_modals.forms import ModelCrispyForm, CrispyForm
+from django_modals.view_mixins import BootstrapModelModalMixin, BootstrapModalMixinBase, BootstrapModalMixin
 from django_modals.widgets.select2 import Select2
 from .models import Company, Person
 
@@ -91,3 +91,26 @@ class CompanyForm(ModelCrispyForm):
 
 class ModalCompanySeparateForm(BootstrapModelModalMixin):
     form_class = CompanyForm
+
+
+class HelloModal(BootstrapModalMixinBase):
+    template_name = 'modal/ok.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['message'] = 'hello'
+        return context
+
+
+class TestForm(CrispyForm):
+
+    class Meta:
+        modal_title = 'Test Title'
+
+    def post_init(self, *args, **kwargs):
+        self.fields['name'] = CharField()
+        self.fields['field_2'] = CharField()
+
+
+class FormModal(BootstrapModalMixin):
+    form_class = TestForm
