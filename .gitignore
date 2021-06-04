@@ -1,2 +1,8 @@
 /django_examples/db.sqlite3
-/.idea/
+*.pyc
+.idea/
+build/
+dist/
+/django/db.sqlite3
+/django_filtered_datatables.egg-info/
+
