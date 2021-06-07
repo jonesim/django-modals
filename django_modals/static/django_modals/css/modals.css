@@ -1,4 +1,62 @@
 
+.asteriskField{
+    display: none;
+}
+
+.modal-header{
+    background-color: #eeeeeef5;
+    padding-top: 0.5rem!important;
+    padding-bottom: 0.5rem!important;
+}
+
+.form-buttons{
+    text-align: right;
+    margin-top: 1.5rem;
+}
+
+.form-buttons .modal-submit::before{
+    content: "\f0c7";
+    font-family: "Font Awesome 5 Free";
+    margin-right: 4px;
+    font-style: normal;
+    font-weight: 800;
+    text-decoration: inherit;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+.form-buttons .modal-cancel::before{
+    content: "\f05e";
+    font-family: "Font Awesome 5 Free";
+    margin-right: 4px;
+    font-style: normal;
+    font-weight: 800;
+    text-decoration: inherit;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+.form-buttons .modal-delete::before{
+    content: "\f1f8";
+    font-family: "Font Awesome 5 Free";
+    margin-right: 4px;
+    font-style: normal;
+    font-weight: 800;
+    text-decoration: inherit;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+
 .multi-field .form-group {
     display: flex;
     margin-bottom: 0;

@@ -3,31 +3,37 @@ from django import forms
 from django.apps import apps
 from django.template.loader import render_to_string
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, Field, Layout
+from crispy_forms.layout import HTML, Field, Layout, Div
 from crispy_forms.bootstrap import StrictButton
+
+
+class BaseModalFormat:
+
+    submit_css = "btn-success modal-submit"
+    cancel_css = "btn-secondary modal-cancel"
+    delete_css = "btn-danger modal-delete"
 
 
 class CrispyFormMixin:
 
     instance = None
+    format = BaseModalFormat
 
     def post_init(self, *args, **kwargs):
         if self.modal_config.get('form_setup'):
             return self.modal_config['form_setup'](self, *args, **kwargs)
         pass
 
-    def submit_button(self, **kwargs):
-        return self.button(kwargs.get('button_text', 'Submit'),
-                           [{'function': 'post_modal'}],
-                           kwargs.get('css_class', 'btn-primary'))
+    def submit_button(self, css_class=format.submit_css, button_text='Submit'):
+        return self.button(button_text, [{'function': 'post_modal'}], css_class)
 
-    def delete_button(self, **_kwargs):
+    def delete_button(self, css_class=format.delete_css):
         if self.instance.pk is not None:
-            return self.button('Delete', [{'function': 'post_modal', 'button_name': 'delete'}], "btn-danger")
+            return self.button('Delete', [{'function': 'post_modal', 'button_name': 'delete'}], css_class)
 
-    def cancel_button(self):
+    def cancel_button(self, css_class=format.cancel_css):
         function_params = [{'function': 'close'}]
-        return self.button('Cancel', function_params, "btn")
+        return self.button('Cancel', function_params, css_class)
 
     def button(self, title, commands, css_class, **kwargs):
         if self.no_buttons:
@@ -42,7 +48,6 @@ class CrispyFormMixin:
         self.no_buttons = kwargs.pop('no_buttons', False)
         self.pk = kwargs.pop('pk', None)
         self.readonly = kwargs.pop('readonly', False)
-        # self.url = kwargs.pop('url', None)
         if 'modal_title' in self.modal_config:
             self.modal_title = self.modal_config['modal_title']
         if 'form_delete' in self.modal_config:
@@ -84,10 +89,11 @@ class CrispyFormMixin:
             self.helper.layout = Layout(Field(*self.fields))
         existing_buttons = [b.content for b in self.helper.layout.fields if isinstance(b, StrictButton)]
         if not existing_buttons and not hasattr(self.Meta, 'no_buttons'):
-            self.helper.layout.append(self.submit_button(css_class="btn-success"))
+            buttons = [self.submit_button()]
             if hasattr(self.Meta, 'delete') and self.Meta.delete:
-                self.helper.layout.append(self.delete_button())
-            self.helper.layout.append(self.cancel_button())
+                buttons.append(self.delete_button())
+            buttons.append(self.cancel_button())
+            self.helper.layout.append(Div(Div(*buttons, css_class='btn-group'), css_class='form-buttons'))
         self.helper.layout.append(HTML(render_to_string('form_scripts/form_change.html', {'form_helper': self.helper})))
 
 

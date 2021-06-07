@@ -39,4 +39,4 @@ def submit_form(url_name, *args):
     slug = ''.join(str_args)
     url = reverse(url_name, kwargs={'slug': slug})
     view = resolve(url).func.view_class
-    return mark_safe(f"modal.send_form('{url}?formonly=true&no_buttons=True', '{view.form_class.__name__}')")
+    return mark_safe(f"ajax_helpers.send_form('{url}?formonly=true&no_buttons=True', '{view.form_class.__name__}')")

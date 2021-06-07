@@ -1,5 +1,5 @@
 {% load crispy_forms_tags %}
-<div class="{{ css }} show fade" tabindex="-1" role="dialog" aria-hidden="true" data-url="{{ request.path }}">
+<div class="{{ css }} show fade" tabindex="-1" role="dialog" aria-hidden="true" data-url="{{ request.path }}" data-backdrop="static" data-keyboard="false">
     {% block style %}
     {% endblock %}
     <div class="{{ css }}-dialog {{ css }}-{% if size %}{{ size }}{% else %}lg{% endif %}" role="document">

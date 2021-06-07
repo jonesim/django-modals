@@ -74,7 +74,7 @@ def post_data(modal_name, modal_type, data, *args, **kwargs):
     else:
         json_data = json.dumps(data).replace('"', "'")
     modal_url = reverse(modal_name, kwargs={'slug': slug})
-    javascript = f"modal.send_form('{modal_url}', null, {json_data})"
+    javascript = f"ajax_helpers.send_form('{modal_url}', null, {json_data})"
     if modal_type == 'datatable' or kwargs.get('datatable'):
         javascript = javascript.replace('-ref-', '%ref%')
     if modal_type == 'javascript' or modal_type == 'raw':

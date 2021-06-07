@@ -105,7 +105,9 @@ class BootstrapModalMixin(BootstrapModalMixinBase, FormMixin):
         if self.request.GET.get('formonly', False):
             form = self.get_form()
             return HttpResponse(render_crispy_form(form))
-        return super().form_invalid(form)
+        self.add_command('html', {'selector': f'#{form.Meta.form_id}:parent',
+                                              'parent': True, 'html': render_crispy_form(form)})
+        return self.command_response('modal_refresh_trigger', {'selector': f'#{form.Meta.form_id}'})
 
     def form_valid(self, form):
         form.save()
@@ -132,8 +134,7 @@ class BootstrapModalMixin(BootstrapModalMixinBase, FormMixin):
     def button_refresh_form(self, _request, *_args, **kwargs):
         form = self.get_form()
         form.clear_errors()
-        kwargs['form'] = form
-        return self.render_to_response(self.get_context_data(**kwargs))
+        return self.form_invalid(form)
 
 
 class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
@@ -162,13 +163,17 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
         if form.Meta.delete:
             self.object.delete()
         if not self.response_commands:
+            self.add_command('close')
+            self.add_command('close')
             self.add_command('reload')
         return self.command_response()
 
-    @staticmethod
-    def button_delete(request, *_args, **_kwargs):
-        return render(request, 'modal/confirm.html',
-                      {'request': request, 'css': 'modal', 'size': 'md', 'message': 'Are you sure you want to delete?'})
+    def button_delete(self, request, *_args, **_kwargs):
+        return self.command_response('modal_html', {
+            'selector': f'#{request.POST["modal_id"]}',
+            'html': render_to_string('modal/confirm.html', {'request': request, 'css': 'modal', 'size': 'md',
+                                                            'message': 'Are you sure you want to delete?'})
+        })
 
     def process_slug_kwargs(self):
         if self.model is None:
