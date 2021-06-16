@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/django-nested-modals.svg)](https://badge.fury.io/py/django-nested-modals)
+
 Add to installed apps in settings   
 `'bootstrap_modals',`
     
