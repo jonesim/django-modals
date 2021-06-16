@@ -2,7 +2,7 @@ from django.db.models import Count
 from django_datatables.columns import ColumnBase, DatatableColumn
 from django_datatables.datatables import DatatableView
 from django_modals.helper import show_modal
-
+from django.urls import reverse
 from . import models
 
 
@@ -16,8 +16,19 @@ class Example1(DatatableView):
             self.title = 'Edit'
             self.options['render'] = [{
                 'html': (f'<a class="btn btn-sm btn-secondary" '
-                         f'href="javascript:{show_modal("company_people_modal", "datatable2")}">EDIT</a>'),
+                                  f'href="javascript:{show_modal("company_people_modal", "datatable2")}">EDIT</a>'),
                 'var': '%ref%',
+                'column': 'id',
+                'function': 'Replace'
+            }]
+
+    class DeleteColumn(DatatableColumn):
+
+        def col_setup(self):
+            self.title = 'Delete'
+            self.options['render'] = [{
+                'html': f'''<a class="btn btn-sm btn-secondary" href="javascript:ajax_helpers.post_json({{url:\'{reverse("company_modal", args=(999999,))}\', data:{{button:\'delete\'}} }})">BIN</a>''',
+                'var': '999999',
                 'column': 'id',
                 'function': 'Replace'
             }]
@@ -30,6 +41,7 @@ class Example1(DatatableView):
             'Tags',
             ColumnBase(column_name='people', field='people', annotations={'people': Count('person__id')}),
             self.EditColumn(column_name='t'),
+            self.DeleteColumn(column_name='tx'),
         )
         table.ajax_data = False
         table.add_js_filters('tag', 'Tags')

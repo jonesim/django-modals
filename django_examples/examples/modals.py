@@ -4,7 +4,9 @@ from django.forms.fields import CharField
 from django.template.loader import render_to_string
 from crispy_forms.layout import Field, HTML
 from django_modals.forms import ModelCrispyForm, CrispyForm
-from django_modals.view_mixins import BootstrapModelModalMixin, BootstrapModalMixinBase, BootstrapModalMixin
+from django_modals.view_mixins import BootstrapModelModalMixin, BootstrapModalMixinBase, BootstrapModalMixin, \
+    BaseModal, MultiForm, MultiFormView
+
 from django_modals.widgets.select2 import Select2
 from .models import Company, Person
 
@@ -44,7 +46,7 @@ class ModalCompanyFormPeople(BootstrapModelModalMixin):
         if not self.object.id:
             form.save()
             self.request.path = reverse('company_people_modal', kwargs={'slug': self.object.id})
-            return self.get(self.request, pk=self.object.id)
+            self.add_command('overwrite_modal', html=self.get(self.request, pk=self.object.id).rendered_content)
         return super().form_valid(form)
 
 
@@ -93,6 +95,22 @@ class ModalCompanySeparateForm(BootstrapModelModalMixin):
     form_class = CompanyForm
 
 
+class ModalCompanyPerson(MultiFormView):
+
+    modal_title = 'Multi form example'
+    forms = [
+        MultiForm(Company, ['name']),
+        MultiForm(Person, ['title', 'first_name', 'surname']),
+    ]
+
+    def forms_valid(self, forms):
+        company = forms['CompanyForm'].save()
+        forms['PersonForm'].instance.company = company
+        forms['PersonForm'].instance.date_entered = datetime.date.today()
+        forms['PersonForm'].save()
+        return self.command_response('reload')
+
+
 class HelloModal(BootstrapModalMixinBase):
     template_name = 'modal/ok.html'
 
@@ -100,6 +118,27 @@ class HelloModal(BootstrapModalMixinBase):
         context = super().get_context_data(**kwargs)
         context['message'] = 'hello'
         return context
+
+
+class ModalButtons(BaseModal):
+    template_name = 'modal_buttons.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['message'] = 'hello'
+        return context
+
+    def button_yes(self, **_kwargs):
+        self.add_command('message', text='You pressed YES')
+        return self.command_response('close')
+
+    def button_change(self, **_kwargs):
+        return self.command_response(
+            'overwrite_modal',
+            html=render_to_string('modal/confirm.html', {'request': self.request, 'css': 'modal', 'size': 'md',
+                                                         'button_function': 'yes',
+                                                         'message': 'You pressed the button'})
+        )
 
 
 class TestForm(CrispyForm):

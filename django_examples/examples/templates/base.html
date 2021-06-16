@@ -9,7 +9,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
-        <script src="{% static 'django_modals/js/ajax_helpers.js' %}"></script>
+        <script src="{% static 'ajax_helpers/ajax_helpers.js' %}"></script>
    <script src="{% static 'django_modals/js/modals.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'django_modals/css/modals.css' %}"/>
     <!-- bootstrap -->
@@ -44,13 +44,12 @@
     <a class="btn btn-primary" href="{% show_modal 'separate_form_modal' 'href' %}">COMPANY SEPARATE FORM</a>
 
 
-
-    <a class="btn btn-primary" href="{% show_modal 'company_modal' 'href' 1 %}">EDIT COMPANY 1</a>
+    <a class="btn btn-primary" href="{% show_modal 'multi_form_modal' 'href' %}">MULTI FORM</a>
     <a class="btn btn-primary" href="{% show_modal 'person_modal' 'href' %}">NEW PERSON</a>
     <br>
     <br>
     <a class="btn btn-primary" href="{% show_modal 'hello_modal' 'href' %}">HELLO</a>
-
+    <a class="btn btn-primary" href="{% show_modal 'button_modal' 'href' %}">BUTTONS</a>
     <br>
     <br>
     <a class="btn btn-primary" href="{% show_modal 'form_modal' 'href' %}">FORM</a>
