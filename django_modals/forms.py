@@ -29,7 +29,7 @@ class CrispyFormMixin:
 
     def delete_button(self, css_class=format.delete_css):
         if self.instance.pk is not None:
-            return self.button('Delete', [{'function': 'post_modal', 'button_name': 'delete'}], css_class)
+            return self.button('Delete', [{'function': 'post_modal', 'button': 'delete'}], css_class)
 
     def cancel_button(self, css_class=format.cancel_css):
         function_params = [{'function': 'close'}]
@@ -78,6 +78,7 @@ class CrispyFormMixin:
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-3 col-form-label-sm'
         self.helper.field_class = 'col-md-9 col-lg-6 input-group-sm'
+        self.helper.disable_csrf = True
         for f in self.fields:
             if type(self.fields[f]) == forms.models.ModelChoiceField:
                 self.fields[f].empty_label = ' '

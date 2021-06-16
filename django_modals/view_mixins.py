@@ -1,13 +1,15 @@
 import json
+import collections
 from crispy_forms.utils import render_crispy_form
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
-from django.views.generic.base import TemplateResponseMixin
+from django.views.generic.base import TemplateResponseMixin, TemplateView
 from django.views.generic.edit import FormMixin, ProcessFormView
 from django.views.generic.detail import SingleObjectMixin
 from django.template.loader import render_to_string
 from django.shortcuts import render
 from django.core.handlers.wsgi import WSGIRequest
+from ajax_helpers.mixins import AjaxHelpers
 from .forms import ModelCrispyForm
 
 '''
@@ -21,14 +23,42 @@ POST - just return form data
 '''
 
 
-class BootstrapModalMixinBase(ProcessFormView, TemplateResponseMixin):
-    kwargs: dict
-    request: WSGIRequest
+class BaseModalMixin:
 
     def __init__(self):
         super().__init__()
         self.slug = {'modalstyle': 'normal'}
-        self.response_commands = []
+
+    def get_context_data(self, **kwargs):
+        if hasattr(super(), 'get_context_data'):
+            context = super().get_context_data(**kwargs)
+        else:
+            context = {}
+        context.update({'request': self.request, 'slug': self.slug})
+        if self.slug['modalstyle'] == 'windowform':
+            context['css'] = 'window'
+        else:
+            context['css'] = 'modal'
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if request.is_ajax() and request.content_type == 'multipart/form-data':
+            response = request.POST
+            for t in self.ajax_commands:
+                if t in response and hasattr(self, f'{t}_{response[t]}'):
+                    return getattr(self, f'{t}_{response[t]}')(**response)
+        if hasattr(super(), 'post'):
+            return super().post(request, *args, **kwargs)
+
+
+class BaseModal(BaseModalMixin, AjaxHelpers, TemplateView):
+    pass
+
+
+class BootstrapModalMixinBase(BaseModalMixin, AjaxHelpers, TemplateResponseMixin, ProcessFormView):
+    kwargs: dict
+    request: WSGIRequest
+    ajax_commands = ['button', 'select2']
 
     def split_slug(self, kwargs):
         if 'slug' not in kwargs:
@@ -51,35 +81,7 @@ class BootstrapModalMixinBase(ProcessFormView, TemplateResponseMixin):
             self.slug['modalstyle'] = 'form'
         self.split_slug(kwargs)
         self.process_slug_kwargs()
-
-        if request.method.lower() == 'post':
-            ajax_functions = ['button_name', 'select2_name']
-            for f in ajax_functions:
-                if f in request.POST:
-                    function_name = f[:-4] + request.POST[f].lower()
-                    if hasattr(self, function_name):
-                        return getattr(self, function_name)(request, *args, **self.kwargs)
-
         return super().dispatch(request, *args, **self.kwargs)
-
-    def add_command(self, function_name, params=None):
-        if params is None:
-            params = {}
-        params['function'] = function_name
-        self.response_commands.append(params)
-
-    def command_response(self, function_name=None, params=None):
-        if function_name is not None:
-            self.add_command(function_name, params)
-        return HttpResponse(json.dumps(self.response_commands), content_type='application/json')
-
-    def get_context_data(self, **kwargs):
-        context = {'request': self.request, 'slug': self.slug}
-        if self.slug['modalstyle'] == 'windowform':
-            context['css'] = 'window'
-        else:
-            context['css'] = 'modal'
-        return context
 
     def get(self, request, *args, **kwargs):
         if self.slug['modalstyle'] == 'window':
@@ -90,6 +92,10 @@ class BootstrapModalMixinBase(ProcessFormView, TemplateResponseMixin):
 
         modal_html = render_to_string(self.template_name, self.get_context_data(**kwargs))
         return render(request, 'modal/blank_form.html', context={'modal_form': modal_html, 'request': request})
+
+    def refresh_form(self, form):
+        self.add_command('html', selector=f'#{form.Meta.form_id}', parent=True, html=render_crispy_form(form))
+        return self.command_response('modal_refresh_trigger', selector=f'#{form.Meta.form_id}')
 
 
 class BootstrapModalMixin(BootstrapModalMixinBase, FormMixin):
@@ -105,9 +111,7 @@ class BootstrapModalMixin(BootstrapModalMixinBase, FormMixin):
         if self.request.GET.get('formonly', False):
             form = self.get_form()
             return HttpResponse(render_crispy_form(form))
-        self.add_command('html', {'selector': f'#{form.Meta.form_id}:parent',
-                                              'parent': True, 'html': render_crispy_form(form)})
-        return self.command_response('modal_refresh_trigger', {'selector': f'#{form.Meta.form_id}'})
+        return self.refresh_form(form)
 
     def form_valid(self, form):
         form.save()
@@ -131,14 +135,14 @@ class BootstrapModalMixin(BootstrapModalMixinBase, FormMixin):
         kwargs['modal_config'] = modal_config
         return kwargs
 
-    def button_refresh_form(self, _request, *_args, **kwargs):
+    def button_refresh_form(self, **_kwargs):
         form = self.get_form()
         form.clear_errors()
         return self.form_invalid(form)
 
 
 class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
-    form_fields: list
+    form_fields = []
     template_name = 'modal/modal_form.html'
     base_form = ModelCrispyForm
 
@@ -158,22 +162,23 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
             kwargs.update({'instance': self.object})
         return kwargs
 
-    def button_confirm_delete(self, _request, *_args, **_kwargs):
+    def button_confirm_delete(self, **_kwargs):
         form = self.get_form()
         if form.Meta.delete:
             self.object.delete()
         if not self.response_commands:
-            self.add_command('close')
-            self.add_command('close')
+            self.add_command('close', no_refresh=True)
             self.add_command('reload')
         return self.command_response()
 
-    def button_delete(self, request, *_args, **_kwargs):
-        return self.command_response('modal_html', {
-            'selector': f'#{request.POST["modal_id"]}',
-            'html': render_to_string('modal/confirm.html', {'request': request, 'css': 'modal', 'size': 'md',
-                                                            'message': 'Are you sure you want to delete?'})
-        })
+    def button_delete(self, **_kwargs):
+        return self.command_response(
+            'modal_html', html=render_to_string('modal/confirm.html', {
+                'request': self.request, 'css': 'modal', 'size': 'md',
+                'button_function': 'confirm_delete',
+                'message': 'Are you sure you want to delete?'
+            })
+        )
 
     def process_slug_kwargs(self):
         if self.model is None:
@@ -191,3 +196,64 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
                     self.initial[i] = [self.slug[i]]
                 else:
                     setattr(self.object, i, self.slug[i])
+
+
+MultiForm = collections.namedtuple('MultiForm', ['model', 'fields', 'id', 'initial', 'widgets'],
+                                   defaults=[None, None, None, {}, []])
+
+
+class MultiFormView(BootstrapModalMixinBase):
+    template_name = 'modal/multi_form.html'
+    modal_title = ''
+    base_form = ModelCrispyForm
+    forms = []
+
+    def get_form_classes(self):
+        return [modelform_factory(f.model, form=self.base_form, fields=f.fields, widgets=f.widgets)
+                for f in self.forms]
+
+    def get_form_kwargs(self):
+        all_kwargs = []
+        if self.request.method in ('POST', 'PUT'):
+            form_data = json.loads(self.request.body)
+        else:
+            form_data = {}
+        for f in self.forms:
+            form_id = f.id
+            if not form_id:
+                form_id = f.model.__name__ + 'Form'
+            kwargs = f.initial.copy()
+            kwargs['no_buttons'] = True
+            if self.request.method in ('POST', 'PUT'):
+                kwargs.update({
+                    'data': form_data[form_id],
+                    # 'files': self.request.FILES,
+                })
+            all_kwargs.append(kwargs)
+        all_kwargs[-1]['no_buttons'] = False
+        return all_kwargs
+
+    def get_forms(self):
+        form_kwargs = self.get_form_kwargs()
+        return [form_class(**form_kwargs[c]) for c, form_class in enumerate(self.get_form_classes())]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['forms'] = self.get_forms()
+        context['modal_title'] = self.modal_title
+        return context
+
+    def refresh_form(self, forms):
+        self.add_command('html', selector=f'#{forms[0].Meta.form_id}', parent=True,
+                         html=' '.join([render_crispy_form(f) for f in forms]))
+        return self.command_response('modal_refresh_trigger', selector=f'#{forms[0].Meta.form_id}')
+
+    def forms_valid(self):
+        pass
+
+    def post(self, request, *args, **kwargs):
+        forms = self.get_forms()
+        for f in forms:
+            if not f.is_valid():
+                return self.refresh_form(forms)
+        return self.forms_valid({f.helper.form_id: f for f in forms})

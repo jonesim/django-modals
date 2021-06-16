@@ -12,6 +12,7 @@ if (typeof modal == 'undefined') {
     var modal = function () {
         let window_width = 1022
         var open_modals = 0;
+        var modals = []
         var process_lock = false;
         var post_load_event = new CustomEvent('modalPostLoad');
         var target;
@@ -30,7 +31,10 @@ if (typeof modal == 'undefined') {
             }
         }
 
-        ajax_helpers.command_functions.close = function () {
+        ajax_helpers.command_functions.close = function (command) {
+            if (command !== undefined && command.no_refresh === true){
+                modals[modals.length-1].no_refresh = true
+            }
             if (determine_type() == 'popup') {
                 window.close()
             } else {
@@ -38,7 +42,13 @@ if (typeof modal == 'undefined') {
                 modal_div().modal('hide');
             }
         }
-
+        ajax_helpers.command_functions.overwrite_modal = function (command) {
+            if (command.selector === undefined){
+                command.selector = '#' + modal.active_modal_container_id()
+            }
+            ajax_helpers.command_functions.html(command)
+            init_modal_container($(command.selector))
+        }
         ajax_helpers.command_functions.show_modal = function (command) {
             ajax_helpers.ajax_busy = true;
             show_modal(command.modal);
@@ -47,7 +57,7 @@ if (typeof modal == 'undefined') {
             create_modal(command.html);
         }
         ajax_helpers.command_functions.post_modal = function (command) {
-            send_inputs(command.button_name);
+            send_inputs(command.button);
         }
 
         ajax_helpers.command_functions.modal_refresh_trigger = function (command) {
@@ -61,17 +71,11 @@ if (typeof modal == 'undefined') {
 
         function determine_type() {
             if (typeof (form_url) == 'undefined') {
-                if (open_modals == 1) {
-                    return 'modal_base'
-                } else {
                     return 'modal'
-                }
             } else {
                 switch (open_modals) {
                     case 1:
                         return 'popup'
-                    case 2:
-                        return 'modal_base'
                     default:
                         return 'modal'
                 }
@@ -80,9 +84,17 @@ if (typeof modal == 'undefined') {
 
         function create_modal(modal_html) {
             open_modals += 1;
+            modals.push({id: active_modal_container_id()})
             modal_container = $('<div>', {id: active_modal_container_id()}).appendTo('body');
             modal_container.html(modal_html);
-
+            if (open_modals === 1) {
+                backdrop = $('<div>', {class: 'modal-backdrop fade'}).appendTo('body');
+                window.setTimeout(function () {
+                    $(backdrop).addClass('show')
+                }, 50)
+            }
+            set_backdrop_z();
+            init_modal_container(modal_container)
             /*
             window.onbeforeunload = function() {
                 if (open_modals > 0){
@@ -90,28 +102,23 @@ if (typeof modal == 'undefined') {
                 }
             };
             */
+        }
+        function init_modal_container(modal_container){
             modal_element = modal_container.children();
             modal_element.css('z-index', 1040 + (10 * open_modals));
-
+            modal_element.modal({'backdrop': false})
             modal_type = determine_type();
-            switch (modal_type) {
-                case 'modal_base':
-                    modal_element.modal();
-                    set_backdrop_z();
-                    break;
-                case 'modal':
-                    modal_element.modal({'backdrop': false});
-                    set_backdrop_z();
-                    break;
-            }
-
             modal_element.on('hidden.bs.modal', function (event) {
                 $(this).parent().remove();
                 open_modals -= 1;
+                if (open_modals == 0){
+                    $('.modal-backdrop').remove()
+                }
+                var closing_modal = modals.pop()
                 set_backdrop_z();
                 open_modals && $(document.body).addClass('modal-open');
                 ajax_helpers.ajax_busy = false;
-                if (open_modals > 0) {
+                if (open_modals > 0 && closing_modal.no_refresh !== true) {
                     send_inputs('refresh_form')
                 }
             });
@@ -190,7 +197,7 @@ if (typeof modal == 'undefined') {
             if (typeof (button_name) == 'object') {
                 params = button_name
             } else if (typeof (button_name) != 'undefined') {
-                params = {'button_name': button_name}
+                params = {'button': button_name}
             } else {
                 params = {}
             }
@@ -201,17 +208,31 @@ if (typeof modal == 'undefined') {
                 modal_url = url_change(modal_url, 'modalstyle', 'windowform')
             }
             if (typeof (tinymce) != 'undefined') tinymce.triggerSave();
-            data = new FormData(modal_container.find('form')[0])
-            for (var property in params) {
-                data.append(property, params[property])
+
+            forms = modal_container.find('form')
+            if (forms.length > 1) {
+                var data = {}
+                for (var f of forms) {
+                    var form_data = new FormData(f)
+                    data[f.id] = {}
+                    for (var d of form_data.entries()) {
+                        data[f.id][d[0]] = d[1]
+                    }
+                }
+                data = (JSON.stringify(data))
+            } else {
+                data = new FormData(forms[0])
+                for (var property in params) {
+                    data.append(property, params[property])
+                }
             }
             ajax_helpers.post_data(modal_url, data)
         }
 
         function url_change(url, key, value) {
             split_url = url.split('/')
-            slug = split_url[split_url.length - 2]
-            split_slug = slug.split('-')
+            var slug = split_url[split_url.length - 2]
+            var split_slug = slug.split('-')
             if (split_slug.length == 1) {
                 split_slug = ['pk', slug]
             }
@@ -247,18 +268,14 @@ if (typeof modal == 'undefined') {
             send_inputs('refresh_form', function (form_response) {
                 load_external_modal(doc, form_response)
             })
-
             //modal_container = get_modal_container();
             //modal_name = modal_container.find("input[name='modal_name']").val();
             //window.open('/modal/' + modal_name + '/', width=600, height=400 )
-
             //  modal_div().toggleClass('minimised')
             //   $('.modal-backdrop').toggle();
             //    $('body').removeClass('modal-open')
             //   modal_div().hide()
-
         }
-
         return {
             show_modal,
             send_inputs,
