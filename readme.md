@@ -40,7 +40,7 @@ Add to template
 
 ###### **Adding different buttons**
 
- `self.button('Delete', [{'function': 'post_modal', 'button_name': 'delete'}], "btn-danger")`
+ `self.button('Delete', [{'function': 'post_modal', 'button': 'delete'}], "btn-danger")`
 
 in view the function button_buttonname will be called
 
