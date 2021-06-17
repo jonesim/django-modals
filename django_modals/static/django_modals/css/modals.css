@@ -1,20 +1,33 @@
+select[readonly].select2-hidden-accessible + .select2-container {
+    pointer-events: none;
+    touch-action: none;
+}
 
-.asteriskField{
+select[readonly].select2-hidden-accessible + .select2-container .select2-selection {
+    background: #eee;
+    box-shadow: none;
+}
+
+select[readonly].select2-hidden-accessible + .select2-container .select2-selection__arrow, select[readonly].select2-hidden-accessible + .select2-container .select2-selection__clear {
     display: none;
 }
 
-.modal-header{
-    background-color: #eeeeeef5;
-    padding-top: 0.5rem!important;
-    padding-bottom: 0.5rem!important;
+.asteriskField {
+    display: none;
 }
 
-.form-buttons{
+.modal-header {
+    background-color: #eeeeeef5;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+.form-buttons {
     text-align: right;
     margin-top: 1.5rem;
 }
 
-.form-buttons .modal-submit::before{
+.form-buttons .modal-submit::before {
     content: "\f0c7";
     font-family: "Font Awesome 5 Free";
     margin-right: 4px;
@@ -28,7 +41,7 @@
     -webkit-font-smoothing: antialiased;
 }
 
-.form-buttons .modal-cancel::before{
+.form-buttons .modal-cancel::before {
     content: "\f05e";
     font-family: "Font Awesome 5 Free";
     margin-right: 4px;
@@ -42,7 +55,7 @@
     -webkit-font-smoothing: antialiased;
 }
 
-.form-buttons .modal-delete::before{
+.form-buttons .modal-delete::before {
     content: "\f1f8";
     font-family: "Font Awesome 5 Free";
     margin-right: 4px;
