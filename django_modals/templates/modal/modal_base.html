@@ -7,15 +7,31 @@
             <input type="hidden" name="modal_name" value="{{ request.path }}">
             <input type="hidden" name="modal_style" value="{{ slug.modalstyle }}">
             {% block modal_header %}
+                {% if header %}
+                    <div class="modal-header">
+                        <span class="modal-title">
+                            {{ header }}
+                        </span>
+                        <button type="button" data-dismiss="modal">
+                            <i class="fas fa-times pt-1"></i>
+                        </button>
+                    </div>
+                {% endif %}
             {% endblock %}
             <div class="{{ css }}-body">
                 {% block modal_content %}
                 {% endblock %}
             </div>
             {% block footer %}
+                {{ footer }}
             {% endblock %}
         </div>
     </div>
     {% block javascript %}
+        {% if script %}
+            <script>
+                {{ script }}
+            </script>
+        {% endif %}
     {% endblock %}
 </div>
