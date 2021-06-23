@@ -8,8 +8,8 @@
 
     modals contained in <div> with id modal-%no% which is created initially and destroyed on hidden
 */
-if (typeof modal == 'undefined') {
-    var modal = function () {
+if (typeof django_modal == 'undefined') {
+    var django_modal = function () {
         let window_width = 1022
         var open_modals = 0;
         var modals = []
@@ -44,7 +44,7 @@ if (typeof modal == 'undefined') {
         }
         ajax_helpers.command_functions.overwrite_modal = function (command) {
             if (command.selector === undefined){
-                command.selector = '#' + modal.active_modal_container_id()
+                command.selector = '#' + django_modal.active_modal_container_id()
             }
             ajax_helpers.command_functions.html(command)
             init_modal_container($(command.selector))
@@ -61,7 +61,7 @@ if (typeof modal == 'undefined') {
         }
 
         ajax_helpers.command_functions.modal_refresh_trigger = function (command) {
-            $(command.selector).trigger('modalPostLoad', [modal.active_modal_container_id()])
+            $(command.selector).trigger('modalPostLoad', [django_modal.active_modal_container_id()])
         }
 
         if (window.opener != null) {
@@ -219,14 +219,18 @@ if (typeof modal == 'undefined') {
                         data[f.id][d[0]] = d[1]
                     }
                 }
-                data = (JSON.stringify(data))
+                for (var property in params) {
+                    data[property] = params[property]
+                }
+                ajax_data = {'data': data, url: modal_url}
+                ajax_helpers.post_json(ajax_data)
             } else {
                 data = new FormData(forms[0])
                 for (var property in params) {
                     data.append(property, params[property])
                 }
+                ajax_helpers.post_data(modal_url, data)
             }
-            ajax_helpers.post_data(modal_url, data)
         }
 
         function url_change(url, key, value) {
@@ -254,7 +258,7 @@ if (typeof modal == 'undefined') {
                     load_external_modal(document, html)
                 }, 100)
             } else {
-                doc.modal.create_modal(html)
+                doc.django_modal.create_modal(html)
             }
         }
 
@@ -276,6 +280,69 @@ if (typeof modal == 'undefined') {
             //    $('body').removeClass('modal-open')
             //   modal_div().hide()
         }
+
+        var form_change_functions = {
+            hide: function (config) {
+                $(config.selector).hide()
+            },
+            show: function (config) {
+                $(config.selector).show()
+            },
+            disable: function (config) {
+                $(config.selector + ' input').attr('disabled', true)
+            },
+            enable: function (config) {
+                $(config.selector + ' input').attr('disabled', false)
+            },
+            clear: function (config) {
+                $(config.selector + ' input').val('')
+            },
+        }
+
+        var modal_triggers = {}
+
+        function reset_triggers(form_id){
+            for (var f in django_modal.modal_triggers[form_id]){
+                alter_form($('#' + form_id + ' [name="' + f + '"]'))
+            }
+        }
+
+        function alter_form(field) {
+            var value
+            var element = $(field)
+            var form_id = element.closest('form').attr('id')
+            config = django_modal.modal_triggers[form_id][element.attr('name')]
+            switch (element.prop('type')) {
+                case 'checkbox':
+                    if (element.is(':checked')) {
+                        value = 'checked'
+                    } else {
+                        value = 'unchecked'
+                    }
+                    break;
+                default:
+                    value = element.val()
+            }
+            if (Array.isArray(config)) {
+                for (var c of config) {
+                    perform_function(c, value)
+                }
+            } else {
+                perform_function(config, value)
+            }
+        }
+
+        function perform_function(config, value) {
+            var html_function = config.values[value]
+            if (html_function === undefined) {
+                if (config.default !== undefined) {
+                    form_change_functions[config.default](config)
+                }
+            } else {
+                form_change_functions[html_function](config)
+            }
+        }
+
         return {
             show_modal,
             send_inputs,
@@ -283,6 +350,10 @@ if (typeof modal == 'undefined') {
             create_modal,
             process_commands_lock,
             active_modal_container_id,
+            modal_triggers,
+            alter_form,
+            form_change_functions,
+            reset_triggers,
         }
     }();
 }

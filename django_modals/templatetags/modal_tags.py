@@ -1,7 +1,7 @@
 from django import template
 from django.urls import reverse, resolve
 from django.utils.safestring import mark_safe
-from django_modals.helper import show_modal as show_modal_helper, post_data_tag
+from django_modals.helper import show_modal as show_modal_helper
 
 register = template.Library()
 
@@ -10,7 +10,7 @@ register = template.Library()
 def onclick_modal(modal, *args):
     str_args = [str(a) for a in args]
     slug = ''.join(str_args)
-    return mark_safe("modal.show_modal('{}')".format(reverse(modal, kwargs={'slug': slug})))
+    return mark_safe("django_modal.show_modal('{}')".format(reverse(modal, kwargs={'slug': slug})))
 
 
 @register.simple_tag
@@ -23,11 +23,6 @@ def modal_url(modal, *args):
 @register.simple_tag
 def show_modal(modal, *args, **kwargs):
     return mark_safe(show_modal_helper(modal, *args, **kwargs))
-
-
-@register.simple_tag
-def post_data(modal, modal_type,  data, *args, **kwargs):
-    return mark_safe(post_data_tag(modal, modal_type, data, *args, **kwargs))
 
 
 @register.simple_tag
