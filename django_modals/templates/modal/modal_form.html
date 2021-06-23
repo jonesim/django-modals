@@ -5,7 +5,7 @@
     <div class="{{ css }}-header">
     <span class="{{ css }}-title">
         {% block header %}
-            <span class="{{ css }}-title">{{ form.modal_title|safe }}</span>
+            <span class="{{ css }}-title">{{ form.get_title }}</span>
         {% endblock %}
     </span>
         <button type="button" data-dismiss="modal">
