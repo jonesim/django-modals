@@ -1,3 +1,11 @@
+
+@media only screen and (min-width: 1550px)
+{
+    .modal-xl{
+        max-width:1500px!important;
+    }
+}
+
 select[readonly].select2-hidden-accessible + .select2-container {
     pointer-events: none;
     touch-action: none;
@@ -69,11 +77,6 @@ select[readonly].select2-hidden-accessible + .select2-container .select2-selecti
     -webkit-font-smoothing: antialiased;
 }
 
-
-.multi-field .form-group {
-    display: flex;
-    margin-bottom: 0;
-}
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
