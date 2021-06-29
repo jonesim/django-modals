@@ -61,13 +61,13 @@ if (typeof django_modal == 'undefined') {
         }
 
         ajax_helpers.command_functions.modal_refresh_trigger = function (command) {
+            disable_enter_key();
             $(command.selector).trigger('modalPostLoad', [django_modal.active_modal_container_id()])
         }
 
         if (window.opener != null) {
             target = window.opener.location.href
         }
-
 
         function determine_type() {
             if (typeof (form_url) == 'undefined') {
@@ -103,6 +103,17 @@ if (typeof django_modal == 'undefined') {
             };
             */
         }
+
+        function disable_enter_key(){
+            $('form input').keydown(function (e) {
+                if (e.keyCode == 13) {
+                    e.preventDefault();
+                    $('.modal-submit')[0].click()
+                    return false;
+                }
+            });
+        }
+
         function init_modal_container(modal_container){
             modal_element = modal_container.children();
             modal_element.css('z-index', 1040 + (10 * open_modals));
@@ -125,15 +136,9 @@ if (typeof django_modal == 'undefined') {
             modal_element.on('shown.bs.modal', function (event) {
                 ajax_helpers.ajax_busy = false;
             });
+            disable_enter_key()
 
-            $('form input').keydown(function (e) {
-                if (e.keyCode == 13) {
-                    e.preventDefault();
-                    $('.modal-submit')[0].click()
-                    return false;
-                }
-            });
-            // modalPostLoad used to configure datepicker/select2 etc
+            // modalPostLoad used toconfigure datepicker/select2 etc
             if (determine_type() == 'popup') {
                 window.resizeTo(window_width, $(document).height() + window.outerHeight - window.innerHeight)
             }
@@ -203,7 +208,7 @@ if (typeof django_modal == 'undefined') {
             }
             params = additional_parameters(params);
             modal_container = get_modal_container(index);
-            modal_url = modal_container.find("input[name='modal_name']").val();
+            modal_url = modal_div().attr('data-url')
             if (typeof callback != 'undefined') {
                 modal_url = url_change(modal_url, 'modalstyle', 'windowform')
             }
@@ -265,7 +270,7 @@ if (typeof django_modal == 'undefined') {
         function minimise(button) {
 
             modal_container = get_modal_container();
-            modal_name = modal_container.find("input[name='modal_name']").val();
+            modal_name = modal_div().attr('data-url')
             modal_name = url_change(modal_name, 'modalstyle', 'window')
             doc = window.open(modal_name, "", "width=" + window_width + ",height=20")
             ajax_helpers.command_functions.close()
