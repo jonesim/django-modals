@@ -130,7 +130,7 @@ if (typeof django_modal == 'undefined') {
                 open_modals && $(document.body).addClass('modal-open');
                 ajax_helpers.ajax_busy = false;
                 if (open_modals > 0 && closing_modal.no_refresh !== true) {
-                    send_inputs('refresh_form')
+                    send_inputs('refresh_modal')
                 }
             });
             modal_element.on('shown.bs.modal', function (event) {
@@ -274,7 +274,7 @@ if (typeof django_modal == 'undefined') {
             modal_name = url_change(modal_name, 'modalstyle', 'window')
             doc = window.open(modal_name, "", "width=" + window_width + ",height=20")
             ajax_helpers.command_functions.close()
-            send_inputs('refresh_form', function (form_response) {
+            send_inputs('refresh_modal', function (form_response) {
                 load_external_modal(doc, form_response)
             })
             //modal_container = get_modal_container();

@@ -5,13 +5,15 @@ from crispy_forms.utils import render_crispy_form
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
 from django.views.generic.base import TemplateResponseMixin, TemplateView
-from django.views.generic.edit import FormMixin, ProcessFormView
+from django.views.generic.edit import BaseFormView
 from django.views.generic.detail import SingleObjectMixin
-from django.template.loader import render_to_string
-from django.shortcuts import render
+from django.urls import reverse, resolve
 from django.utils.safestring import mark_safe
 from ajax_helpers.mixins import AjaxHelpers
 from .forms import ModelCrispyForm
+from .helper import render_modal
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 '''
 modalstyle
@@ -24,10 +26,14 @@ POST - just return form data
 '''
 
 
-class BaseModalMixin:
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class BaseModalMixin(AjaxHelpers):
     request: WSGIRequest
+    kwargs: dict
+    ajax_commands = ['button', 'select2']
 
-    def __init__(self):
+    def __init__(self, modal_url=None):
+        self.modal_url = modal_url
         super().__init__()
         self.slug = {'modalstyle': 'normal'}
 
@@ -42,6 +48,12 @@ class BaseModalMixin:
             context['css'] = 'window'
         else:
             context['css'] = 'modal'
+        if self.modal_url is None:
+            context['modal_url'] = self.request.path
+        else:
+            context['modal_url'] = self.modal_url
+        if getattr(self, 'no_header_x', None):
+            context['no_header_x'] = True
         return context
 
     def post(self, request, *args, **kwargs):
@@ -52,16 +64,6 @@ class BaseModalMixin:
                     return getattr(self, f'{t}_{response[t]}')(**response)
         if hasattr(super(), 'post'):
             return super().post(request, *args, **kwargs)
-
-
-class BaseModal(BaseModalMixin, AjaxHelpers, TemplateView):
-    pass
-
-
-class BootstrapModalMixinBase(BaseModalMixin, AjaxHelpers, TemplateResponseMixin):
-    kwargs: dict
-    request: WSGIRequest
-    ajax_commands = ['button', 'select2']
 
     def split_slug(self, kwargs):
         if 'slug' not in kwargs:
@@ -80,37 +82,63 @@ class BootstrapModalMixinBase(BaseModalMixin, AjaxHelpers, TemplateResponseMixin
         pass
 
     def dispatch(self, request, *args, **kwargs):
-        if request.is_ajax():
-            self.slug['modalstyle'] = 'form'
         self.split_slug(kwargs)
         self.process_slug_kwargs()
         # noinspection PyUnresolvedReferences
         return super().dispatch(request, *args, **self.kwargs)
 
-    def get(self, request, *args, **kwargs):
-        if self.slug['modalstyle'] == 'window':
-            return render(request, 'modal/blank_form.html', context={'request': request})
+    def forward_modal(self, url_name):
+        modal_url = reverse(url_name, kwargs={'slug': '-'})
+        return resolve(modal_url).func.view_class.as_view()(self.request, modal_url=modal_url)
 
-        if self.slug['modalstyle'] == 'form':
-            # noinspection PyUnresolvedReferences
-            return super().get(request, *args, **kwargs)
+    def button_refresh_modal(self, **_kwargs):
+        return self.command_response('')
 
-        modal_html = render_to_string(self.template_name, self.get_context_data(**kwargs))
-        return render(request, 'modal/blank_form.html', context={'modal_form': modal_html, 'request': request})
+
+class BaseModal(BaseModalMixin, TemplateView):
+    pass
+
+
+class ModalFormMixin(BaseModalMixin):
+    request: WSGIRequest
+    template_name = 'modal/modal_base.html'
+
+    def form_invalid(self, form):
+        if self.request.GET.get('formonly', False):
+            form = self.get_form()
+            return HttpResponse(render_crispy_form(form))
+        return self.refresh_form(form)
+
+    def form_valid(self, form):
+        save_function = getattr(form, 'save', None)
+        if save_function:
+            save_function()
+        if not self.response_commands:
+            self.add_command('reload')
+        return self.command_response()
 
     def refresh_form(self, form):
         self.add_command('html', selector=f'#{form.helper.form_id}', parent=True, html=render_crispy_form(form))
         return self.command_response('modal_refresh_trigger', selector=f'#{form.helper.form_id}')
 
-
-class BootstrapModalMixin(BootstrapModalMixinBase, FormMixin, ProcessFormView):
-
-    template_name = 'modal/modal_form.html'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.field_attributes = {}
-        self.triggers = {}
+    def get_context_data(self, **kwargs):
+        get_context_data = getattr(super(), 'get_context_data', None)
+        if get_context_data:
+            context = get_context_data(**kwargs)
+        else:
+            context = {}
+        context['css'] = 'modal'
+        if context['form']:
+            context['header_title'] = context['form'].get_title()
+        else:
+            context['form'] = kwargs['message']
+        for f in self.field_attributes:
+            context['form'].helper[f].update_attributes(**self.field_attributes[f])
+        self.add_trigger_to_context(context)
+        if not self.request.is_ajax():
+            context['form'] = render_modal(template_name=self.template_name, **context)
+            self.template_name = 'modal/blank_page_form.html'
+        return context
 
     def add_trigger(self, field, trigger, conditions):
         self.field_attributes.setdefault(field, {})[trigger] = 'django_modal.alter_form(this)'
@@ -123,44 +151,33 @@ class BootstrapModalMixin(BootstrapModalMixinBase, FormMixin, ProcessFormView):
         reset_triggers = f'django_modal.reset_triggers(\'{context["form"].form_id}\')'
         context['script'] = mark_safe(context.get('script', '') + f';{modal_triggers};{reset_triggers};')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(FormMixin.get_context_data(self, **kwargs))
-        for f in self.field_attributes:
-            context['form'].helper[f].update_attributes(**self.field_attributes[f])
-        self.add_trigger_to_context(context)
-        return context
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.field_attributes = {}
+        self.triggers = {}
 
-    def form_invalid(self, form):
-        if self.request.GET.get('formonly', False):
-            form = self.get_form()
-            return HttpResponse(render_crispy_form(form))
-        return self.refresh_form(form)
-
-    def form_valid(self, form):
-        form.save()
-        if not self.response_commands:
-            self.add_command('reload')
-        return self.command_response()
+    def button_refresh_modal(self, **_kwargs):
+        form = self.get_form()
+        form.clear_errors()
+        return self.form_invalid(form)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs['request_user'] = self.request.user
         kwargs['no_buttons'] = self.request.GET.get('no_buttons')
         if hasattr(self, 'form_setup') and callable(self.form_setup):
             kwargs['form_setup'] = self.form_setup
         kwargs.update({k: getattr(self, k, None) for k in ['modal_title', 'form_delete', 'slug']})
         return kwargs
 
-    def button_refresh_form(self, **_kwargs):
-        form = self.get_form()
-        form.clear_errors()
-        return self.form_invalid(form)
+
+class BootstrapModalMixin(ModalFormMixin, TemplateResponseMixin, BaseFormView):
+    pass
 
 
 class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
     form_fields = []
-    template_name = 'modal/modal_form.html'
+    template_name = 'modal/modal_base.html'
     base_form = ModelCrispyForm
     delete_message = 'Are you sure you want to delete?'
 
@@ -191,11 +208,8 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
 
     def button_delete(self, **_kwargs):
         return self.command_response(
-            'modal_html', html=render_to_string('modal/confirm.html', {
-                'request': self.request, 'css': 'modal', 'size': 'md',
-                'button_function': 'confirm_delete',
-                'message': self.delete_message
-            })
+            'modal_html', html=render_modal(template_name='modal/confirm.html', modal_url=self.request.path,
+                                            size='md', button_function='confirm_delete', message=self.delete_message)
         )
 
     def process_slug_kwargs(self):
@@ -221,7 +235,7 @@ MultiForm = collections.namedtuple('MultiForm', ['model', 'fields', 'id', 'initi
                                    defaults=[None, None, None, {}, []])
 
 
-class MultiFormView(BootstrapModalMixinBase, TemplateView):
+class MultiFormView(BaseModal):
     template_name = 'modal/multi_form.html'
     modal_title = ''
     base_form = ModelCrispyForm
@@ -261,7 +275,7 @@ class MultiFormView(BootstrapModalMixinBase, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['forms'] = self.get_forms()
-        context['modal_title'] = self.modal_title
+        context['header_title'] = self.modal_title
         return context
 
     def refresh_form(self, forms):

@@ -3,6 +3,8 @@ from django.urls import reverse, resolve
 from django.utils.safestring import mark_safe
 from django_modals.helper import show_modal as show_modal_helper
 
+from django_modals import helper
+
 register = template.Library()
 
 
@@ -35,3 +37,8 @@ def submit_form(url_name, *args):
     url = reverse(url_name, kwargs={'slug': slug})
     view = resolve(url).func.view_class
     return mark_safe(f"ajax_helpers.send_form('{url}?formonly=true&no_buttons=True', '{view.form_class.__name__}')")
+
+
+@register.simple_tag
+def modal_button(button_name, url_name=None, url_args=None, **kwargs):
+    return helper.button_javascript(button_name, url_name, url_args, **kwargs)

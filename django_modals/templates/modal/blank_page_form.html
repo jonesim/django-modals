@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block body %}
+    <script>
+        html_form = `{{ form }}`
+        django_modal.create_modal(html_form);
+    </script>
+{% endblock %}

@@ -1,11 +1,11 @@
 import json
 from django import forms
 from django.apps import apps
-from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Field, Layout, Div
 from crispy_forms.bootstrap import StrictButton
+from crispy_forms.utils import render_crispy_form
 
 
 class CrispyFormMixin:
@@ -20,24 +20,25 @@ class CrispyFormMixin:
 
     def get_defaults(self, variable):
         result = self.supplied_kwargs.get(variable)
-        if result is None:
+        if result is None and hasattr(self, 'Meta'):
             result = getattr(self.Meta, variable, None)
         return result
 
     def __init__(self, *args, pk=None, no_buttons=None, read_only=False, modal_title=None, form_delete=None,
-                 form_setup=None, slug=None, user=None, form_id=None, **kwargs):
+                 form_setup=None, slug=None, request_user=None, form_id=None, **kwargs):
         self.supplied_kwargs = locals()
         self.no_buttons = self.get_defaults('no_buttons')
         self.read_only = self.get_defaults('read_only')
         self.modal_title = self.get_defaults('modal_title')
         self.form_delete = self.get_defaults('form_delete')
         self._form_id = self.get_defaults('form_id')
-        self.user = user
+        self.user = request_user
         self.slug = slug
         self.form_setup = form_setup
         self.pk = pk
         self.instance = None
         self.helper = None
+        self.buttons = []
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
@@ -72,13 +73,18 @@ class CrispyFormMixin:
                 params = [commands]
             else:
                 params = commands
-            return StrictButton(title, onclick='django_modal.process_commands_lock(' + json.dumps(params) + ')',
-                                css_class=css_class, **kwargs)
+            return StrictButton(
+                title,
+                onclick=mark_safe('django_modal.process_commands_lock(' + json.dumps(params).replace('"', "'") + ')'),
+                css_class=css_class, **kwargs
+            )
 
     def get_title(self):
         if isinstance(self.modal_title, list):
             if self.instance.pk is None:
                 return mark_safe(self.modal_title[0])
+            elif self.read_only and len(self.modal_title) > 2:
+                return mark_safe(self.modal_title[2])
             else:
                 return mark_safe(self.modal_title[1])
         else:
@@ -113,15 +119,26 @@ class CrispyFormMixin:
         else:
             self.helper.layout = Layout(Field(*self.fields))
         existing_buttons = [b.content for b in self.helper.layout.fields if isinstance(b, StrictButton)]
-        if not existing_buttons and not self.no_buttons:
-            buttons = [self.submit_button()]
-            if self.form_delete:
-                buttons.append(self.delete_button())
-            buttons.append(self.cancel_button())
-            self.helper.layout.append(Div(Div(*buttons, css_class='btn-group'), css_class='form-buttons'))
+        if not existing_buttons and not self.no_buttons and not self.buttons:
+            if not self.read_only:
+                self.buttons.append(self.submit_button())
+            if self.form_delete and not self.read_only:
+                self.buttons.append(self.delete_button())
+            self.buttons.append(self.cancel_button())
+        if not self.read_only and self.buttons:
+            self.append_buttons(self.buttons)
         if self.read_only:
             self.helper[:].update_attributes(disabled=True)
-        self.helper.layout.append(HTML(render_to_string('form_scripts/form_change.html', {'form_helper': self.helper})))
+
+    def append_buttons(self, buttons):
+        self.helper.layout.append(Div(Div(*buttons, css_class='btn-group'), css_class='form-buttons'))
+
+    def clear_errors(self):
+        # noinspection PyAttributeOutsideInit
+        self._errors = {}
+
+    def __str__(self):
+        return mark_safe(render_crispy_form(self))
 
 
 class ModelCrispyForm(CrispyFormMixin, forms.ModelForm):
@@ -133,9 +150,6 @@ class ModelCrispyForm(CrispyFormMixin, forms.ModelForm):
         else:
             # noinspection PyUnresolvedReferences
             return cls.Meta.model
-
-    def clear_errors(self):
-        self._errors = {}
 
 
 class CrispyForm(CrispyFormMixin, forms.Form):
