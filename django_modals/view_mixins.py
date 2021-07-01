@@ -94,9 +94,57 @@ class BaseModalMixin(AjaxHelpers):
     def button_refresh_modal(self, **_kwargs):
         return self.command_response('')
 
+    @staticmethod
+    def button(title, commands, css_class):
+        if type(commands) == str:
+            params = [{'function': commands}]
+        elif type(commands) == dict:
+            params = [commands]
+        else:
+            params = commands
+        return f'''<button onclick='django_modal.process_commands_lock({json.dumps(params)})' 
+                class="btn {css_class}">{title}</button>'''
+
+    def button_group(self, button_str=None):
+        if button_str is not None:
+            return f'<div class="form-buttons"><div class="btn-group">{button_str}</div></div>'
+        if hasattr(self, 'buttons') and self.buttons:
+            return f'<div class="form-buttons"><div class="btn-group">{"".join(self.buttons)}</div></div>'
+        return ''
+
 
 class BaseModal(BaseModalMixin, TemplateView):
-    pass
+    template_name = 'modal/modal_base.html'
+
+    def get_context_data(self, **kwargs):
+        get_context_data = getattr(super(), 'get_context_data', None)
+        if get_context_data:
+            context = get_context_data(**kwargs)
+        else:
+            context = {}
+        if hasattr(self, 'modal_title'):
+            context['header_title'] = self.modal_title
+        if not self.request.is_ajax():
+            context['form'] = render_modal(template_name=self.template_name, **context)
+            self.template_name = 'modal/blank_page_form.html'
+        return context
+
+
+class SimpleModal(BaseModal):
+
+    def modal_content(self):
+        return ''
+
+    @property
+    def extra_context(self):
+        if not self._extra_content:
+            self._extra_content = {'form': mark_safe(self.modal_content() + self.button_group())}
+        return self._extra_content
+
+    def __init__(self):
+        self.buttons = []
+        self._extra_content = None
+        super().__init__()
 
 
 class ModalFormMixin(BaseModalMixin):
@@ -273,9 +321,11 @@ class MultiFormView(BaseModal):
         return [form_class(**form_kwargs[c]) for c, form_class in enumerate(self.get_form_classes())]
 
     def get_context_data(self, **kwargs):
+        self.extra_context = {
+            'forms': self.get_forms(),
+            'header_title': self.modal_title
+        }
         context = super().get_context_data(**kwargs)
-        context['forms'] = self.get_forms()
-        context['header_title'] = self.modal_title
         return context
 
     def refresh_form(self, forms):
