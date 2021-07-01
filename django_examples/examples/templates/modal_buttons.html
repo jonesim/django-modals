@@ -1,0 +1,12 @@
+{% extends "modal/modal_base.html" %}
+{% load ajax_helpers %}
+{% block modal_content %}
+    {{ message }}
+    <br>
+    <br>
+    <button type="button" class="btn btn-primary" onclick="django_modal.send_inputs({'button': 'change'})">Are you sure?</button>
+    <br><br>
+    <div style="text-align: center">
+        <button type="button" class="btn btn-success" data-dismiss="modal">OK</button>
+    </div>
+{% endblock %}
