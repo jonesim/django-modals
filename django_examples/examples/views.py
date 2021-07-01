@@ -1,9 +1,30 @@
+import json
 from django.db.models import Count
 from django_datatables.columns import ColumnBase, DatatableColumn
 from django_datatables.datatables import DatatableView
 from django_modals.helper import show_modal
 from django.urls import reverse
 from . import models
+from django_modals.helper import modal_buttons
+
+
+def button_javascript(button_name, url_name=None, url_args=None, **kwargs):
+    json_data = {'data': dict(button=button_name, **kwargs)}
+    if url_name:
+        json_data['url'] = reverse(url_name, args=url_args)
+    return f'ajax_helpers.post_json({json.dumps(json_data)})'
+
+
+def delete_datatable(url_name):
+    return {
+        'html': f'''<button class='btn btn-sm' 
+                    onclick='{button_javascript('delete', url_name=url_name, url_args=(999999,))}'>
+                    {modal_buttons['delete']}
+                    </button>''',
+        'var': '999999',
+        'column': 'id',
+        'function': 'Replace'
+    }
 
 
 class Example1(DatatableView):
@@ -27,7 +48,7 @@ class Example1(DatatableView):
         def col_setup(self):
             self.title = 'Delete'
             self.options['render'] = [{
-                'html': f'''<a class="btn btn-sm btn-secondary" href="javascript:ajax_helpers.post_json({{url:\'{reverse("company_modal", args=(999999,))}\', data:{{button:\'delete\'}} }})">BIN</a>''',
+                'html': f'''<button class='btn btn-sm' onclick='{button_javascript('delete', url_name='company_people_modal', url_args=(999999,))}'>{modal_buttons['delete']}</button>''',
                 'var': '999999',
                 'column': 'id',
                 'function': 'Replace'
@@ -42,6 +63,7 @@ class Example1(DatatableView):
             ColumnBase(column_name='people', field='people', annotations={'people': Count('person__id')}),
             self.EditColumn(column_name='t'),
             self.DeleteColumn(column_name='tx'),
+            ('del', {'calculated': True,'render': [delete_datatable('company_people_modal')]}),
         )
         table.ajax_data = False
         table.add_js_filters('tag', 'Tags')

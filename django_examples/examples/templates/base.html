@@ -6,7 +6,9 @@
 
 
 
-
+<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.0.1/styles/default.min.css">
+<script src="https://unpkg.com/@highlightjs/cdn-assets@11.0.1/highlight.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
         <script src="{% static 'ajax_helpers/ajax_helpers.js' %}"></script>
@@ -34,7 +36,10 @@
 
 </head>
 <body>
+
+{% block body %}
 <div class="p-4">
+{{ request.user }}
     <h4>{{ title }}</h4>
     {{ description|safe }}
     <br>
@@ -42,6 +47,7 @@
     <a class="btn btn-primary" href="{% show_modal 'extra_field_modal' 'href' %}">NEW COMPANY EXTRA FIELD</a>
     <a class="btn btn-primary" href="{% show_modal 'company_people_modal' 'href' %}">NEW COMPANY PEOPLE</a>
     <a class="btn btn-primary" href="{% show_modal 'separate_form_modal' 'href' %}">COMPANY SEPARATE FORM</a>
+    <a class="btn btn-primary" href="{% show_modal 'separate_person_modal' 'href' %}">PERSON SEPARATE FORM</a>
 
 
     <a class="btn btn-primary" href="{% show_modal 'multi_form_modal' 'href' %}">MULTI FORM</a>
@@ -70,6 +76,7 @@
 </div>
 
 {% block table %}
+{% endblock %}
 {% endblock %}
 
 </body>
