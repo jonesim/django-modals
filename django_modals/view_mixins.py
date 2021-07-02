@@ -114,7 +114,7 @@ class BaseModalMixin(AjaxHelpers):
 
 
 class BaseModal(BaseModalMixin, TemplateView):
-    template_name = 'modal/modal_base.html'
+    template_name = 'django_modals/modal_base.html'
 
     def get_context_data(self, **kwargs):
         get_context_data = getattr(super(), 'get_context_data', None)
@@ -126,7 +126,7 @@ class BaseModal(BaseModalMixin, TemplateView):
             context['header_title'] = self.modal_title
         if not self.request.is_ajax():
             context['form'] = render_modal(template_name=self.template_name, **context)
-            self.template_name = 'modal/blank_page_form.html'
+            self.template_name = 'django_modals/blank_page_form.html'
         return context
 
 
@@ -149,7 +149,7 @@ class SimpleModal(BaseModal):
 
 class ModalFormMixin(BaseModalMixin):
     request: WSGIRequest
-    template_name = 'modal/modal_base.html'
+    template_name = 'django_modals/modal_base.html'
 
     def form_invalid(self, form):
         if self.request.GET.get('formonly', False):
@@ -185,7 +185,7 @@ class ModalFormMixin(BaseModalMixin):
         self.add_trigger_to_context(context)
         if not self.request.is_ajax():
             context['form'] = render_modal(template_name=self.template_name, **context)
-            self.template_name = 'modal/blank_page_form.html'
+            self.template_name = 'django_modals/blank_page_form.html'
         return context
 
     def add_trigger(self, field, trigger, conditions):
@@ -225,7 +225,7 @@ class BootstrapModalMixin(ModalFormMixin, TemplateResponseMixin, BaseFormView):
 
 class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
     form_fields = []
-    template_name = 'modal/modal_base.html'
+    template_name = 'django_modals/modal_base.html'
     base_form = ModelCrispyForm
     delete_message = 'Are you sure you want to delete?'
 
@@ -256,7 +256,7 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
 
     def button_delete(self, **_kwargs):
         return self.command_response(
-            'modal_html', html=render_modal(template_name='modal/confirm.html', modal_url=self.request.path,
+            'modal_html', html=render_modal(template_name='django_modals/confirm.html', modal_url=self.request.path,
                                             size='md', button_function='confirm_delete', message=self.delete_message)
         )
 
@@ -284,7 +284,7 @@ MultiForm = collections.namedtuple('MultiForm', ['model', 'fields', 'id', 'initi
 
 
 class MultiFormView(BaseModal):
-    template_name = 'modal/multi_form.html'
+    template_name = 'django_modals/multi_form.html'
     modal_title = ''
     base_form = ModelCrispyForm
     forms = []

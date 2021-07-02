@@ -69,7 +69,7 @@ def show_modal(modal_name, modal_type, *args, **kwargs):
         return f'<a title="Edit" class="{css_class}" href="javascript:{javascript}">{name}</a>'
 
 
-def render_modal(template_name='modal/modal_base.html', **kwargs):
+def render_modal(template_name='django_modals/modal_base.html', **kwargs):
     if 'request' in kwargs and 'modal_url' not in kwargs:
         kwargs['modal_url'] = kwargs['request'].path
     kwargs['message'] = mark_safe(kwargs.get('message'))
@@ -98,8 +98,8 @@ def button_javascript(button_name, url_name=None, url_args=None, **kwargs):
 
 
 def overwrite_message(view, message, header=None):
-    message_modal = render_modal('modal/ok.html', message=message, header=header)
+    message_modal = render_modal('django_modals/ok.html', message=message, header=header)
     if view.request.is_ajax():
         return view.command_response('overwrite_modal', html=message_modal)
     else:
-        return render(view.request, 'modal/blank_page_form.html', context={'form': message_modal})
+        return render(view.request, 'django_modals/blank_page_form.html', context={'form': message_modal})
