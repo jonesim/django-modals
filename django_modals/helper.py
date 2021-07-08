@@ -72,8 +72,9 @@ def show_modal(modal_name, modal_type, *args, **kwargs):
 def render_modal(template_name='django_modals/modal_base.html', **kwargs):
     if 'request' in kwargs and 'modal_url' not in kwargs:
         kwargs['modal_url'] = kwargs['request'].path
-    kwargs['message'] = mark_safe(kwargs.get('message'))
-    kwargs['css'] = 'modal'
+    button_kwargs = {a: kwargs[a] for a in ['button_group_class', 'button_container_class'] if a in kwargs}
+    kwargs['contents'] = mark_safe(kwargs.get('contents') + modal_button_group(kwargs.get('modal_buttons'),
+                                                                               **button_kwargs))
     return render_to_string(template_name, kwargs)
 
 
@@ -103,3 +104,29 @@ def overwrite_message(view, message, header=None):
         return view.command_response('overwrite_modal', html=message_modal)
     else:
         return render(view.request, 'django_modals/blank_page_form.html', context={'form': message_modal})
+
+
+def modal_button(title, commands, css_class='btn-primary'):
+    if type(commands) == str:
+        params = [{'function': commands}]
+    elif type(commands) == dict:
+        params = [commands]
+    else:
+        params = commands
+    return f'''<button onclick='django_modal.process_commands_lock({json.dumps(params)})' 
+            class="btn {css_class}">{title}</button>'''
+
+
+def modal_button_method(title, method_name, css_class='btn-primary'):
+    return modal_button(title, {'function': 'post_modal', 'button': method_name}, css_class)
+
+
+def modal_button_group(buttons=None, button_container_class=None, button_group_class='btn-group'):
+
+    group_class = f'form-buttons{" " + button_container_class if button_container_class else ""}'
+    if type(buttons) == str:
+        return f'<div class="{group_class}"><div class="{button_group_class}">{buttons}</div></div>'
+    if buttons:
+        return (f'<div class="{group_class}">'
+                f'<div class="{button_group_class}">{"".join(buttons)}</div></div>')
+    return ''
