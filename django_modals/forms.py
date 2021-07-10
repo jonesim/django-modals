@@ -17,6 +17,7 @@ class CrispyFormMixin:
     submit_class = 'btn-success modal-submit'
     cancel_class = 'btn-secondary modal-cancel'
     delete_class = 'btn-danger modal-delete'
+    edit_class = 'btn-warning modal-edit'
 
     def get_defaults(self, variable):
         result = self.supplied_kwargs.get(variable)
@@ -63,6 +64,10 @@ class CrispyFormMixin:
     def cancel_button(self, css_class=cancel_class):
         return self.button('Cancel', 'close', css_class)
 
+    def edit_button(self, css_class=edit_class):
+        return self.button('Edit', {'function': 'post_modal', 'button': {'button': 'refresh_modal', 'edit': True}},
+                           css_class)
+
     def button(self, title, commands, css_class, **kwargs):
         if self.no_buttons:
             return HTML('')
@@ -80,6 +85,16 @@ class CrispyFormMixin:
             )
 
     def get_title(self):
+
+        if self.modal_title is None:
+            if hasattr(self, 'Meta') and hasattr(self.Meta, 'model'):
+                # noinspection PyProtectedMember
+                # noinspection PyUnresolvedReferences
+                model_name = self.Meta.model._meta.verbose_name.title()
+            else:
+                model_name = ''
+            self.modal_title = [f'{t} {model_name}' for t in ['New', 'Edit', 'View']]
+
         if isinstance(self.modal_title, list):
             if self.instance.pk is None:
                 return mark_safe(self.modal_title[0])
@@ -125,7 +140,7 @@ class CrispyFormMixin:
             if self.form_delete and not self.read_only:
                 self.buttons.append(self.delete_button())
             self.buttons.append(self.cancel_button())
-        if not self.read_only and self.buttons:
+        if self.buttons:
             self.append_buttons(self.buttons)
         if self.read_only:
             self.helper[:].update_attributes(disabled=True)
