@@ -1,5 +1,6 @@
 import json
-from django.urls import reverse
+
+from django.urls import reverse, NoReverseMatch
 from django.template.loader import render_to_string
 from crispy_forms.layout import HTML, Div
 from django.utils.safestring import mark_safe
@@ -27,7 +28,10 @@ def make_slug(*args, datatable=False):
 
 def show_modal(modal_name, modal_type, *args, **kwargs):
     slug = make_slug(*args)
-    javascript = f"django_modal.show_modal('{reverse(modal_name, kwargs={'slug': slug})}')"
+    try:
+        javascript = f"django_modal.show_modal('{reverse(modal_name, kwargs={'slug': slug})}')"
+    except NoReverseMatch:
+        javascript = f"django_modal.show_modal('{reverse(modal_name)}')"
 
     if modal_type == 'datatable':
         no_search = kwargs.get('no_search', True)
