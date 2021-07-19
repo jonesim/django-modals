@@ -21,7 +21,7 @@ if (typeof django_modal == 'undefined') {
             if (open_modals > 1) {
                 ajax_helpers.command_functions.close()
             } else {
-                if (determine_type() != 'popup') {
+                if (determine_type() !== 'popup') {
                     ajax_helpers.ajax_busy = true
                     location.reload();
                 } else {
@@ -35,7 +35,7 @@ if (typeof django_modal == 'undefined') {
             if (command !== undefined && command.no_refresh === true){
                 modals[modals.length-1].no_refresh = true
             }
-            if (determine_type() == 'popup') {
+            if (determine_type() === 'popup') {
                 window.close()
             } else {
                 ajax_helpers.ajax_busy = true;
@@ -85,10 +85,10 @@ if (typeof django_modal == 'undefined') {
         function create_modal(modal_html) {
             open_modals += 1;
             modals.push({id: active_modal_container_id()})
-            modal_container = $('<div>', {id: active_modal_container_id()}).appendTo('body');
+            var modal_container = $('<div>', {id: active_modal_container_id()}).appendTo('body');
             modal_container.html(modal_html);
             if (open_modals === 1) {
-                backdrop = $('<div>', {class: 'modal-backdrop fade'}).appendTo('body');
+                var backdrop = $('<div>', {class: 'modal-backdrop fade'}).appendTo('body');
                 window.setTimeout(function () {
                     $(backdrop).addClass('show')
                 }, 50)
@@ -106,7 +106,7 @@ if (typeof django_modal == 'undefined') {
 
         function disable_enter_key(){
             $('form input').keydown(function (e) {
-                if (e.keyCode == 13) {
+                if (e.keyCode === 13) {
                     e.preventDefault();
                     $('.modal-submit')[0].click()
                     return false;
@@ -115,14 +115,14 @@ if (typeof django_modal == 'undefined') {
         }
 
         function init_modal_container(modal_container){
-            modal_element = modal_container.children();
+            var modal_element = modal_container.children();
             modal_element.css('z-index', 1040 + (10 * open_modals));
             modal_element.modal({'backdrop': false})
-            modal_type = determine_type();
+            $('.modal-dialog', modal_element).first().css({top: open_modals*10 - 10, left: open_modals*10 - 20});
             modal_element.on('hidden.bs.modal', function (event) {
                 $(this).parent().remove();
                 open_modals -= 1;
-                if (open_modals == 0){
+                if (open_modals === 0){
                     $('.modal-backdrop').remove()
                 }
                 var closing_modal = modals.pop()
@@ -139,7 +139,7 @@ if (typeof django_modal == 'undefined') {
             disable_enter_key()
 
             // modalPostLoad used toconfigure datepicker/select2 etc
-            if (determine_type() == 'popup') {
+            if (determine_type() === 'popup') {
                 window.resizeTo(window_width, $(document).height() + window.outerHeight - window.innerHeight)
             }
             modal_container.trigger('modalPostLoad', [active_modal_container_id()])
@@ -184,7 +184,7 @@ if (typeof django_modal == 'undefined') {
 
 
         function show_modal(modal_url, slug, params) {
-
+            var ajax_url;
             if (typeof slug != 'undefined') {
                 ajax_url = modal_url + slug + '/?'
             } else {
@@ -199,6 +199,8 @@ if (typeof django_modal == 'undefined') {
         }
 
         function send_inputs(button_name, callback, index) {
+            var params
+            var property
             if (typeof (button_name) == 'object') {
                 params = button_name
             } else if (typeof (button_name) != 'undefined') {
@@ -207,14 +209,18 @@ if (typeof django_modal == 'undefined') {
                 params = {}
             }
             params = additional_parameters(params);
-            modal_container = get_modal_container(index);
-            modal_url = modal_div().attr('data-url')
+            var modalDiv = modal_div()
+            var modal_url = modalDiv.attr('data-url')
+            var modal_type = modalDiv.attr('data-modaltype')
+            if (modal_type !== undefined){
+                params['modal_type'] = modal_type
+            }
             if (typeof callback != 'undefined') {
                 modal_url = url_change(modal_url, 'modalstyle', 'windowform')
             }
             if (typeof (tinymce) != 'undefined') tinymce.triggerSave();
 
-            forms = modal_container.find('form')
+            var forms = modalDiv.find('form')
             if (forms.length > 1) {
                 var data = {}
                 for (var f of forms) {
@@ -224,14 +230,14 @@ if (typeof django_modal == 'undefined') {
                         data[f.id][d[0]] = d[1]
                     }
                 }
-                for (var property in params) {
+                for (property in params) {
                     data[property] = params[property]
                 }
-                ajax_data = {'data': data, url: modal_url}
+                var ajax_data = {'data': data, url: modal_url}
                 ajax_helpers.post_json(ajax_data)
             } else {
                 data = new FormData(forms[0])
-                for (var property in params) {
+                for (property in params) {
                     data.append(property, params[property])
                 }
                 ajax_helpers.post_data(modal_url, data)
@@ -239,10 +245,10 @@ if (typeof django_modal == 'undefined') {
         }
 
         function url_change(url, key, value) {
-            split_url = url.split('/')
+            var split_url = url.split('/')
             var slug = split_url[split_url.length - 2]
             var split_slug = slug.split('-')
-            if (split_slug.length == 1) {
+            if (split_slug.length === 1) {
                 split_slug = ['pk', slug]
             }
             split_slug.push(key)
@@ -252,7 +258,7 @@ if (typeof django_modal == 'undefined') {
         }
 
         function process_event(event) {
-            if (open_modals == 0 && window.location.href == event.data.initurl) {
+            if (open_modals === 0 && window.location.href === event.data.initurl) {
                 process_commands(event.data.commands)
             }
         }
@@ -269,10 +275,10 @@ if (typeof django_modal == 'undefined') {
 
         function minimise(button) {
 
-            modal_container = get_modal_container();
-            modal_name = modal_div().attr('data-url')
+            var modal_container = get_modal_container();
+            var modal_name = modal_div().attr('data-url')
             modal_name = url_change(modal_name, 'modalstyle', 'window')
-            doc = window.open(modal_name, "", "width=" + window_width + ",height=20")
+            var doc = window.open(modal_name, "", "width=" + window_width + ",height=20")
             ajax_helpers.command_functions.close()
             send_inputs('refresh_modal', function (form_response) {
                 load_external_modal(doc, form_response)
@@ -316,7 +322,7 @@ if (typeof django_modal == 'undefined') {
             var value
             var element = $(field)
             var form_id = element.closest('form').attr('id')
-            config = django_modal.modal_triggers[form_id][element.attr('name')]
+            var config = django_modal.modal_triggers[form_id][element.attr('name')]
             switch (element.prop('type')) {
                 case 'checkbox':
                     if (element.is(':checked')) {
@@ -359,6 +365,7 @@ if (typeof django_modal == 'undefined') {
             alter_form,
             form_change_functions,
             reset_triggers,
+            modal_div,
         }
     }();
 }
