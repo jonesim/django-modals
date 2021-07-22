@@ -1,0 +1,11 @@
+<input id="id_{{ widget.name }}" autocomplete="off" type="{{ widget.type }}" name="{{ widget.name }}"
+        {% if widget.value != None %}
+       value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+<script>
+    $(function () {
+        $('#id_{{ widget.name }}').datepicker({
+            dateFormat: "dd/mm/yy",
+            {% if 'min_date' in widget.attrs %}minDate:{{ widget.attrs.min_date }},{% endif %}
+        });
+    })
+</script>

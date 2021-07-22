@@ -1,0 +1,25 @@
+{% spaceless %}
+    <select style="width:{% if widget.attrs.width %}{{ widget.attrs.width }}{% else %}100%{% endif %}"
+            name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+        {% for group_name, group_choices, group_index in widget.optgroups %}{% if group_name %}
+            <optgroup label="{{ group_name }}">{% endif %}{% for option in group_choices %}
+            {% include option.template_name with widget=option %}{% endfor %}{% if group_name %}
+            </optgroup>{% endif %}{% endfor %}
+    </select>
+
+    <script>
+        (function () {
+            var data {% if widget.select_data %}= JSON.parse(`{{ widget.select_data }}`)
+                for (f of data) {
+                    f.text = decodeURI(f.text);
+                }
+            {% endif %}
+            select2_widget.initselect2(
+                "{{ widget.attrs.id }}",
+                {{ widget.attrs.ajax|yesno:"true,false" }},
+                {enabled: {{widget.attrs.tags|yesno:"true,false" }}, new_marker: "{{ widget.attrs.new_marker}}"},
+                data
+            )
+        })()
+    </script>
+{% endspaceless %}

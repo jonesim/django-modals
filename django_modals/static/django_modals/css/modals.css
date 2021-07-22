@@ -1,4 +1,17 @@
 
+.select2-results .btn{
+    display: none;
+}
+.select2-selection__rendered .btn{
+    margin: 1px 5px;
+    z-index: 999999;
+    float: right!important;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+
+
 @media only screen and (min-width: 1550px)
 {
     .modal-xl{
@@ -33,6 +46,20 @@ select[readonly].select2-hidden-accessible + .select2-container .select2-selecti
 .form-buttons {
     text-align: right;
     margin-top: 1.5rem;
+}
+
+.form-buttons .modal-edit::before {
+    content: "\f304";
+    font-family: "Font Awesome 5 Free";
+    margin-right: 4px;
+    font-style: normal;
+    font-weight: 800;
+    text-decoration: inherit;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
 }
 
 .form-buttons .modal-submit::before {
@@ -82,6 +109,10 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.ui-datepicker{
+  z-index: 99999!important;
 }
 
 
@@ -182,13 +213,44 @@ input::-webkit-inner-spin-button {
 /* from https://github.com/ttskch/select2-bootstrap4-theme
 modified heights from 0.75rem to 0.5rem
  */
+
+
+
+.input-group-sm .select2-container .select2-selection--single .select2-selection__rendered {
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+
+}
+.input-group-sm .select2-container--bootstrap4 .select2-selection--single {
+    height: 31px !important;
+}
+
+.input-group-sm .select2-container--bootstrap4 .select2-selection__clear {
+    width: 0.9em;
+    height: 0.9em;
+    line-height: 0.75em;
+    padding-left: 0.1em;
+    margin-top: 0.4em;
+    border-radius: 100%;
+    background-color: #c8c8c8;
+    color: #f8f9fa;
+    float: right;
+    margin-right: 0.3em;
+}
+
+
+
+
+
+
+
 .select2-container--bootstrap4 .select2-selection--single {
     height: calc(1.5em + 0.5rem + 2px) !important;
 }
 
 .select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
     color: #757575;
-    line-height: calc(1.5em + 0.5rem);
 }
 
 .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
@@ -209,10 +271,6 @@ modified heights from 0.75rem to 0.5rem
     margin-left: -4px;
     margin-top: -2px;
     position: absolute;
-}
-
-.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
-    line-height: calc(1.5em + 0.5rem);
 }
 
 .select2-search--dropdown .select2-search__field {

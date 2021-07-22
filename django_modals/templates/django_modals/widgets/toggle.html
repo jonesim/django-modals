@@ -4,7 +4,5 @@
            value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
 </div>
 <script>
-    $(function () {
-        $('#id_{{ widget.name }}').bootstrapToggle();
-    })
+    $(function () {$('#id_{{ widget.name }}').bootstrapToggle();})
 </script>

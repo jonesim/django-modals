@@ -182,7 +182,6 @@ if (typeof django_modal == 'undefined') {
             $('.modal-backdrop').css('z-index', 1039 + (10 * open_modals));
         }
 
-
         function show_modal(modal_url, slug, params) {
             var ajax_url;
             if (typeof slug != 'undefined') {
