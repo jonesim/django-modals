@@ -77,7 +77,7 @@ def render_modal(template_name='django_modals/modal_base.html', **kwargs):
     if 'request' in kwargs and 'modal_url' not in kwargs:
         kwargs['modal_url'] = kwargs['request'].path
     button_kwargs = {a: kwargs[a] for a in ['button_group_class', 'button_container_class'] if a in kwargs}
-    kwargs['contents'] = mark_safe(kwargs.get('contents') + modal_button_group(kwargs.get('modal_buttons'),
+    kwargs['contents'] = mark_safe(kwargs.get('contents', '') + modal_button_group(kwargs.get('modal_buttons', ''),
                                                                                **button_kwargs))
     return render_to_string(template_name, kwargs)
 
