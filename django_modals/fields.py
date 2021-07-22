@@ -1,13 +1,9 @@
-from django.forms import ChoiceField, MultipleChoiceField
+from django.forms import ChoiceField
 from crispy_forms.layout import Field, HTML, Div
 from crispy_forms.utils import TEMPLATE_PACK
 from crispy_forms.bootstrap import PrependedText, AppendedText, PrependedAppendedText
 
 date_picker = {'autocomplete': 'off', 'css_class': 'datepicker', 'style': 'width:110px'}
-
-
-def field_select2(*args):
-    return Field(*args, css_class='s2-enable', style='width:100%')
 
 
 def html_label(title):
@@ -86,12 +82,6 @@ class FieldNoLabel(MultiField):
         kwargs['label_class'] = 'd-none'
         kwargs['form_class'] = ''
         super().__init__(*args, **kwargs)
-
-
-class MultipleChoiceFieldExtra(MultipleChoiceField):
-
-    def valid_value(self, value):
-        return True
 
 
 class ChoiceFieldExtra(ChoiceField):
