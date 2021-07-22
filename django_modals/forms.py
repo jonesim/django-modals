@@ -3,9 +3,11 @@ from django import forms
 from django.apps import apps
 from django.utils.safestring import mark_safe
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, Field, Layout, Div
+from crispy_forms.layout import HTML, Layout, Div
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.utils import render_crispy_form
+from .processes import PROCESS_CREATE, PROCESS_VIEW, PROCESS_EDIT, process_title
+from .fields import FieldOptions
 
 
 class CrispyFormMixin:
@@ -26,13 +28,14 @@ class CrispyFormMixin:
         return result
 
     def __init__(self, *args, pk=None, no_buttons=None, read_only=False, modal_title=None, form_delete=None,
-                 form_setup=None, slug=None, request_user=None, form_id=None, **kwargs):
+                 form_setup=None, slug=None, request_user=None, form_id=None, edit_button=False, **kwargs):
         self.supplied_kwargs = locals()
         self.no_buttons = self.get_defaults('no_buttons')
         self.read_only = self.get_defaults('read_only')
         self.modal_title = self.get_defaults('modal_title')
         self.form_delete = self.get_defaults('form_delete')
         self._form_id = self.get_defaults('form_id')
+        self.edit_button = self.get_defaults('edit_button')
         self.user = request_user
         self.slug = slug
         self.form_setup = form_setup
@@ -64,7 +67,7 @@ class CrispyFormMixin:
     def cancel_button(self, css_class=cancel_class):
         return self.button('Cancel', 'close', css_class)
 
-    def edit_button(self, css_class=edit_class):
+    def view_edit_button(self, css_class=edit_class):
         return self.button('Edit', {'function': 'post_modal', 'button': {'button': 'refresh_modal', 'edit': True}},
                            css_class)
 
@@ -93,8 +96,9 @@ class CrispyFormMixin:
                 model_name = self.Meta.model._meta.verbose_name.title()
             else:
                 model_name = ''
-            self.modal_title = [f'{t} {model_name}' for t in ['New', 'Edit', 'View']]
-
+            self.modal_title = [f'{t} {model_name}' for t in [
+                process_title[PROCESS_CREATE], process_title[PROCESS_EDIT], process_title[PROCESS_VIEW]
+            ]]
         if isinstance(self.modal_title, list):
             if self.instance.pk is None:
                 return mark_safe(self.modal_title[0])
@@ -132,11 +136,15 @@ class CrispyFormMixin:
             else:
                 self.helper.layout = Layout(layout)
         else:
-            self.helper.layout = Layout(Field(*self.fields))
+            self.helper.layout = Layout(*[getattr(self.fields[f].widget, 'crispy_field_class', FieldOptions)
+                                          (f, **getattr(self.fields[f].widget, 'crispy_kwargs', {}))
+                                          for f in self.fields])
         existing_buttons = [b.content for b in self.helper.layout.fields if isinstance(b, StrictButton)]
         if not existing_buttons and not self.no_buttons and not self.buttons:
             if not self.read_only:
                 self.buttons.append(self.submit_button())
+            elif self.edit_button:
+                self.buttons.append(self.view_edit_button())
             if self.form_delete and not self.read_only:
                 self.buttons.append(self.delete_button())
             self.buttons.append(self.cancel_button())

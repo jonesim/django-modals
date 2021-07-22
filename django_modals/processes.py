@@ -1,0 +1,24 @@
+PROCESS_CREATE = 0
+PROCESS_EDIT = 1
+PROCESS_VIEW = 2
+PROCESS_DELETE = 3
+
+PERMISSION_DISABLE = 2
+PERMISSION_ON = 1
+PERMISSION_OFF = 0
+PERMISSION_AUTHENTICATED = 3
+PERMISSION_STAFF = 4
+
+process_title = {
+    PROCESS_CREATE: 'New',
+    PROCESS_EDIT: 'Edit',
+    PROCESS_VIEW: 'View',
+    PROCESS_DELETE: 'Delete',
+}
+
+permission_name = {
+    PROCESS_CREATE: 'add',
+    PROCESS_EDIT: 'change',
+    PROCESS_VIEW: 'view',
+    PROCESS_DELETE: 'delete',
+}
