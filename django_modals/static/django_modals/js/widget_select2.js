@@ -9,7 +9,7 @@ var select2_widget = function() {
         django_modal.show_modal(modal_url);
     }
 
-    function initselect2(select_id, ajax, tags, data) {
+    function initselect2(select_id, ajax, tags, data, placeholder) {
         var select_element = $("#" + select_id);
         var modal_container = select_element.closest(".modal-content");
         if (modal_container.length === 0) {
@@ -20,7 +20,7 @@ var select2_widget = function() {
             theme: "bootstrap4",
             dropdownParent: modal_container,
             allowClear: true,
-            placeholder: "-"
+            placeholder: placeholder
         }
 
         if (data !== undefined) {

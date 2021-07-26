@@ -6,6 +6,8 @@ from crispy_forms.layout import HTML, Div
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
 
+DUMMY_SLUG = 'DUMMY-SLUG'
+
 modal_buttons = {
     'edit': '<i class="fas fa-edit"></i>',
     'add':  '<i class="fas fa-plus-circle p-1"></i>',
@@ -13,64 +15,28 @@ modal_buttons = {
 }
 
 
-def make_slug(*args, datatable=False):
-
-    str_args = [str(a) for a in args]
-    slug = ''.join(str_args)
-    if slug == '' and datatable:
-        slug = '-ref-'
-    elif slug == '':
-        slug = '-'
-    elif datatable:
-        slug += '-ref-'
-    return slug
-
-
-def show_modal(modal_name, modal_type, *args, **kwargs):
-    slug = make_slug(*args)
+def show_modal(modal_name, *args, datatable=False, href=False, button=None, button_classes='btn btn-primary mx-1',
+               row=False):
     try:
-        javascript = f"django_modal.show_modal('{reverse(modal_name, kwargs={'slug': slug})}')"
+        javascript = f"django_modal.show_modal('{reverse(modal_name, args=[DUMMY_SLUG])}')"
     except NoReverseMatch:
         javascript = f"django_modal.show_modal('{reverse(modal_name)}')"
-
-    if modal_type == 'datatable':
-        no_search = kwargs.get('no_search', True)
-        if slug == '-':
-            remove_chars = -4
-        else:
-            remove_chars = -3
-        options = {
-            'javascript': f"{javascript[:remove_chars]}%ref%/')",
-            'colRef': kwargs.get('col_ref', 'id'),
-            'nonullref': kwargs.get('nonullref', True)
-        }
-        if kwargs.get('row'):
-            options['javascript'] = f"{javascript[:remove_chars]}pk-%ref%-row-%row%/')"
-        if not no_search:
-            options['text'] = ''
-        else:
-            options['no-col-search'] = True
-        return options
-    elif modal_type == 'datatable2':
-        if slug == '-':
-            remove_chars = -4
-        else:
-            remove_chars = -3
-        if kwargs.get('row'):
-            return f"{javascript[:remove_chars]}pk-%ref%-row-%row%/')"
-        else:
-            return f'{javascript[:remove_chars]}%ref%/\')'
-    elif modal_type == 'href':
-        return f"javascript:{javascript}"
-    elif modal_type == 'javascript':
-        return javascript
-
-    elif modal_type in modal_buttons:
-        name = kwargs.get('name', '')
-        if name == "":
-            name = modal_buttons[modal_type]
-        css_class = kwargs.get('css_class', 'mx-1')
-        return f'<a title="Edit" class="{css_class}" href="javascript:{javascript}">{name}</a>'
+    str_args = [str(a) for a in args]
+    slug = ''.join(str_args)
+    if datatable:
+        if slug:
+            slug += '-'
+        slug += 'pk-%ref%'
+        if row:
+            slug += '-row-%row%'
+    if href:
+        javascript = 'javascript:' + javascript
+    if button:
+        button_text = modal_buttons.get(button, button)
+        javascript = f'<a {css_classes(button_classes)} href="javascript:{javascript}">{button_text}</a>'
+    if not slug:
+        slug = '-'
+    return javascript.replace(DUMMY_SLUG, slug)
 
 
 def render_modal(template_name='django_modals/modal_base.html', **kwargs):
@@ -87,7 +53,7 @@ def css_classes(classes):
 
 
 def crispy_modal_link(modal_name, text, div=False, div_classes='', button_classes=''):
-    link = HTML(f'''<a{css_classes(button_classes)} href="{show_modal(modal_name, "href")}">{text}</a>''')
+    link = HTML(show_modal(modal_name, button=text, button_classes=button_classes))
     if div:
         link = Div(link, css_class=div_classes)
     return link

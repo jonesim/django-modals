@@ -13,7 +13,8 @@ from .fields import FieldOptions
 class CrispyFormMixin:
     Meta: object
     fields: list
-
+    flex_label_class = 'col-form-label col-form-label-sm mx-1'
+    flex_field_class = 'input-group-sm'
     label_class = 'col-md-3 col-form-label-sm'
     field_class = 'col-md-9 col-lg-6 input-group-sm'
     submit_class = 'btn-success modal-submit'
@@ -28,8 +29,10 @@ class CrispyFormMixin:
         return result
 
     def __init__(self, *args, pk=None, no_buttons=None, read_only=False, modal_title=None, form_delete=None,
-                 form_setup=None, slug=None, request_user=None, form_id=None, edit_button=False, **kwargs):
+                 form_setup=None, slug=None, request_user=None, form_id=None, edit_button=False, auto_placeholder=None,
+                 **kwargs):
         self.supplied_kwargs = locals()
+        self.auto_placeholder = self.get_defaults('auto_placeholder')
         self.no_buttons = self.get_defaults('no_buttons')
         self.read_only = self.get_defaults('read_only')
         self.modal_title = self.get_defaults('modal_title')
@@ -45,6 +48,7 @@ class CrispyFormMixin:
         self.buttons = []
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
+        self.mode = []
 
     @property
     def form_id(self):
@@ -126,9 +130,6 @@ class CrispyFormMixin:
         self.helper.label_class = self.label_class
         self.helper.field_class = self.field_class
         self.helper.disable_csrf = True
-        for f in self.fields:
-            if type(self.fields[f]) == forms.models.ModelChoiceField:
-                self.fields[f].empty_label = ' '
         layout = self.post_init(*args, **kwargs)
         if layout:
             if isinstance(layout, (tuple, list)):

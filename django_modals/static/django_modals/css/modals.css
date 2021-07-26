@@ -1,4 +1,10 @@
 
+.input-group-sm .select2-selection__rendered{
+    font-size: .875rem;
+    padding-top: .25rem!important;
+    padding-bottom: .25rem!important;
+}
+
 .select2-results .btn{
     display: none;
 }
