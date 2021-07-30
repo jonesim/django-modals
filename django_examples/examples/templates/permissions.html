@@ -1,0 +1,64 @@
+{% extends 'demo.html' %}
+{% load ajax_helpers modal_tags src_code %}
+{% block contents %}
+    <div class="ml-4">
+
+        {{ menus.users.render }}
+        <br>
+        <h4>Default modals</h4>
+        <div class="ml-4">
+            <p>Anyone can Create, Edit or View. Delete disabled</p>
+            {{ menus.default.render }}
+        </div>
+
+        <hr>
+        <h4>Delete Enabled</h4>
+        <div class="ml-4">
+            <p>Delete enabled for everyone</p>
+            {{ menus.delete.render }}
+        </div>
+
+        <hr>
+        <h4>Django User permissions</h4>
+        <p>Will fail with uncaptured exception if user does not have permission</p>
+        <data value="user">
+            <div class="ml-4">
+                <p></p>
+                <p><b>Signed in as </b>{{ request.user }}</p>
+                <div class="ml-4 small text-dark">
+                    {% for p in request.user.user_permissions.all %}
+                        {{ p }}<br>
+                    {% endfor %}
+                </div>
+                {% if request.user.is_superuser %}
+                    <p>Superuser</p>
+                {% endif %}
+                <p>
+                    {% if request.user.username == 'permission_test_user' %}
+                        <p>{% ajax_button 'logout' 'logout' %} {% ajax_button 'Superuser' 'super_user' 'btn btn-warning' %}</p>
+                        <a class="btn btn-success" href="{% show_modal 'perms_user' test_user.id href=True %}">Edit User
+                            perms</a>
+                    {% else %}
+                        {% ajax_button 'Test User log in' 'signin' view_enable=True %}
+                    {% endif %}
+                </p>
+                {{ menus.perms.render }}
+            </div>
+        </data>
+        <div class="ml-4 mt-2">
+            {% show_src_code 'show_src_code:source_code_modal' 'user' %}
+        </div>
+        <hr>
+        <h4>Django Staff and Authenticated</h4>
+        <div class="ml-4">
+            Logged in user can view and edit. Staff can delete.
+            {% if request.user.is_staff %}
+                <p>Staff</p>
+            {% endif %}
+        </div>
+        <div class="ml-4">
+            {{ menus.auth.render }}
+        </div>
+
+    </div>
+{% endblock %}
