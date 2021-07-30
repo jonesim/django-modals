@@ -1,0 +1,44 @@
+{% extends 'demo.html' %}
+{% load ajax_helpers modal_tags %}
+
+{% block contents %}
+    <div class="m-4">
+        <h4>Select2 examples</h4>
+        <div class="ml-4">
+            {% show_modal 'people_select2' button_classes='btn btn-primary' button='Person' %}
+        </div>
+
+        <hr>
+        <h4>Select2 Many to Many field examples</h4>
+        <div class="ml-4">
+            {{ menus.select2.render }}
+        </div>
+
+        <hr>
+        <h4>Select2 Ajax</h4>
+        <div class="ml-4">
+            {{ menus.ajax.render }}
+        </div>
+
+        <hr>
+        <h4>Bootstrap toggle</h4>
+        <div class="ml-4">
+            <a class="btn btn-primary" href="{% show_modal 'toggle_company' href=True %}">Toggle</a>
+        </div>
+
+        <hr>
+        <h4>Notes</h4>
+        <div class="ml-4">
+            <a class="btn btn-primary" href="{% show_modal 'company_note' href=True %}">Note</a>
+        </div>
+
+        <hr>
+        <h4>Datatable</h4>
+        <div class="ml-4">
+            <a class="btn btn-primary" href="{% show_modal 'datatable_ex' tag_id href=True %}">Datatable</a>
+            <a class="btn btn-primary" href="{% show_modal 'datatable_rev' company_id href=True %}">Datatable Reverse</a>
+            <a class="btn btn-primary" href="{% show_modal 'datatable_reorder' href=True %}">Reorder</a>
+        </div>
+    </div>
+
+{% endblock %}
