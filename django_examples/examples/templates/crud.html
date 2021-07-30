@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load django_menu_tags ajax_helpers modal_tags datatable_tags src_code %}
+
+{% block body %}
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark active-bar">
+        {{ menus.main_menu.render }}
+        <div class="text-light">
+            {{ request.user }}
+        </div>
+    </nav>
+    {% block contents %}
+        <div class="m-4">
+            <h4>Single view configured by URL slug</h4>
+            <br>
+            {{ menus.modals.render }}
+            <p class="my-2">
+                <data value="crud">
+                    {% show_src_code 'crud_source_code' 'crud_menu' %}
+                </data>
+            </p>
+        </div>
+        <hr>
+        <div class="m-4">
+            <h4>Different Views configured to provide CRUD</h4>
+            <br>
+            {{ menus.view_configured.render }}
+            <p class="my-2">
+                {% show_src_code 'crud_source_code' 'crud_view_menu' %}
+            </p>
+        </div>
+        <hr>
+        <data value="crud_template">
+            <div class="m-4">
+                <h4>Modals called by template tags</h4>
+                <br>
+                {% show_modal 'company_modal' button='Create' %}
+                {% show_modal 'company_modal' id button='Edit' %}
+                {% show_modal 'company_modal' 'modal-view-pk-' id button='View' %}
+                {% modal_delete 'company_modal' id %}
+            </div>
+        </data>
+        <div class="m-4">
+            <p class="my-2">
+                {% show_src_code 'crud_source_code' 'crud_template' %}
+            </p>
+        </div>
+        {% if datatable %}
+            <div class="d-flex">
+                <div style="min-width:320px">
+                    {% filter_control datatable %}
+                </div>
+                <div class="px-4 d-block float-left w-50">
+                    {{ datatable.render|safe }}vv
+                </div>
+            </div>
+        {% endif %}
+    {% endblock %}
+{% endblock %}
+
+
