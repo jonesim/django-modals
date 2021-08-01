@@ -16,13 +16,8 @@
     padding-bottom: 0;
 }
 
-
-
-@media only screen and (min-width: 1550px)
-{
-    .modal-xl{
-        max-width:1500px!important;
-    }
+.modal-xl{
+    max-width:1500px!important;
 }
 
 select[readonly].select2-hidden-accessible + .select2-container {
