@@ -118,7 +118,14 @@ if (typeof django_modal == 'undefined') {
             var modal_element = modal_container.children();
             modal_element.css('z-index', 1040 + (10 * open_modals));
             modal_element.modal({'backdrop': false})
-            $('.modal-dialog', modal_element).first().css({top: open_modals*10 - 10, left: open_modals*10 - 20});
+            modal_dialog = $('.modal-dialog', modal_element).first()
+            if ((document.documentElement.clientWidth - modal_dialog.width()) > 20){
+                left_pos = open_modals*10 - 20
+            } else {
+                left_pos = 5
+                modal_dialog.width(document.documentElement.clientWidth-20)
+            }
+            modal_dialog.css({top: open_modals*10 - 10, left: left_pos});
             modal_element.on('hidden.bs.modal', function (event) {
                 $(this).parent().remove();
                 open_modals -= 1;
@@ -317,7 +324,10 @@ if (typeof django_modal == 'undefined') {
             }
         }
 
-        function alter_form(field) {
+        function alter_form(field, e) {
+            if (e !== undefined) {
+                e.stopPropagation();
+            }
             var value
             var element = $(field)
             var form_id = element.closest('form').attr('id')
