@@ -9,6 +9,11 @@ class Select2(Select):
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
+        existing_style = context['widget']['attrs'].get('style', '')
+        if not existing_style:
+            context['widget']['attrs']['style'] = 'width:100%'
+        elif 'width' not in existing_style:
+            context['widget']['attrs']['style'] = existing_style + ';width:100%'
         if not self.attrs.get('ajax') and hasattr(self, 'select_data'):
             context['widget']['select_data'] = mark_safe(json.dumps(self.select_data))
         return context
@@ -48,8 +53,8 @@ class ModelSelect2ChoiceField(ChoiceField):
 
     def prepare_value(self, value):
         if value:
-            object = self.model.objects.get(pk=value)
-            self.choices = ((object.id, str(object)),)
+            model_object = self.model.objects.get(pk=value)
+            self.choices = ((model_object.id, str(model_object)),)
         return super().prepare_value(value)
 
 
@@ -61,7 +66,7 @@ class MultipleChoiceFieldAddValues(MultipleChoiceField):
         return True
 
     def clean(self, value):
-        return_data = {'existing': [],'new': []}
+        return_data = {'existing': [], 'new': []}
         for v in value:
             if v.startswith(Select2Multiple.new_marker):
                 return_data['new'].append(v[len(Select2Multiple.new_marker):])
