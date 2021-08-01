@@ -1,18 +1,12 @@
 from django import template
 from django.urls import reverse, resolve
 from django.utils.safestring import mark_safe
-from django_modals.helper import show_modal as show_modal_helper
 
-from django_modals import helper
+from ajax_helpers.templatetags.ajax_helpers import ajax_button
+
+from django_modals.helper import show_modal as show_modal_helper, modal_buttons, button_javascript
 
 register = template.Library()
-
-
-@register.simple_tag
-def onclick_modal(modal, *args):
-    str_args = [str(a) for a in args]
-    slug = ''.join(str_args)
-    return mark_safe("django_modal.show_modal('{}')".format(reverse(modal, kwargs={'slug': slug})))
 
 
 @register.simple_tag
@@ -41,4 +35,11 @@ def submit_form(url_name, *args):
 
 @register.simple_tag
 def modal_button(button_name, url_name=None, url_args=None, **kwargs):
-    return helper.button_javascript(button_name, url_name, url_args, **kwargs)
+    return button_javascript(button_name, url_name, url_args, **kwargs)
+
+
+@register.simple_tag
+def modal_delete(url_name, slug=None, text=None, **kwargs):
+    if not text:
+        text = modal_buttons['delete'] + ' Delete'
+    return ajax_button(text, 'delete', url_name=url_name, url_args=[slug], css_class='btn btn-danger', **kwargs)
