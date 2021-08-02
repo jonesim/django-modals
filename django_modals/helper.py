@@ -1,5 +1,5 @@
 import json
-
+from ajax_helpers.templatetags.ajax_helpers import button_javascript
 from django.urls import reverse, NoReverseMatch
 from django.template.loader import render_to_string
 from crispy_forms.layout import HTML, Div
@@ -15,14 +15,20 @@ modal_buttons = {
 }
 
 
+def make_slug(*args, make_pk=False):
+    slug = ''.join([str(a) for a in args])
+    if make_pk and '-' not in slug:
+        slug = 'pk-' + slug
+    return slug
+
+
 def show_modal(modal_name, *args, datatable=False, href=False, button=None, button_classes='btn btn-primary mx-1',
                row=False):
     try:
         javascript = f"django_modal.show_modal('{reverse(modal_name, args=[DUMMY_SLUG])}')"
     except NoReverseMatch:
         javascript = f"django_modal.show_modal('{reverse(modal_name)}')"
-    str_args = [str(a) for a in args]
-    slug = ''.join(str_args)
+    slug = make_slug(*args)
     if datatable:
         if slug:
             slug += '-'
@@ -44,7 +50,7 @@ def render_modal(template_name='django_modals/modal_base.html', **kwargs):
         kwargs['modal_url'] = kwargs['request'].path
     button_kwargs = {a: kwargs[a] for a in ['button_group_class', 'button_container_class'] if a in kwargs}
     kwargs['contents'] = mark_safe(kwargs.get('contents', '') + modal_button_group(kwargs.get('modal_buttons', ''),
-                                                                               **button_kwargs))
+                                                                                   **button_kwargs))
     return render_to_string(template_name, kwargs)
 
 
@@ -57,15 +63,6 @@ def crispy_modal_link(modal_name, text, div=False, div_classes='', button_classe
     if div:
         link = Div(link, css_class=div_classes)
     return link
-
-
-def button_javascript(button_name, url_name=None, url_args=None, **kwargs):
-    json_data = {'data': dict(button=button_name, **kwargs)}
-    if url_name:
-        if url_args is None:
-            url_args = ['-']
-        json_data['url'] = reverse(url_name, args=url_args)
-    return f'ajax_helpers.post_json({json.dumps(json_data)})'
 
 
 def overwrite_message(view, message, header=None):
@@ -100,3 +97,7 @@ def modal_button_group(buttons=None, button_container_class=None, button_group_c
         return (f'<div class="{group_class}">'
                 f'<div class="{button_group_class}">{"".join(buttons)}</div></div>')
     return ''
+
+
+def modal_delete_javascript(url_name, pk):
+    return mark_safe(button_javascript('delete', url_name=url_name, url_args=[pk]).replace('"', "'"))
