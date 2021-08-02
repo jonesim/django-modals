@@ -2,9 +2,9 @@ from django import template
 from django.urls import reverse, resolve
 from django.utils.safestring import mark_safe
 
-from ajax_helpers.templatetags.ajax_helpers import ajax_button
+from ajax_helpers.templatetags.ajax_helpers import ajax_button, button_javascript
 
-from django_modals.helper import show_modal as show_modal_helper, modal_buttons, button_javascript
+from django_modals.helper import show_modal as show_modal_helper, modal_buttons
 
 register = template.Library()
 
