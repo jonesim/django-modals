@@ -4,11 +4,6 @@ from crispy_forms.layout import Field, Div
 from crispy_forms.utils import TEMPLATE_PACK
 
 
-def reverse_field(*args, field_class='form-group-sm', **kwargs):
-    return FieldOptions(*args, css_class='form-control-sm', field_class=field_class, group_class='d-flex',
-                        label_class='form-control-sm', **kwargs, template='modal_fields/reverse.html')
-
-
 class Flex(Div):
     def __init__(self, *args, **kwargs):
         css_class = 'd-flex'
@@ -28,12 +23,12 @@ class MultiFieldRow(Div):
     def __init__(self, label, *fields, form_show_labels=False, form_class='', wrapper_class='d-flex mr-2',
                  field_class='input-group-sm', **kwargs):
         self.label = label
-        extra_classes = FieldOptions.get_extra_classes(locals())
+        extra_classes = FieldEx.get_extra_classes(locals())
         super().__init__(*fields, css_class='row')
 
     def render(self, form, form_style, context, template_pack=TEMPLATE_PACK, **kwargs):
         form.mode = form.mode + ['no_labels', 'flex']
-        self.fields = Label(self.label), Div(FieldOptions(*self.fields), css_class=form.field_class + ' d-flex')
+        self.fields = Label(self.label), Div(FieldEx(*self.fields), css_class=form.helper.field_class + ' d-flex')
         render_result = super().render(form, form_style, context, template_pack=TEMPLATE_PACK, **kwargs)
         form.mode = form.mode[:-2]
         return render_result
@@ -67,7 +62,7 @@ class Label:
         return labels
 
 
-class FieldOptions(Field):
+class FieldEx(Field):
     @staticmethod
     def get_extra_classes(kwargs):
         return {c: kwargs.pop(c) for c in ['label_class', 'field_class', 'form_class', 'form_show_labels',
@@ -78,25 +73,27 @@ class FieldOptions(Field):
         self.prepended_text = prepended_text
         self.appended_text = appended_text
         self.extra_classes = self.get_extra_classes(kwargs)
+        self.org_context = None
         super().__init__(*args, **kwargs)
 
     def add_to_context(self, context, extra_context, check_override=False, **kwargs):
         for key in kwargs:
             if not check_override or key not in self.extra_classes:
                 if key in context:
+                    self.org_context[key] = context[key]
                     context[key] = kwargs[key]
                 else:
                     extra_context[key] = kwargs[key]
 
     def render(self, form, form_style, context, template_pack=TEMPLATE_PACK, extra_context=None, **kwargs):
-
-        if self.auto_placeholder or (self.auto_placeholder is None and form.auto_placeholder):
+        self.org_context = {}
+        if self.auto_placeholder or (self.auto_placeholder is None and getattr(form.helper, 'auto_placeholder', False)):
             self.add_placeholders(self.fields, form.fields)
         if extra_context is None:
             extra_context = {}
         if 'flex' in form.mode:
             self.add_to_context(context, extra_context, check_override=True, form_class='', wrapper_class='d-flex',
-                                label_class=form.flex_label_class, field_class=form.flex_field_class)
+                                label_class=form.helper.flex_label_class, field_class=form.helper.flex_field_class)
         if 'no_labels' in form.mode:
             self.add_to_context(context, extra_context, form_show_labels=False)
         extra_context.update(self.extra_classes)
@@ -107,7 +104,7 @@ class FieldOptions(Field):
                                 crispy_prepended_text=self.prepended_text, crispy_appended_text=self.appended_text)
         else:
             template = self.get_template_name(template_pack)
-        return self.get_rendered_fields(
+        content = self.get_rendered_fields(
             form,
             form_style,
             context,
@@ -117,6 +114,10 @@ class FieldOptions(Field):
             extra_context=extra_context,
             **kwargs,
         )
+
+        for k in self.org_context:
+            context[k] = self.org_context[k]
+        return content
 
     @staticmethod
     def add_placeholders(fields, form_fields):
@@ -128,7 +129,7 @@ class FieldOptions(Field):
                     form_fields[f].widget.attrs['placeholder'] = form_fields[f].label
 
 
-class MultiField(FieldOptions):
+class MultiField(FieldEx):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('label_class', 'col-form-label-sm')
         kwargs.setdefault('field_class', 'input-group-sm mr-2')

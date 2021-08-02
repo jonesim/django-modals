@@ -20,7 +20,7 @@ from ajax_helpers.mixins import AjaxHelpers
 from .forms import ModelCrispyForm
 from .helper import render_modal, modal_button, modal_button_group
 from .processes import PROCESS_CREATE, PROCESS_VIEW, PROCESS_EDIT, PROCESS_DELETE, \
-    PERMISSION_OFF, PERMISSION_DISABLE, PERMISSION_AUTHENTICATED, PERMISSION_STAFF, permission_name
+    PROCESS_EDIT_DELETE, PERMISSION_OFF, PERMISSION_DISABLE, user_has_perm, get_process, modal_url_type
 
 
 class ModalException(Exception):
@@ -35,6 +35,7 @@ class BaseModalMixin(AjaxHelpers):
     menu_config = {'href_format': "javascript:django_modal.show_modal('{}')"}
     ajax_commands = ['button', 'select2']
     button_group_css = None
+    size = 'lg'
 
     def __init__(self, modal_url=None):
         self.modal_url = modal_url
@@ -58,6 +59,7 @@ class BaseModalMixin(AjaxHelpers):
             context['modal_url'] = self.modal_url
         if getattr(self, 'no_header_x', None):
             context['no_header_x'] = True
+        context['size'] = self.size
         return context
 
     def post(self, request, *args, **kwargs):
@@ -83,12 +85,11 @@ class BaseModalMixin(AjaxHelpers):
             self.kwargs['pk'] = self.slug['pk']
 
     def process_slug_kwargs(self):
-        pass
+        return True
 
     def dispatch(self, request, *args, **kwargs):
         self.split_slug(kwargs)
-        self.process_slug_kwargs()
-        if self.permission():
+        if self.process_slug_kwargs():
             # noinspection PyUnresolvedReferences
             return super().dispatch(request, *args, **self.kwargs)
         else:
@@ -121,6 +122,12 @@ class BaseModalMixin(AjaxHelpers):
         return self.command_response({'function': 'overwrite_modal',
                                       'html': view_class.as_view()(self.request, slug=slug, **kwargs).rendered_content})
 
+    def message(self, message, title=None):
+        modal_kwargs = {'message': message}
+        if title is not None:
+            modal_kwargs['modal_title'] = title
+        return self.modal_replace(modal_class=MessageModal, **modal_kwargs)
+
     def modal_redirect(self, modal_name, slug='-'):
         return self.command_response([{'function': 'close'},
                                       {'function': 'show_modal', 'modal': reverse(modal_name, kwargs={'slug': slug})}])
@@ -142,6 +149,8 @@ class BaseModal(BaseModalMixin, TemplateView):
             context = {}
         if hasattr(self, 'modal_title'):
             context['header_title'] = self.modal_title
+        elif 'modal_title' in kwargs:
+            context['header_title'] = kwargs['modal_title']
         self.check_for_background_page(context)
         return context
 
@@ -166,6 +175,15 @@ class SimpleModal(BaseModal):
     def __init__(self):
         self.buttons = []
         self._extra_content = None
+        super().__init__()
+
+
+class MessageModal(SimpleModal):
+
+    def modal_content(self):
+        return self.kwargs.get('message', 'Are you sure?')
+
+    def __init__(self):
         super().__init__()
 
 
@@ -219,7 +237,7 @@ class ModalFormMixin(BaseModalMixin):
         return context
 
     def add_trigger(self, field, trigger, conditions):
-        self.field_attributes.setdefault(field, {})[trigger] = 'django_modal.alter_form(this)'
+        self.field_attributes.setdefault(field, {})[trigger] = 'django_modal.alter_form(this, arguments[0])'
         self.triggers[field] = conditions
 
     def add_trigger_to_context(self, context):
@@ -230,24 +248,24 @@ class ModalFormMixin(BaseModalMixin):
         context['script'] = mark_safe(context.get('script', '') + f';{modal_triggers};{reset_triggers};')
 
     def __init__(self, *args, **kwargs):
-        self.process = PROCESS_EDIT
+        if not hasattr(self, 'process'):
+            self.process = None
         super().__init__(*args, **kwargs)
         self.field_attributes = {}
         self.triggers = {}
 
+    def button_make_edit(self, **_kwargs):
+        self.slug['modal'] = 'editdelete'
+        new_slug = '-'.join([f'{k}-{v}' for k, v in self.slug.items() if k != 'modalstyle'])
+        self.request.method = 'GET'
+        self.process = PROCESS_EDIT_DELETE
+        self.request.path = reverse(self.request.resolver_match.url_name, kwargs={'slug': new_slug})
+        return self.command_response('overwrite_modal',
+                                     html=render_to_string(self.template_name, self.get_context_data()))
+
     def button_refresh_modal(self, **kwargs):
         if self.slug.get('readonly'):
-            if kwargs.get('edit'):
-                del self.slug['readonly']
-                self.request.method = 'GET'
-                split_slug = self.kwargs['slug'].split('-')
-                new_slug = '-'.join([f'{split_slug[s]}-{split_slug[s+1]}' for s in range(0, len(split_slug), 2)
-                                     if split_slug[s] != 'readonly'])
-                self.request.path = reverse(self.request.resolver_match.url_name, kwargs={'slug': new_slug})
-                return self.command_response('overwrite_modal', html=render_to_string(self.template_name,
-                                                                                      self.get_context_data()))
-            else:
-                return ''
+            return ''
         else:
             form = self.get_form()
             form.clear_errors()
@@ -260,16 +278,43 @@ class ModalFormMixin(BaseModalMixin):
         if hasattr(self, 'form_setup') and callable(self.form_setup):
             kwargs['form_setup'] = self.form_setup
         kwargs.update({k: getattr(self, k, None) for k in ['modal_title', 'slug']})
-        kwargs['form_delete'] = self.permission(PROCESS_DELETE)
-        if self.process == PROCESS_VIEW:
-            kwargs['read_only'] = True
-            if self.user_has_perm(self.request.user, PROCESS_EDIT):
-                kwargs['edit_button'] = True
+        if hasattr(self, 'helper_class'):
+            kwargs['helper_class'] = self.helper_class
+        kwargs['process'] = self.process
         return kwargs
 
 
 class BootstrapModalMixin(ModalFormMixin, TemplateResponseMixin, BaseFormView):
     pass
+
+
+class ProcessFormFields:
+    def __init__(self, form_fields, widgets=None, field_classes=None):
+        self.fields = []
+        self.widgets = widgets if widgets else {}
+        self.field_classes = field_classes if field_classes else {}
+        self.layout_field_classes = {}
+        self.layout_field_params = {}
+
+        for f in form_fields:
+            if type(f) == tuple:
+                self.fields.append(f[0])
+                param_dict = dict(f[1])
+                for k in f[1]:
+                    if k == 'widget':
+                        self.widgets[f[0]] = param_dict.pop(k)
+                    if k == 'layout_field_class':
+                        self.layout_field_classes[f[0]] = param_dict.pop(k)
+                if param_dict:
+                    self.layout_field_params[f[0]] = param_dict
+            else:
+                self.fields.append(f)
+
+    def form_init_kwargs(self):
+        return {f: getattr(self, f) for f in ['layout_field_classes', 'layout_field_params'] if getattr(self, f, None)}
+
+    def extra_kwargs(self):
+        return {f: getattr(self, f) for f in ['widgets', 'field_classes'] if getattr(self, f, None)}
 
 
 class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
@@ -283,21 +328,12 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
     permission_view = PERMISSION_OFF
     permission_create = PERMISSION_OFF
 
-    @classmethod
-    def get_permission(cls, process):
-        permissions = {
-            PROCESS_DELETE: cls.permission_delete,
-            PROCESS_EDIT: cls.permission_edit,
-            PROCESS_VIEW: cls.permission_view,
-            PROCESS_CREATE: cls.permission_create,
-        }
-        return permissions[process]
-
     @staticmethod
     def formfield_callback(f, **kwargs):
         form_class = kwargs.get('form_class')
         if isinstance(form_class, Field):
             if hasattr(form_class, 'field_setup'):
+                # noinspection PyCallingNonCallable
                 form_class.field_setup(f)
             return form_class
         elif form_class:
@@ -305,14 +341,16 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
         return f.formfield(**kwargs)
 
     def __init__(self, *args, **kwargs):
+        self.form_init_args = {}
         if not self.form_class:
-            extra_kwargs = {}
-            if hasattr(self, 'widgets'):
-                extra_kwargs['widgets'] = self.widgets
-            if hasattr(self, 'field_classes'):
-                extra_kwargs['field_classes'] = self.field_classes
-            self.form_class = modelform_factory(self.model, form=self.base_form, fields=self.form_fields,
-                                                formfield_callback = self.formfield_callback, **extra_kwargs)
+
+            processed_form_fields = ProcessFormFields(self.form_fields, widgets=getattr(self, 'widgets', None),
+                                                      field_classes=getattr(self, 'field_classes', None))
+
+            self.form_init_args = processed_form_fields.form_init_kwargs()
+            self.form_class = modelform_factory(self.model, form=self.base_form, fields=processed_form_fields.fields,
+                                                formfield_callback=self.formfield_callback,
+                                                **processed_form_fields.extra_kwargs())
         super().__init__(*args, **kwargs)
         self.object = None
 
@@ -320,11 +358,11 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
         kwargs = super().get_form_kwargs()
         if hasattr(self, 'object'):
             kwargs.update({'instance': self.object})
+        kwargs.update(self.form_init_args)
         return kwargs
 
     def button_confirm_delete(self, **_kwargs):
-        form = self.get_form()
-        if form.form_delete:
+        if self.process in [PROCESS_DELETE, PROCESS_EDIT_DELETE]:
             self.object.delete()
         if not self.response_commands:
             self.add_command('close', no_refresh=True)
@@ -337,40 +375,30 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
                                             size='md', button_function='confirm_delete', message=self.delete_message)
         )
 
-    @classmethod
-    def user_has_perm(cls, user, process):
-        if cls.get_permission(process) == PERMISSION_OFF:
-            return True
-        elif cls.get_permission(process) == PERMISSION_DISABLE:
-            return False
-        elif cls.get_permission(process) == PERMISSION_AUTHENTICATED:
-            return user.is_authenticated
-        elif cls.get_permission(process) == PERMISSION_STAFF:
-            return user.is_staff or user.is_superuser
-        # noinspection PyProtectedMember
-        perm_name = f'{cls.model._meta.app_label}.{permission_name[process]}_{cls.model._meta.model_name}'
-        return user.has_perm(perm_name)
-
     def permission(self, process=None):
         if process is None:
             process = self.process
-        perm_value = self.user_has_perm(self.request.user, process)
+        perm_value = user_has_perm(self.__class__, self.request.user, process)
         if not perm_value and process == PROCESS_EDIT:
             self.process = PROCESS_VIEW
             perm_value = self.permission(PROCESS_VIEW)
         return perm_value
 
     def process_slug_kwargs(self):
+        if 'pk' not in self.slug:
+            self.process = PROCESS_CREATE
+        elif 'modal' in self.slug:
+            self.process = modal_url_type[self.slug['modal']]
+        else:
+            if self.process is None:
+                self.process = PROCESS_EDIT_DELETE
+        has_perm, self.process = get_process(self, self.request.user, self.process)
+
         if self.model is None:
             self.model = self.form_class.get_model(self.slug)
         if 'pk' in self.kwargs:
             self.object = self.get_object()
-            if self.slug.get('read_only') and not self.request.POST.get('edit'):
-                self.process = PROCESS_VIEW
-            else:
-                self.process = PROCESS_EDIT
         else:
-            self.process = PROCESS_CREATE
             self.object = self.model()
             # noinspection PyProtectedMember
             fields = self.model._meta.get_fields()
@@ -382,9 +410,10 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
                     self.initial[i] = [self.slug[i]]
                 else:
                     setattr(self.object, i, self.slug[i])
+        return has_perm
 
     def select2_ajax_search(self, page_len=10, filter_field=None, filter_search='istartswith', search=None, page=None,
-                            extra_filter=None):
+                            extra_filter=None, **_kwargs):
         field_name = inspect.stack()[1][3][len('select2_'):]
         field = fields_for_model(self.model, field_classes=self.field_classes, fields=[field_name],
                                  formfield_callback=self.formfield_callback)[field_name]
@@ -395,12 +424,14 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
         if extra_filter:
             query_filter.update(extra_filter)
         if hasattr(field, 'model'):
+            # noinspection PyUnresolvedReferences
             choices = field.model.objects.filter(**query_filter)
         else:
             choices = field.choices.queryset.filter(**query_filter)
         if page:
             choices = choices[page_len * (page - 1): page_len * page + 1]
         if hasattr(field, 'select_str'):
+            # noinspection PyCallingNonCallable
             results = [{'id': str(c.id), 'text': field.select_str(c)} for c in choices[:page_len]]
         else:
             results = [{'id': str(c.id), 'text': str(c)} for c in choices[:page_len]]
@@ -416,13 +447,35 @@ class MultiFormView(BaseModal):
     modal_title = ''
     base_form = ModelCrispyForm
     forms = []
+    menu_config = {'href_format': "javascript:django_modal.show_modal('{}')"}
 
     def get_form_classes(self):
-        return [modelform_factory(f.model, form=self.base_form, fields=f.fields, widgets=f.widgets)
-                for f in self.forms]
+        for f in self.forms:
+            processed_form_fields = ProcessFormFields(f.fields, widgets=f.widgets)
+            self.form_setup_args.append({
+                'form_class': modelform_factory(f.model, form=self.base_form, fields=processed_form_fields.fields,
+                                                **processed_form_fields.extra_kwargs()),
+                'processed_form_fields': processed_form_fields
+            })
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form_setup_args = []
+
+    @staticmethod
+    def make_form_id(form, used_ids):
+        form_id = form.model.__name__ + 'Form'
+        if form_id not in used_ids:
+            return form_id
+        form_id += '_{}'
+        count = 1
+        while form_id.format(count) in used_ids:
+            count += 1
+        return form_id.format(count)
 
     def get_form_kwargs(self):
         all_kwargs = []
+        used_ids = []
         if self.request.method in ('POST', 'PUT'):
             form_data = json.loads(self.request.body)
         else:
@@ -430,8 +483,10 @@ class MultiFormView(BaseModal):
         for f in self.forms:
             form_id = f.id
             if not form_id:
-                form_id = f.model.__name__ + 'Form'
+                form_id = self.make_form_id(f, used_ids)
+            used_ids.append(form_id)
             kwargs = f.initial.copy()
+            kwargs['form_id'] = form_id
             kwargs['no_buttons'] = True
             if self.request.method in ('POST', 'PUT'):
                 kwargs.update({
@@ -445,8 +500,14 @@ class MultiFormView(BaseModal):
         return all_kwargs
 
     def get_forms(self):
+        self.get_form_classes()
         form_kwargs = self.get_form_kwargs()
-        return [form_class(**form_kwargs[c]) for c, form_class in enumerate(self.get_form_classes())]
+        forms = []
+        for c, s in enumerate(self.form_setup_args):
+            kwargs = form_kwargs[c]
+            kwargs.update(s['processed_form_fields'].form_init_kwargs())
+            forms.append(s['form_class'](**kwargs))
+        return forms
 
     def get_context_data(self, **kwargs):
         self.extra_context = {
