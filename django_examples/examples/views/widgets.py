@@ -7,7 +7,7 @@ from django_datatables.datatables import DatatableView
 
 from django_modals.helper import show_modal
 from django_modals.widgets.select2 import Select2, Select2Multiple, MultipleChoiceFieldAddValues
-from django_modals.widgets.widgets import Toggle, TimyMCE
+from django_modals.widgets.widgets import Toggle, TinyMCE
 from django_modals.widgets.jquery_datepicker import DatePicker
 
 from show_src_code.modals import BootstrapModelModalMixin
@@ -177,7 +177,7 @@ class NoteForm(BootstrapModelModalMixin):
     model = Note
 
     form_fields = ['company', 'date', 'notes']
-    widgets = {'company': Select2, 'date': DatePicker, 'notes': TimyMCE}
+    widgets = {'company': Select2, 'date': DatePicker, 'notes': TinyMCE}
 
 
 class ToggleForm(BootstrapModelModalMixin):
