@@ -1,12 +1,12 @@
-import django_modals.view_mixins as view_mixins
+import django_modals.modals as modals
 from django.utils.safestring import mark_safe
 
 from django_modals.helper import modal_button
-from django_modals.view_mixins import SimpleModal
+from django_modals.modals import Modal
 from .source_code import template_source, html_code
 
 
-class BaseSourceCodeModal(SimpleModal):
+class BaseSourceCodeModal(Modal):
     size = 'xl'
     modal_title = 'Source Code'
     code = {'template_src': 'crud'}
@@ -42,31 +42,32 @@ class CodeMixin:
                 code = html_code(self.form_class)
         except OSError:
             pass
+        if isinstance(self, TemplateModal):
+            code += template_source(self.modal_template)
         code += html_code(self.__class__)
         # noinspection PyUnresolvedReferences
-        return self.modal_render(contents=mark_safe(code), size='xl', header='Source Code',
-                                 script=mark_safe('hljs.highlightAll();'), modal_buttons=modal_button('OK', 'close'))
+        return self.message(message=code, size='xl', title='Source Code', script=mark_safe('hljs.highlightAll();'))
 
 
-class BootstrapModalMixin(CodeMixin, view_mixins.BootstrapModalMixin):
+class FormModal(CodeMixin, modals.FormModal):
     pass
 
 
-class BootstrapModelModalMixin(CodeMixin, view_mixins.BootstrapModelModalMixin):
+class ModelFormModal(CodeMixin, modals.ModelFormModal):
     pass
 
 
-class MultiFormView(CodeMixin, view_mixins.MultiFormView):
+class MultiFormModal(CodeMixin, modals.MultiFormModal):
     pass
 
 
-class BaseModal(CodeMixin, view_mixins.BaseModal):
+class BaseModal(CodeMixin, modals.BaseModal):
     pass
 
 
-class SimpleModal(CodeMixin, view_mixins.SimpleModal):
+class Modal(CodeMixin, modals.Modal):
     pass
 
 
-class SimpleModalTemplate(CodeMixin, view_mixins.SimpleModalTemplate):
+class TemplateModal(CodeMixin, modals.TemplateModal):
     pass

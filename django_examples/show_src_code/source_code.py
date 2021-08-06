@@ -8,11 +8,16 @@ def code_block(file, line_no, code):
                <pre><code class="python-html">{code}</code></pre>'''
 
 
-def template_source(template_name, code_ptr):
+def template_source(template_name, code_ptr=None):
     source = loader.get_template(template_name).template.source
-    code_location = source.find('>', source.find(f'<data value="{code_ptr}"')) + 1
-    code_end = source.find('</data>', code_location)
-    lines = source[:code_location].count('\n') + 1
+    if code_ptr:
+        code_location = source.find('>', source.find(f'<data value="{code_ptr}"')) + 1
+        code_end = source.find('</data>', code_location)
+        lines = source[:code_location].count('\n') + 1
+    else:
+        lines = 0
+        code_location = 0
+        code_end = len(source)
     return code_block(template_name, lines, escape(source[code_location: code_end]))
 
 
