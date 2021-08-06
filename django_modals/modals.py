@@ -9,7 +9,7 @@ from django.views.generic.base import TemplateResponseMixin, TemplateView
 from django.views.generic.edit import BaseFormView
 from django.views.generic.detail import SingleObjectMixin
 from django.template.loader import render_to_string
-from django.urls import reverse, resolve
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.decorators import method_decorator
 
@@ -18,7 +18,8 @@ from crispy_forms.utils import render_crispy_form
 from ajax_helpers.mixins import AjaxHelpers
 
 from .forms import ModelCrispyForm
-from .helper import render_modal, modal_button, modal_button_group
+from .helper import render_modal, modal_button, modal_button_group, ajax_modal_redirect, modal_button_method, \
+    ajax_modal_replace
 from .processes import PROCESS_CREATE, PROCESS_VIEW, PROCESS_EDIT, PROCESS_DELETE, \
     PROCESS_EDIT_DELETE, PERMISSION_OFF, PERMISSION_DISABLE, user_has_perm, get_process, modal_url_type
 
@@ -37,10 +38,11 @@ class BaseModalMixin(AjaxHelpers):
     button_group_css = None
     size = 'lg'
 
-    def __init__(self, modal_url=None):
-        self.modal_url = modal_url
+    def __init__(self):
         super().__init__()
-        self.slug = {'modalstyle': 'normal'}
+        if not hasattr(self, 'modal_mode'):
+            self.modal_mode = True
+        self.slug = {}
 
     @staticmethod
     def permission(process=None):
@@ -53,36 +55,21 @@ class BaseModalMixin(AjaxHelpers):
         else:
             context = {}
         context.update({'request': self.request, 'slug': self.slug})
-        if self.modal_url is None:
-            context['modal_url'] = self.request.path
-        else:
-            context['modal_url'] = self.modal_url
+        context['modal_url'] = kwargs.get('modal_url', self.request.path)
         if getattr(self, 'no_header_x', None):
             context['no_header_x'] = True
-        context['size'] = self.size
+        context['size'] = kwargs.get('size', self.size)
         return context
 
-    def post(self, request, *args, **kwargs):
-        if request.is_ajax() and request.content_type == 'multipart/form-data':
-            response = request.POST
-            for t in self.ajax_commands:
-                if t in response and hasattr(self, f'{t}_{response[t]}'):
-                    return getattr(self, f'{t}_{response[t]}')(**response)
-        if hasattr(super(), 'post'):
-            return super().post(request, *args, **kwargs)
-
     def split_slug(self, kwargs):
-        if 'slug' not in kwargs:
-            return
-        s = kwargs['slug'].split('-')
-        if len(s) == 1:
-            if s[0] != 'new':
+        if 'slug' in kwargs:
+            s = kwargs['slug'].split('-')
+            if len(s) == 1:
                 self.slug['pk'] = s[0]
-        else:
-            for k in range(0, int(len(s)-1), 2):
-                self.slug[s[k]] = s[k+1]
-        if 'pk' in self.slug:
-            self.kwargs['pk'] = self.slug['pk']
+            else:
+                self.slug.update({s[k]: s[k+1] for k in range(0, int(len(s)-1), 2)})
+            if 'pk' in self.slug:
+                self.kwargs['pk'] = self.slug['pk']
 
     def process_slug_kwargs(self):
         return True
@@ -95,47 +82,37 @@ class BaseModalMixin(AjaxHelpers):
         else:
             raise ModalException('User does not have permission')
 
-    def forward_modal(self, url_name):
-        modal_url = reverse(url_name, kwargs={'slug': '-'})
-        return resolve(modal_url).func.view_class.as_view()(self.request, modal_url=modal_url)
-
     def button_refresh_modal(self, **_kwargs):
         return self.command_response('')
 
     def button_group(self):
-        kwargs = {a: getattr(self, a) for a in ['button_group_class', 'button_container_class'] if getattr(self, a)}
-        return modal_button_group(self.buttons, **kwargs)
+        button_kwargs = {
+            'button_group_class': self.kwargs.get('button_group_class', self.button_group_class),
+            'button_container_class': self.kwargs.get('button_container_class', self.button_container_class)
+        }
+        button_kwargs = {k: v for k, v in button_kwargs.items() if v}
+        return modal_button_group(self.buttons, **button_kwargs)
 
     def check_for_background_page(self, context):
-        if not self.request.is_ajax():
+        if not self.request.is_ajax() and self.modal_mode:
             context['form'] = render_modal(template_name=self.template_name, modal_type='no-parent', **context)
             # noinspection PyAttributeOutsideInit
             self.template_name = 'django_modals/blank_page_form.html'
 
     def modal_replace(self, modal_name=None, modal_class=None, slug='-', **kwargs):
-        self.request.method = 'get'
-        if modal_class:
-            view_class = modal_class
-        else:
-            self.request.path = reverse(modal_name, kwargs=dict(slug=slug))
-            view_class = resolve(self.request.path).func.view_class
-        return self.command_response({'function': 'overwrite_modal',
-                                      'html': view_class.as_view()(self.request, slug=slug, **kwargs).rendered_content})
+        return self.command_response(ajax_modal_replace(self.request, modal_name, slug=slug,
+                                                        modal_class=modal_class, **kwargs))
 
-    def message(self, message, title=None):
-        modal_kwargs = {'message': message}
+    def message(self, message, title=None, **modal_kwargs):
         if title is not None:
             modal_kwargs['modal_title'] = title
-        return self.modal_replace(modal_class=MessageModal, **modal_kwargs)
+        return self.modal_replace(modal_class=Modal, message=message, ajax_function='modal_html', **modal_kwargs)
+
+    def confirm(self, message, title=None, button_group_type='confirm', **kwargs):
+        return self.message(message, title=title, button_group_type=button_group_type, **kwargs)
 
     def modal_redirect(self, modal_name, slug='-'):
-        return self.command_response([{'function': 'close'},
-                                      {'function': 'show_modal', 'modal': reverse(modal_name, kwargs={'slug': slug})}])
-
-    def modal_render(self, contents=None, header_title=None, modal_buttons=None, **kwargs):
-        return self.command_response('modal_html', html=render_modal(
-            request=self.request, modal_buttons=modal_buttons, contents=contents, header_title=header_title, **kwargs
-        ))
+        return self.command_response(ajax_modal_redirect(modal_name, slug))
 
 
 class BaseModal(BaseModalMixin, TemplateView):
@@ -155,50 +132,55 @@ class BaseModal(BaseModalMixin, TemplateView):
         return context
 
 
-class SimpleModal(BaseModal):
+class Modal(BaseModal):
 
     def modal_content(self):
-        return ''
+        return self.kwargs.get('message', '')
 
-    def modal_buttons(self):
-        self.buttons = [modal_button('OK', 'close', 'btn-success')]
+    def get_modal_buttons(self):
+        button_group_type = self.kwargs.get('button_group_type')
+        if button_group_type == 'confirm':
+            return [
+                modal_button_method('Confirm', self.kwargs.get('button_function', 'confirm'), 'btn-success'),
+                modal_button('Cancel', 'close', 'btn-secondary')
+            ]
+        elif button_group_type == 'yes_cancel':
+            return [
+                modal_button_method('Yes', self.kwargs.get('button_function', 'confirm'), 'btn-danger'),
+                modal_button('Cancel', 'close', 'btn-success')
+            ]
+        else:
+            return [modal_button('OK', 'close', 'btn-success')]
 
     @property
     def extra_context(self):
         if not self._extra_content:
             modal_content = self.modal_content()
             if not self.buttons:
-                self.modal_buttons()
+                self.buttons = self.get_modal_buttons()
             self._extra_content = {'form': mark_safe(modal_content + self.button_group())}
         return self._extra_content
 
     def __init__(self):
-        self.buttons = []
+        if not hasattr(self, 'buttons'):
+            self.buttons = []
         self._extra_content = None
         super().__init__()
 
 
-class MessageModal(SimpleModal):
-
-    def modal_content(self):
-        return self.kwargs.get('message', 'Are you sure?')
-
-    def __init__(self):
-        super().__init__()
-
-
-class SimpleModalTemplate(SimpleModal):
+class TemplateModal(Modal):
 
     modal_template = None
 
-    def modal_context(self):
+    @staticmethod
+    def modal_context():
         return {}
 
     def modal_content(self):
         return render_to_string(self.modal_template, self.modal_context())
 
 
-class ModalFormMixin(BaseModalMixin):
+class FormModalMixin(BaseModalMixin):
     template_name = 'django_modals/modal_base.html'
 
     def form_invalid(self, form):
@@ -250,13 +232,14 @@ class ModalFormMixin(BaseModalMixin):
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'process'):
             self.process = None
+        # noinspection PyArgumentList
         super().__init__(*args, **kwargs)
         self.field_attributes = {}
         self.triggers = {}
 
     def button_make_edit(self, **_kwargs):
         self.slug['modal'] = 'editdelete'
-        new_slug = '-'.join([f'{k}-{v}' for k, v in self.slug.items() if k != 'modalstyle'])
+        new_slug = '-'.join([f'{k}-{v}' for k, v in self.slug.items()])
         self.request.method = 'GET'
         self.process = PROCESS_EDIT_DELETE
         self.request.path = reverse(self.request.resolver_match.url_name, kwargs={'slug': new_slug})
@@ -284,7 +267,7 @@ class ModalFormMixin(BaseModalMixin):
         return kwargs
 
 
-class BootstrapModalMixin(ModalFormMixin, TemplateResponseMixin, BaseFormView):
+class FormModal(FormModalMixin, TemplateResponseMixin, BaseFormView):
     pass
 
 
@@ -317,11 +300,12 @@ class ProcessFormFields:
         return {f: getattr(self, f) for f in ['widgets', 'field_classes'] if getattr(self, f, None)}
 
 
-class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
+class ModelFormModal(SingleObjectMixin, FormModal):
     form_fields = []
     template_name = 'django_modals/modal_base.html'
     base_form = ModelCrispyForm
     delete_message = 'Are you sure you want to delete?'
+    delete_title = 'Warning'
     field_classes = None
     permission_delete = PERMISSION_DISABLE
     permission_edit = PERMISSION_OFF
@@ -370,10 +354,8 @@ class BootstrapModelModalMixin(SingleObjectMixin, BootstrapModalMixin):
         return self.command_response()
 
     def button_delete(self, **_kwargs):
-        return self.command_response(
-            'modal_html', html=render_modal(template_name='django_modals/confirm.html', modal_url=self.request.path,
-                                            size='md', button_function='confirm_delete', message=self.delete_message)
-        )
+        return self.confirm(self.delete_message, self.delete_title, button_function='confirm_delete',
+                            button_group_type='yes_cancel', size='md')
 
     def permission(self, process=None):
         if process is None:
@@ -442,7 +424,7 @@ MultiForm = collections.namedtuple('MultiForm', ['model', 'fields', 'id', 'initi
                                    defaults=[None, None, None, {}, []])
 
 
-class MultiFormView(BaseModal):
+class MultiFormModal(BaseModal):
     template_name = 'django_modals/multi_form.html'
     modal_title = ''
     base_form = ModelCrispyForm
@@ -459,6 +441,7 @@ class MultiFormView(BaseModal):
             })
 
     def __init__(self, *args, **kwargs):
+        # noinspection PyArgumentList
         super().__init__(*args, **kwargs)
         self.form_setup_args = []
 
