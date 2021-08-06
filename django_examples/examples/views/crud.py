@@ -1,5 +1,5 @@
 from django_menus.menu import MenuItem
-from show_src_code.modals import BootstrapModelModalMixin, BaseSourceCodeModal
+from show_src_code.modals import ModelFormModal, BaseSourceCodeModal
 
 from django_modals.helper import modal_delete_javascript
 from django_modals.processes import PERMISSION_OFF, PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_EDIT
@@ -41,7 +41,7 @@ class CrudExamples(MainMenuTemplateView):
         return context
 
 
-class ModalCompanyForm(BootstrapModelModalMixin):
+class ModalCompanyForm(ModelFormModal):
 
     model = Company
     form_fields = ['name', 'active']
@@ -51,21 +51,21 @@ class ModalCompanyForm(BootstrapModelModalMixin):
         super().__init__(*args, **kwargs)
 
 
-class CrudRead(BootstrapModelModalMixin):
+class CrudRead(ModelFormModal):
 
     model = Company
     form_fields = ['name', 'active']
     process = PROCESS_VIEW
 
 
-class CrudEdit(BootstrapModelModalMixin):
+class CrudEdit(ModelFormModal):
 
     model = Company
     form_fields = ['name', 'active']
     process = PROCESS_EDIT
 
 
-class CrudEditDelete(BootstrapModelModalMixin):
+class CrudEditDelete(ModelFormModal):
 
     model = Company
     form_fields = ['name', 'active']
