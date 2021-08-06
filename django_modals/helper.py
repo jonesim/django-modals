@@ -1,10 +1,11 @@
 import json
 from ajax_helpers.templatetags.ajax_helpers import button_javascript
-from django.urls import reverse, NoReverseMatch
+from django.urls import reverse, resolve, NoReverseMatch
 from django.template.loader import render_to_string
 from crispy_forms.layout import HTML, Div
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
+
 
 DUMMY_SLUG = 'DUMMY-SLUG'
 
@@ -80,8 +81,8 @@ def modal_button(title, commands, css_class='btn-primary'):
         params = [commands]
     else:
         params = commands
-    return f'''<button onclick='django_modal.process_commands_lock({json.dumps(params)})' 
-            class="btn {css_class}">{title}</button>'''
+    return mark_safe(f'''<button onclick='django_modal.process_commands_lock({json.dumps(params)})' 
+            class="btn {css_class}">{title}</button>''')
 
 
 def modal_button_method(title, method_name, css_class='btn-primary'):
@@ -101,3 +102,25 @@ def modal_button_group(buttons=None, button_container_class=None, button_group_c
 
 def modal_delete_javascript(url_name, pk):
     return mark_safe(button_javascript('delete', url_name=url_name, url_args=[pk]).replace('"', "'"))
+
+
+def ajax_modal_redirect(modal_name, slug='-'):
+    return [{'function': 'close'},
+            {'function': 'show_modal', 'modal': reverse(modal_name, kwargs={'slug': slug})}]
+
+
+def reverse_modal(modal_name, slug='-'):
+    try:
+        return reverse(modal_name, args=slug)
+    except NoReverseMatch:
+        return reverse(modal_name)
+
+
+def ajax_modal_replace(request, modal_name=None, modal_class=None, slug='-', ajax_function='overwrite_modal', **kwargs):
+    request.method = 'get'
+    if modal_class:
+        view_class = modal_class
+    else:
+        request.path = reverse_modal(modal_name, slug)
+        view_class = resolve(request.path).func.view_class
+    return {'function': ajax_function, 'html': view_class.as_view()(request, slug=slug, **kwargs).rendered_content}
