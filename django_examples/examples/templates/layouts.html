@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load django_menu_tags ajax_helpers modal_tags datatable_tags %}
+
+{% block body %}
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark active-bar">
+        {{ menus.main_menu.render }}
+        <div class="text-light">
+            {{ request.user }}
+        </div>
+    </nav>
+    {% block contents %}
+        <div class="m-4">
+            <h4>Regular Forms</h4>
+            {{ menus.modals.render }}
+        </div>
+
+        <div class="m-4">
+            <h4>Horizontal Forms</h4>
+
+            {{ menus.horizontal_forms.render }}
+        </div>
+
+        <div class="m-4">
+            <h4>Manual Field setup</h4>
+            {{ menus.manual.render }}
+        </div>
+
+        <div class="m-4">
+            <h4>Sizes</h4>
+            <p>Size can be set with the size variable. Different helpers can be used to set width of form fields</p>
+            {{ menus.size.render }}
+        </div>
+
+        {% if datatable %}
+            <div class="d-flex">
+                <div style="min-width:320px">
+                    {% filter_control datatable %}
+                </div>
+                <div class="px-4 d-block float-left w-50">
+                    {{ datatable.render|safe }}vv
+                </div>
+            </div>
+        {% endif %}
+    {% endblock %}
+{% endblock %}
+
+
