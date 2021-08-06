@@ -7,7 +7,7 @@ from django_modals.processes import PERMISSION_OFF, PERMISSION_ON, PROCESS_VIEW,
 from django_modals.widgets.select2 import Select2Multiple
 
 from examples.models import Company
-from show_src_code.modals import BootstrapModelModalMixin
+from show_src_code.modals import ModelFormModal
 from .views import MainMenuTemplateView
 
 
@@ -68,20 +68,20 @@ class PermissionExamples(MainMenuTemplateView):
         return context
 
 
-class DefaultCompany(BootstrapModelModalMixin):
+class DefaultCompany(ModelFormModal):
 
     model = Company
     form_fields = ['name']
 
 
-class DeleteCompany(BootstrapModelModalMixin):
+class DeleteCompany(ModelFormModal):
 
     model = Company
     form_fields = ['name']
     permission_delete = PERMISSION_OFF
 
 
-class CompanyPermissions(BootstrapModelModalMixin):
+class CompanyPermissions(ModelFormModal):
 
     model = Company
     form_fields = ['name']
@@ -92,7 +92,7 @@ class CompanyPermissions(BootstrapModelModalMixin):
     permission_create = PERMISSION_ON
 
 
-class AuthenticatedStaffPermissions(BootstrapModelModalMixin):
+class AuthenticatedStaffPermissions(ModelFormModal):
 
     model = Company
     form_fields = ['name']
@@ -103,7 +103,7 @@ class AuthenticatedStaffPermissions(BootstrapModelModalMixin):
     permission_create = PERMISSION_ON
 
 
-class PermUser(BootstrapModelModalMixin):
+class PermUser(ModelFormModal):
     model = User
     form_fields = ['user_permissions', 'is_staff']
     widgets = {'user_permissions': Select2Multiple}

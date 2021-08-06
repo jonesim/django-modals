@@ -1,8 +1,8 @@
 import datetime
 from django_modals.widgets.select2 import Select2
-from django_modals.view_mixins import MultiForm
+from django_modals.modals import MultiForm
 
-from show_src_code.modals import MultiFormView
+from show_src_code.modals import MultiFormModal
 from django_modals.fields import FieldEx
 from crispy_forms.layout import HTML
 from .views import MainMenuTemplateView
@@ -18,7 +18,7 @@ class MultiFormExampleView(MainMenuTemplateView):
         )
 
 
-class ModalCompanyPerson(MultiFormView):
+class ModalCompanyPerson(MultiFormModal):
 
     modal_title = 'Multi form example'
     forms = [

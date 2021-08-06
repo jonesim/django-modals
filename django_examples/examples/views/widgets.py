@@ -10,7 +10,7 @@ from django_modals.widgets.select2 import Select2, Select2Multiple, MultipleChoi
 from django_modals.widgets.widgets import Toggle, TinyMCE
 from django_modals.widgets.jquery_datepicker import DatePicker
 
-from show_src_code.modals import BootstrapModelModalMixin
+from show_src_code.modals import ModelFormModal
 
 from examples.models import Company, Tags, Note, Person
 from .views import MainMenu
@@ -47,19 +47,19 @@ class WidgetExamples(MainMenu, DatatableView):
         return context
 
 
-class Select2PersonCompanyForm(BootstrapModelModalMixin):
+class Select2PersonCompanyForm(ModelFormModal):
     model = Person
     form_fields = ['company', 'first_name']
     widgets = {'company': Select2}
 
 
-class DatatableWidgetExample(BootstrapModelModalMixin):
+class DatatableWidgetExample(ModelFormModal):
     model = Tags
     form_fields = ['company']
     widgets = {'company': DataTableWidget(model=Company, fields=['.id', 'name'])}
 
 
-class DatatableWidgetReverseExample(BootstrapModelModalMixin):
+class DatatableWidgetReverseExample(ModelFormModal):
     model = Company
     form_fields = []
 
@@ -76,7 +76,7 @@ class DatatableWidgetReverseExample(BootstrapModelModalMixin):
         return response
 
 
-class DatatableReorderWidgetExample(BootstrapModelModalMixin):
+class DatatableReorderWidgetExample(ModelFormModal):
     model = Company
     form_fields = []
     ajax_commands = ['datatable', 'button']
@@ -99,7 +99,7 @@ class DatatableReorderWidgetExample(BootstrapModelModalMixin):
         return self.command_response('')
 
 
-class AjaxTagsCompanyForm(BootstrapModelModalMixin):
+class AjaxTagsCompanyForm(ModelFormModal):
     model = Tags
     form_fields = ['tag', 'company']
     widgets = {'company': Select2Multiple(attrs={'ajax': True})}
@@ -164,7 +164,7 @@ class PeopleField(ChoiceField):
         return {'new_marker': self.new_marker}
 
 
-class AjaxPersonCompanyForm(BootstrapModelModalMixin):
+class AjaxPersonCompanyForm(ModelFormModal):
     model = Person
     form_fields = ['company', 'first_name']
     field_classes = {'company': PeopleField(test=1)}
@@ -173,20 +173,20 @@ class AjaxPersonCompanyForm(BootstrapModelModalMixin):
         return self.select2_ajax_search(**kwargs, filter_field='name')
 
 
-class NoteForm(BootstrapModelModalMixin):
+class NoteForm(ModelFormModal):
     model = Note
 
     form_fields = ['company', 'date', 'notes']
     widgets = {'company': Select2, 'date': DatePicker, 'notes': TinyMCE}
 
 
-class ToggleForm(BootstrapModelModalMixin):
+class ToggleForm(ModelFormModal):
     model = Company
     form_fields = ['name', 'active']
     widgets = {'active': Toggle(attrs={'data-on': 'ACTIVE', 'data-off': 'INACTIVE'})}
 
 
-class ModalCompanyForm(BootstrapModelModalMixin):
+class ModalCompanyForm(ModelFormModal):
 
     model = Company
     form_fields = []
@@ -204,7 +204,7 @@ class ModalCompanyForm(BootstrapModelModalMixin):
         return response
 
 
-class ModalCompanyFormAdd(BootstrapModelModalMixin):
+class ModalCompanyFormAdd(ModelFormModal):
 
     model = Company
     form_fields = []
@@ -224,13 +224,13 @@ class ModalCompanyFormAdd(BootstrapModelModalMixin):
         return response
 
 
-class TagsCompanyForm(BootstrapModelModalMixin):
+class TagsCompanyForm(ModelFormModal):
     model = Tags
     form_fields = ['tag', 'company']
     widgets = {'company': Select2Multiple()}
 
 
-class TagsCompanyFormAddValues(BootstrapModelModalMixin):
+class TagsCompanyFormAddValues(ModelFormModal):
     model = Tags
     form_fields = ['tag', 'company']
 

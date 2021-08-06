@@ -6,7 +6,7 @@ from django_modals.fields import FieldEx
 from crispy_forms.layout import HTML
 
 from .views import MainMenuTemplateView
-from show_src_code.modals import BootstrapModalMixin
+from show_src_code.modals import FormModal
 
 
 class AdaptiveView(MainMenuTemplateView):
@@ -29,7 +29,7 @@ class TestForm(CrispyForm):
     if_three = CharField(label='Field for 3', required=False)
 
 
-class AdaptiveModal(BootstrapModalMixin):
+class AdaptiveModal(FormModal):
     form_class = TestForm
 
     @staticmethod

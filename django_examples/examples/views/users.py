@@ -7,7 +7,7 @@ from django_datatables.columns import ColumnBase, ManyToManyColumn
 from django_datatables.datatables import DatatableView
 from django_datatables.helpers import row_button
 
-from show_src_code.modals import BootstrapModelModalMixin, BaseSourceCodeModal
+from show_src_code.modals import ModelFormModal, BaseSourceCodeModal
 
 from django_modals.widgets.select2 import Select2Multiple
 from django_modals.datatables import ModalLink, DeleteColumn, EditColumn
@@ -16,7 +16,7 @@ from django_modals.processes import PERMISSION_ON
 from .views import MainMenu
 
 
-class ModalUser(BootstrapModelModalMixin):
+class ModalUser(ModelFormModal):
     model = User
     form_fields = ['username', 'groups', 'user_permissions']
     widgets = {'groups': Select2Multiple, 'user_permissions': Select2Multiple}
@@ -37,7 +37,7 @@ class ModalUser(BootstrapModelModalMixin):
         return self.command_response('close')
 
 
-class ModalGroup(BootstrapModelModalMixin):
+class ModalGroup(ModelFormModal):
     model = Group
     form_fields = ['name', ('permissions', {'widget': Select2Multiple})]
 
