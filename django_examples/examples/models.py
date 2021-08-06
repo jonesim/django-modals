@@ -6,6 +6,8 @@ from django_datatables.columns import ColumnLink, DatatableColumn, ChoiceColumn
 
 class Company(models.Model):
     name = models.CharField(max_length=80)
+    active = models.BooleanField(default=False)
+    importance = models.IntegerField(null=True)
 
     class Datatable(DatatableModel):
         people = {'annotations': {'people': Count('person__id')}}
@@ -44,9 +46,15 @@ class Person(models.Model):
     company = models.ForeignKey(Company,  on_delete=models.CASCADE)
     first_name = models.CharField(max_length=80)
     surname = models.CharField(max_length=80)
-    date_entered = models.DateField()
+    date_entered = models.DateField(auto_now_add=True)
 
 
 class Tags(models.Model):
     tag = models.CharField(max_length=40)
-    company = models.ManyToManyField(Company)
+    company = models.ManyToManyField(Company, blank=True)
+
+
+class Note(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    date = models.DateField()
+    notes = models.TextField()
