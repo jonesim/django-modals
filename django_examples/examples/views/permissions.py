@@ -12,7 +12,7 @@ from .views import MainMenuTemplateView
 
 
 class PermissionExamples(MainMenuTemplateView):
-    template_name = 'permissions.html'
+    template_name = 'example_views/permissions.html'
 
     def crud_menu(self, url_name, menu_name, company_id):
         self.add_menu(menu_name, 'button_menu.html', ).add_items(

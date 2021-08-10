@@ -1,4 +1,4 @@
-from ..url_helper import get_urls
+from django_modals.url_helper import get_urls
 from django_modals.helper import modal_button, modal_button_method, ajax_modal_redirect
 from .views import MainMenuTemplateView
 from show_src_code.modals import Modal, TemplateModal
@@ -6,7 +6,7 @@ from show_src_code.modals import Modal, TemplateModal
 
 class Basic(MainMenuTemplateView):
 
-    template_name = 'demo_pages/basic.html'
+    template_name = 'example_views/basic.html'
 
     def setup_menu(self):
         super().setup_menu()
@@ -29,7 +29,7 @@ class ModalConfirm(Modal):
         return 'Custom buttons with confirm stacked modal'
 
     def get_modal_buttons(self):
-        return [modal_button_method('Confirm', 'confirm_message'), modal_button('Cancel', 'close', 'btn-seconaey')]
+        return [modal_button_method('Confirm', 'confirm_message'), modal_button('Cancel', 'close', 'btn-secondary')]
 
     def button_confirm_message(self, **_kwargs):
         return self.confirm('Confirm message - Confirming will execute button_confirm method')
@@ -103,7 +103,7 @@ class ForwardingExample(Modal):
                 modal_button_method('Message', 'message', 'btn-warning mx-1')]
 
     def button_message(self, **_kwargs):
-        return self.message('Message modal on top of calling modal',  'Message Title',
+        return self.message('Message modal on top of calling modal', 'Message Title',
                             button_container_class='text-center')
 
     def button_redirect(self, **_kwargs):

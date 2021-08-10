@@ -44,7 +44,7 @@ class ModalGroup(ModelFormModal):
 
 class UserExamples(MainMenu, DatatableView):
 
-    template_name = 'user.html'
+    template_name = 'example_views/users.html'
     model = User
     ajax_commands = ['row']
 

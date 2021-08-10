@@ -9,7 +9,7 @@ from .views import MainMenuTemplateView
 
 
 class CrudExamples(MainMenuTemplateView):
-    template_name = 'crud.html'
+    template_name = 'example_views/crud.html'
 
     def crud_menu(self):
         self.add_menu('modals', 'button_menu.html', ).add_items(

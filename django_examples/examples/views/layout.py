@@ -14,7 +14,7 @@ from .views import MainMenuTemplateView
 
 
 class Layout(MainMenuTemplateView):
-    template_name = 'layouts.html'
+    template_name = 'example_views/layout.html'
 
     def setup_menu(self):
         super().setup_menu()
@@ -173,3 +173,13 @@ class ModalSizes(ModelFormModal):
             self.size = 'lg'
             self.helper_class = TwoColumnHelper
         return super().get_context_data()
+
+
+class ModalNoButtons(ModelFormModal):
+    form_class = Layout1Form
+
+    # Can be set via kwargs or in Meta of form
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['no_buttons'] = True
+        return kwargs

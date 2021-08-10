@@ -18,7 +18,7 @@ from .views import MainMenu
 
 class WidgetExamples(MainMenu, DatatableView):
 
-    template_name = 'widgets.html'
+    template_name = 'example_views/widgets.html'
 
     def setup_menu(self):
         super().setup_menu()
