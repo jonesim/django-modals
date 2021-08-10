@@ -4,7 +4,6 @@ from django.urls import reverse, resolve, NoReverseMatch
 from django.template.loader import render_to_string
 from crispy_forms.layout import HTML, Div
 from django.utils.safestring import mark_safe
-from django.shortcuts import render
 
 
 DUMMY_SLUG = 'DUMMY-SLUG'
@@ -64,14 +63,6 @@ def crispy_modal_link(modal_name, text, div=False, div_classes='', button_classe
     if div:
         link = Div(link, css_class=div_classes)
     return link
-
-
-def overwrite_message(view, message, header=None):
-    message_modal = render_modal('django_modals/ok.html', message=message, header=header)
-    if view.request.is_ajax():
-        return view.command_response('overwrite_modal', html=message_modal)
-    else:
-        return render(view.request, 'django_modals/blank_page_form.html', context={'form': message_modal})
 
 
 def modal_button(title, commands, css_class='btn-primary'):
