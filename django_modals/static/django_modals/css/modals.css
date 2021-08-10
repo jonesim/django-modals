@@ -1,23 +1,33 @@
 
-.input-group-sm .select2-selection__rendered{
-    font-size: .875rem;
-    padding-top: .25rem!important;
-    padding-bottom: .25rem!important;
+.toggle.off {
+    border-color: rgba(0, 0, 0, .25);
 }
 
-.select2-results .btn{
+.toggle-handle {
+    background-color: white;
+    border: thin rgba(0, 0, 0, .25) solid;
+}
+
+.input-group-sm .select2-selection__rendered {
+    font-size: .875rem;
+    padding-top: .25rem !important;
+    padding-bottom: .25rem !important;
+}
+
+.select2-results .btn {
     display: none;
 }
-.select2-selection__rendered .btn{
+
+.select2-selection__rendered .btn {
     margin: 1px 5px;
     z-index: 999999;
-    float: right!important;
+    float: right !important;
     padding-top: 0;
     padding-bottom: 0;
 }
 
-.modal-xl{
-    max-width:1500px!important;
+.modal-xl {
+    max-width: 1500px !important;
 }
 
 select[readonly].select2-hidden-accessible + .select2-container {
@@ -112,8 +122,8 @@ input::-webkit-inner-spin-button {
     margin: 0;
 }
 
-.ui-datepicker{
-  z-index: 99999!important;
+.ui-datepicker {
+    z-index: 99999 !important;
 }
 
 
@@ -201,28 +211,16 @@ input::-webkit-inner-spin-button {
     display: block;
 }
 
-/*
-.form-horizontal label{
-    margin-left: 15px;
-}
-.form-horizontal .form-group{
-    margin-bottom: 0.5rem;
-}
-
-*/
 
 /* from https://github.com/ttskch/select2-bootstrap4-theme
 modified heights from 0.75rem to 0.5rem
  */
 
-
-
 .input-group-sm .select2-container .select2-selection--single .select2-selection__rendered {
     padding-top: 2px;
     padding-bottom: 2px;
-
-
 }
+
 .input-group-sm .select2-container--bootstrap4 .select2-selection--single {
     height: 31px !important;
 }
@@ -239,11 +237,6 @@ modified heights from 0.75rem to 0.5rem
     float: right;
     margin-right: 0.3em;
 }
-
-
-
-
-
 
 
 .select2-container--bootstrap4 .select2-selection--single {
