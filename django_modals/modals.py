@@ -272,9 +272,13 @@ class FormModal(FormModalMixin, TemplateResponseMixin, BaseFormView):
 
 
 class ProcessFormFields:
-    def __init__(self, form_fields, widgets=None, field_classes=None):
+    def __init__(self, form_fields, widgets=None, field_classes=None, labels=None, help_texts=None,
+                 error_messages=None):
         self.fields = []
         self.widgets = widgets if widgets else {}
+        self.labels = labels if labels else {}
+        self.help_texts = help_texts if help_texts else {}
+        self.error_messages = error_messages if error_messages else {}
         self.field_classes = field_classes if field_classes else {}
         self.layout_field_classes = {}
         self.layout_field_params = {}
@@ -286,6 +290,12 @@ class ProcessFormFields:
                 for k in f[1]:
                     if k == 'widget':
                         self.widgets[f[0]] = param_dict.pop(k)
+                    if k == 'label':
+                        self.labels[f[0]] = param_dict.pop(k)
+                    if k == 'help_text':
+                        self.help_texts[f[0]] = param_dict.pop(k)
+                    if k == 'error_messages':
+                        self.error_messages[f[0]] = param_dict.pop(k)
                     if k == 'layout_field_class':
                         self.layout_field_classes[f[0]] = param_dict.pop(k)
                 if param_dict:
@@ -297,7 +307,8 @@ class ProcessFormFields:
         return {f: getattr(self, f) for f in ['layout_field_classes', 'layout_field_params'] if getattr(self, f, None)}
 
     def extra_kwargs(self):
-        return {f: getattr(self, f) for f in ['widgets', 'field_classes'] if getattr(self, f, None)}
+        return {f: getattr(self, f) for f in ['widgets', 'field_classes', 'labels', 'help_texts',
+                                              'error_messages'] if getattr(self, f, None)}
 
 
 class ModelFormModal(SingleObjectMixin, FormModal):
@@ -329,7 +340,10 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         if not self.form_class:
 
             processed_form_fields = ProcessFormFields(self.form_fields, widgets=getattr(self, 'widgets', None),
-                                                      field_classes=getattr(self, 'field_classes', None))
+                                                      field_classes=getattr(self, 'field_classes', None),
+                                                      labels=getattr(self, 'labels', None),
+                                                      help_texts=getattr(self, 'help_texts', None),
+                                                      error_messages=getattr(self, 'error_messages', None))
 
             self.form_init_args = processed_form_fields.form_init_kwargs()
             self.form_class = modelform_factory(self.model, form=self.base_form, fields=processed_form_fields.fields,
