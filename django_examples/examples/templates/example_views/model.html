@@ -1,0 +1,41 @@
+{% extends 'demo.html' %}
+{% load datatable_tags %}
+{% block contents %}
+
+    <div class="m-4">
+        <h4>Form setup in View</h4>
+        {{ menus.modals.render }}
+    </div>
+
+    <div class="m-4">
+        <h4>Form setup as separate class</h4>
+        {{ menus.separate_form.render }}
+    </div>
+
+    <div class="m-4">
+        <h4>form_setup callback</h4>
+        <p>Form setup is called at the end of the form init. It can be used to filter query sets and can access the url
+            slug</p>
+        {{ menus.query_set.render }}
+    </div>
+
+    <div class="m-4">
+        <h4>Field setup</h4>
+        {{ menus.field_setup.render }}
+    </div>
+
+    <h2 class="m-4">Companies</h2>
+    <div class="d-flex">
+        <div class="px-4 d-block float-left w-50">
+            {{ datatables.company_table.render }}
+        </div>
+    </div>
+
+    <h2 class="m-4">People</h2>
+    <div class="d-flex">
+
+        <div class="px-4 d-block float-left w-50">
+            {{ datatables.people_table.render}}
+        </div>
+    </div>
+{% endblock %}

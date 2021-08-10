@@ -1,6 +1,6 @@
 {% load modal_tags %}
 {% if company.id %}
-    <a class="btn btn-primary" href="{% show_modal 'person_nocompany_modal' 'href' 'company_id-' company.id %}">ADD PERSON</a>
+    <a class="btn btn-primary" href="{% show_modal 'person_nocompany_modal' 'company_id-' company.id href=True%}">ADD PERSON</a>
     <br><br>
     <table class="table">
         {% for p in company.person_set.all %}
@@ -12,7 +12,7 @@
                     {{ p.surname }}
                 </td>
                 <td>
-                    <a class="btn btn-sm btn-warning" href="{% show_modal 'person_nocompany_modal' 'href' p.id %}">EDIT PERSON</a>
+                    <a class="btn btn-sm btn-warning" href="{% show_modal 'person_nocompany_modal' p.id href=True %}">EDIT PERSON</a>
                 </td>
             </tr>
         {% endfor %}

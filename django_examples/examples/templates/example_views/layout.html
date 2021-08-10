@@ -1,0 +1,33 @@
+{% extends 'demo.html' %}
+{% load modal_tags %}
+{% block contents %}
+    <div class="m-4">
+        <h4>Regular Forms</h4>
+        {{ menus.modals.render }}
+    </div>
+
+    <div class="m-4">
+        <h4>Horizontal Forms</h4>
+        {{ menus.horizontal_forms.render }}
+    </div>
+
+    <div class="m-4">
+        <h4>Manual Field setup</h4>
+        {{ menus.manual.render }}
+    </div>
+
+    <div class="m-4">
+        <h4>No buttons</h4>
+           {% show_modal 'no_buttons' button='No Buttons' %}
+    </div>
+
+    <div class="m-4">
+        <h4>Sizes</h4>
+        <p>Size can be set with the size variable. Different helpers can be used to set width of form fields</p>
+        {{ menus.size.render }}
+    </div>
+
+{% endblock %}
+
+
+
