@@ -59,6 +59,7 @@ class BaseModalMixin(AjaxHelpers):
         if getattr(self, 'no_header_x', None):
             context['no_header_x'] = True
         context['size'] = kwargs.get('size', self.size)
+        context['modal_type'] = self.kwargs.get('modal_type')
         return context
 
     def split_slug(self, kwargs):
@@ -95,7 +96,8 @@ class BaseModalMixin(AjaxHelpers):
 
     def check_for_background_page(self, context):
         if not self.request.is_ajax() and self.modal_mode:
-            context['form'] = render_modal(template_name=self.template_name, modal_type='no-parent', **context)
+            context['modal_type'] = 'no-parent'
+            context['form'] = render_modal(template_name=self.template_name, **context)
             # noinspection PyAttributeOutsideInit
             self.template_name = 'django_modals/blank_page_form.html'
 

@@ -49,7 +49,7 @@ def render_modal(template_name='django_modals/modal_base.html', **kwargs):
     if 'request' in kwargs and 'modal_url' not in kwargs:
         kwargs['modal_url'] = kwargs['request'].path
     button_kwargs = {a: kwargs[a] for a in ['button_group_class', 'button_container_class'] if a in kwargs}
-    kwargs['contents'] = mark_safe(kwargs.get('contents', '') + modal_button_group(kwargs.get('modal_buttons', ''),
+    kwargs['contents'] = mark_safe(kwargs.get('contents', '') + modal_button_group(kwargs.get('modal_buttons', None),
                                                                                    **button_kwargs))
     return render_to_string(template_name, kwargs)
 
@@ -76,8 +76,8 @@ def modal_button(title, commands, css_class='btn-primary'):
             class="btn {css_class}">{title}</button>''')
 
 
-def modal_button_method(title, method_name, css_class='btn-primary'):
-    return modal_button(title, {'function': 'post_modal', 'button': method_name}, css_class)
+def modal_button_method(title, method_name, css_class='btn-primary', **kwargs):
+    return modal_button(title, dict(function='post_modal', button=method_name, **kwargs), css_class)
 
 
 def modal_button_group(buttons=None, button_container_class=None, button_group_class='btn-group'):
