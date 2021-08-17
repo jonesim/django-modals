@@ -207,11 +207,6 @@ input::-webkit-inner-spin-button {
     padding-left: 15px;
 }
 
-.modal-content .modal-header {
-    display: block;
-}
-
-
 /* from https://github.com/ttskch/select2-bootstrap4-theme
 modified heights from 0.75rem to 0.5rem
  */

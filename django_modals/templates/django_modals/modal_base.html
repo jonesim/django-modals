@@ -7,16 +7,18 @@
             {% block modal_header %}
                 {% if header_title %}
                     <div class="modal-header">
-                        <span class="modal-title">
+                        <div class="modal-title{% if center_header %} text-center flex-grow-1{% endif %}">
                             {% block header_title %}
                                 {{ header_title }}
                             {% endblock %}
-                        </span>
+                        </div>
+                        <div>
                         {% if not no_header_x %}
                             <button type="button" data-dismiss="modal">
                                 <i class="fas fa-times pt-1"></i>
                             </button>
                         {% endif %}
+                        </div>
                     </div>
                 {% endif %}
             {% endblock %}

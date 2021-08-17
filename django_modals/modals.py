@@ -56,8 +56,8 @@ class BaseModalMixin(AjaxHelpers):
             context = {}
         context.update({'request': self.request, 'slug': self.slug})
         context['modal_url'] = kwargs.get('modal_url', self.request.path)
-        if getattr(self, 'no_header_x', None):
-            context['no_header_x'] = True
+        context['no_header_x'] = getattr(self, 'no_header_x', None)
+        context['center_header'] = kwargs.get('center_header', getattr(self, 'center_header', None))
         context['size'] = kwargs.get('size', self.size)
         context['modal_type'] = self.kwargs.get('modal_type')
         return context
@@ -121,15 +121,8 @@ class BaseModal(BaseModalMixin, TemplateView):
     template_name = 'django_modals/modal_base.html'
 
     def get_context_data(self, **kwargs):
-        get_context_data = getattr(super(), 'get_context_data', None)
-        if get_context_data:
-            context = get_context_data(**kwargs)
-        else:
-            context = {}
-        if hasattr(self, 'modal_title'):
-            context['header_title'] = self.modal_title
-        elif 'modal_title' in kwargs:
-            context['header_title'] = kwargs['modal_title']
+        context = super().get_context_data(**kwargs)
+        context['header_title'] = kwargs.get('modal_title', getattr(self, 'modal_title', None))
         self.check_for_background_page(context)
         return context
 
@@ -204,11 +197,7 @@ class FormModalMixin(BaseModalMixin):
         return self.command_response('modal_refresh_trigger', selector=f'#{form.helper.form_id}')
 
     def get_context_data(self, **kwargs):
-        get_context_data = getattr(super(), 'get_context_data', None)
-        if get_context_data:
-            context = get_context_data(**kwargs)
-        else:
-            context = {}
+        context = super().get_context_data(**kwargs)
         context['css'] = 'modal'
         if context['form']:
             context['header_title'] = context['form'].get_title()
