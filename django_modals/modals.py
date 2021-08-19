@@ -37,6 +37,7 @@ class BaseModalMixin(AjaxHelpers):
     ajax_commands = ['button', 'select2']
     button_group_css = None
     size = 'lg'
+    no_parent_template = 'django_modals/blank_page_form.html'
 
     def __init__(self):
         super().__init__()
@@ -97,9 +98,10 @@ class BaseModalMixin(AjaxHelpers):
     def check_for_background_page(self, context):
         if not self.request.is_ajax() and self.modal_mode:
             context['modal_type'] = 'no-parent'
+            context['no_header_x'] = True
             context['form'] = render_modal(template_name=self.template_name, **context)
             # noinspection PyAttributeOutsideInit
-            self.template_name = 'django_modals/blank_page_form.html'
+            self.template_name = self.no_parent_template
 
     def modal_replace(self, modal_name=None, modal_class=None, slug='-', **kwargs):
         return self.command_response(ajax_modal_replace(self.request, modal_name, slug=slug,
