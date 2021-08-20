@@ -10,13 +10,13 @@ class Basic(MainMenuTemplateView):
 
     def setup_menu(self):
         super().setup_menu()
-        self.add_menu('modals', 'button_menu.html', ).add_items(
+        self.add_menu('modals', 'buttons', ).add_items(
             ('hello_modal', 'Simple Message'),
             ('hello_title_modal', 'Message with title'),
             ('ModalConfirm,-', 'Confirm'),
             'forward_example,-'
         )
-        self.add_menu('template', 'button_menu.html', ).add_items(
+        self.add_menu('template', 'buttons', ).add_items(
             ('template_modal,-', 'Template Modal'),
             ('template_modal_ajax,-', 'Template Modal with ajax button'),
             ('TemplateModalButtons,-', 'Template Modal with ajax button'),

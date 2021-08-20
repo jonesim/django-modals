@@ -49,21 +49,21 @@ class ModelExamples(MainMenu, DatatableView):
     def setup_menu(self):
         super().setup_menu()
 
-        self.add_menu('modals', 'button_menu.html', ).add_items(
+        self.add_menu('modals', 'buttons', ).add_items(
             (f'company_modal,name-{quote("Prefilled Name")}', 'Company Create pre filled name'),
             ('extra_field_modal,readonly-True', 'Company Extra field'),
             ('company_people_modal,-', 'Company/People modal'),
 
         )
-        self.add_menu('query_set', 'button_menu.html', ).add_items(
+        self.add_menu('query_set', 'buttons', ).add_items(
             (f'person_filter,filter-first', 'Person- company queryset 1st half'),
             (f'person_filter,filter-second', 'Person- company queryset 2nd half'),
 
         )
-        self.add_menu('separate_form', 'button_menu.html', ).add_items(
+        self.add_menu('separate_form', 'buttons', ).add_items(
             ('separate_form_modal,-', 'Separate Form')
         )
-        self.add_menu('field_setup', 'button_menu.html', ).add_items(
+        self.add_menu('field_setup', 'buttons', ).add_items(
             ('PersonFieldSetup,-', 'Field Setup'),
             ('PersonViewSetup,-', 'View Setup'),
         )

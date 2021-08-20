@@ -13,7 +13,7 @@ class AdaptiveView(MainMenuTemplateView):
 
     def setup_menu(self):
         super().setup_menu()
-        self.add_menu('modals', 'button_menu.html', ).add_items(
+        self.add_menu('modals', 'buttons', ).add_items(
             ('adaptive_modal', 'Adaptive Modal'),
         )
 

@@ -18,24 +18,24 @@ class Layout(MainMenuTemplateView):
 
     def setup_menu(self):
         super().setup_menu()
-        self.add_menu('modals', 'button_menu.html', ).add_items(
+        self.add_menu('modals', 'buttons', ).add_items(
             'regular,-',
             ('regular_2c,-', 'Regular 2 column'),
             ('layout2,-', 'Table Form'),
             ('nolabels,-', 'No labels'),
         )
 
-        self.add_menu('horizontal_forms', 'button_menu.html', ).add_items(
+        self.add_menu('horizontal_forms', 'buttons', ).add_items(
             'horizontal,-',
             ('horizontal_placeholder,-', 'Horizontal Placeholder'),
             ('notefield,-', 'Note Field'),
         )
 
-        self.add_menu('manual', 'button_menu.html', ).add_items(
+        self.add_menu('manual', 'buttons', ).add_items(
             'manual,-',
         )
 
-        self.add_menu('size', 'button_menu.html', ).add_items(
+        self.add_menu('size', 'buttons', ).add_items(
             ('small,size-sm', 'Small'),
             ('small,size-md', 'Medium '),
             ('small,size-lg', 'Large'),

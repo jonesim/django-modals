@@ -23,7 +23,7 @@ class WidgetExamples(MainMenu, DatatableView):
     def setup_menu(self):
         super().setup_menu()
 
-        self.add_menu('select2', 'button_menu.html', ).add_items(
+        self.add_menu('select2', 'buttons', ).add_items(
 
         )
         company = Company.objects.first()
@@ -34,7 +34,7 @@ class WidgetExamples(MainMenu, DatatableView):
             (f'widgets_company,pk-{company.id}', 'Reverse Many to Many'),
             (f'company_tags_add,pk-{company.id}', 'Reverse Many to Many ADD VALUES'),
             )
-        self.add_menu('ajax', 'button_menu.html', ).add_items(
+        self.add_menu('ajax', 'buttons', ).add_items(
             (f'ajax_widgets_company,pk-{tag.id}', 'AJAX'),
             (f'people_ajax,-', 'PEOPLE AJAX'),
             (f'people_ajax,57', 'EDIT PEOPLE AJAX'),

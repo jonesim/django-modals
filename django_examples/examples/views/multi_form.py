@@ -13,7 +13,7 @@ class MultiFormExampleView(MainMenuTemplateView):
 
     def setup_menu(self):
         super().setup_menu()
-        self.add_menu('modals', 'button_menu.html', ).add_items(
+        self.add_menu('modals', 'buttons', ).add_items(
             ('multi_form_modal,-', 'Multi Form'),
         )
 

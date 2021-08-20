@@ -12,7 +12,7 @@ class CrudExamples(MainMenuTemplateView):
     template_name = 'example_views/crud.html'
 
     def crud_menu(self):
-        self.add_menu('modals', 'button_menu.html', ).add_items(
+        self.add_menu('modals', 'buttons', ).add_items(
             ('company_modal,-', 'Create'),
             (f'company_modal,pk-{self.company.id}-modal-view', 'View'),
             (f'company_modal,pk-{self.company.id}-modal-viewedit', 'View/Edit'),
@@ -22,7 +22,7 @@ class CrudExamples(MainMenuTemplateView):
         )
 
     def different_views(self):
-        self.add_menu('view_configured', 'button_menu.html', ).add_items(
+        self.add_menu('view_configured', 'buttons', ).add_items(
             (f'crud_read,{self.company.id}', 'View'),
             (f'crud_edit,{self.company.id}', 'Edit'),
             (f'crud_edit_delete,{self.company.id}', 'Edit/Delete'),

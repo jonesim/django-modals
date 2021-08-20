@@ -15,7 +15,7 @@ class PermissionExamples(MainMenuTemplateView):
     template_name = 'example_views/permissions.html'
 
     def crud_menu(self, url_name, menu_name, company_id):
-        self.add_menu(menu_name, 'button_menu.html', ).add_items(
+        self.add_menu(menu_name, 'buttons', ).add_items(
             (f'{url_name},-', 'Create'),
             (f'{url_name},pk-{company_id}', 'Edit'),
             (f'{url_name},pk-{company_id}-modal-viewedit', 'View'),
