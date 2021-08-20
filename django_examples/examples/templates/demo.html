@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load django_menu_tags ajax_helpers modal_tags datatable_tags %}
+
+{% block body %}
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark active-bar">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            {{ menus.main_menu.render }}
+        </div>
+        <div class="text-light">
+            {{ menus.user_menu.render }}
+            {{ request.user }}
+        </div>
+    </nav>
+    {% block contents %}
+        <div class="m-4">
+            {{ menus.modals.render }}
+        </div>
+        {% if datatable %}
+            <div class="d-flex">
+                <div style="min-width:320px">
+                    {% filter_control datatable %}
+                </div>
+                <div class="px-4 d-block float-left w-50">
+                    {{ datatable.render|safe }}vv
+                </div>
+            </div>
+        {% endif %}
+    {% endblock %}
+{% endblock %}
+
