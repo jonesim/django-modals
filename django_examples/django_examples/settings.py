@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'examples',
     'ajax_helpers',
+    'django_menus',
+    'show_src_code',
 ]
 
 MIDDLEWARE = [
@@ -111,16 +113,30 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
-USE_TZ = True
+USE_TZ = False
+
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGIN_URL = '/accounts/loginmodal/-/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+
+OTP_TOTP_ISSUER = 'TEST 2FA'
+
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_HTTPONLY = False
+
+DATE_FORMAT = 'd/m/Y'
+DATE_INPUT_FORMATS = ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y')
