@@ -96,8 +96,14 @@ def modal_delete_javascript(url_name, pk):
 
 
 def ajax_modal_redirect(modal_name, slug='-'):
-    return [{'function': 'close'},
-            {'function': 'show_modal', 'modal': reverse(modal_name, kwargs={'slug': slug})}]
+    try:
+        modal_url = reverse(modal_name, kwargs={'slug': slug})
+    except NoReverseMatch:
+        if slug == '-':
+            modal_url = reverse(modal_name)
+        else:
+            raise NoReverseMatch
+    return [{'function': 'close'}, {'function': 'show_modal', 'modal': modal_url}]
 
 
 def reverse_modal(modal_name, slug='-'):
