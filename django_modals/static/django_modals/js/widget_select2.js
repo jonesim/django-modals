@@ -21,10 +21,10 @@ var select2_widget = function() {
             dropdownParent: modal_container,
             allowClear: true,
             placeholder: placeholder
-        }
+        };
 
         if (data !== undefined) {
-            select2_params.data = data
+            select2_params.data = data;
         }
 
         if (data !== undefined || ajax) {
@@ -79,7 +79,7 @@ var select2_widget = function() {
         });
     }
     return {
-        initselect2,
-        modal
+    	initselect2: initselect2,
+    	modal: modal
     };
 }();
