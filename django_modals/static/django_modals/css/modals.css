@@ -61,7 +61,7 @@ select[readonly].select2-hidden-accessible + .select2-container .select2-selecti
 
 .form-buttons .modal-edit::before {
     content: "\f304";
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro";
     margin-right: 4px;
     font-style: normal;
     font-weight: 800;
@@ -75,7 +75,7 @@ select[readonly].select2-hidden-accessible + .select2-container .select2-selecti
 
 .form-buttons .modal-submit::before {
     content: "\f0c7";
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro";
     margin-right: 4px;
     font-style: normal;
     font-weight: 800;
@@ -89,7 +89,7 @@ select[readonly].select2-hidden-accessible + .select2-container .select2-selecti
 
 .form-buttons .modal-cancel::before {
     content: "\f05e";
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro";
     margin-right: 4px;
     font-style: normal;
     font-weight: 800;
@@ -103,7 +103,7 @@ select[readonly].select2-hidden-accessible + .select2-container .select2-selecti
 
 .form-buttons .modal-delete::before {
     content: "\f1f8";
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro";
     margin-right: 4px;
     font-style: normal;
     font-weight: 800;
@@ -169,7 +169,7 @@ input::-webkit-inner-spin-button {
 
 .modal-header button .min-max:after {
     content: '\f2d1';
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro";
     font-style: normal;
     font-weight: 800;
 }
@@ -177,7 +177,7 @@ input::-webkit-inner-spin-button {
 
 .minimised .modal-header button .min-max:after {
     content: '\f2d0';
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Pro";
     font-style: normal;
     font-weight: 800;
 }
