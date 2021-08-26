@@ -1,1 +1,1 @@
-web: gunicorn django_examples.django_examples.wsgi
+web: gunicorn django_examples.wsgi
