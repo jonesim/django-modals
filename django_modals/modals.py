@@ -186,10 +186,21 @@ class FormModalMixin(BaseModalMixin):
             return HttpResponse(render_crispy_form(form))
         return self.refresh_form(form)
 
+    def create_object(self):
+        pass
+
+    def update_object(self):
+        pass
+
     def form_valid(self, form):
+        org_id = self.object.id
         save_function = getattr(form, 'save', None)
         if save_function:
             save_function()
+        if org_id:
+            self.update_object()
+        else:
+            self.create_object()
         if not self.response_commands:
             self.add_command('reload')
         return self.command_response()
@@ -352,9 +363,13 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         kwargs.update(self.form_init_args)
         return kwargs
 
+    def object_delete(self):
+        pass
+
     def button_confirm_delete(self, **_kwargs):
         if self.process in [PROCESS_DELETE, PROCESS_EDIT_DELETE]:
             self.object.delete()
+        self.object_delete()
         if not self.response_commands:
             self.add_command('close', no_refresh=True)
             self.add_command('reload')
