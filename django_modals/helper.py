@@ -77,7 +77,7 @@ def modal_button(title, commands, css_class='btn-primary'):
 
 
 def modal_button_method(title, method_name, css_class='btn-primary', **kwargs):
-    return modal_button(title, dict(function='post_modal', button=method_name, **kwargs), css_class)
+    return modal_button(title, dict(function='post_modal', button=dict(button=method_name, **kwargs)), css_class)
 
 
 def modal_button_group(buttons=None, button_container_class=None, button_group_class='btn-group'):
