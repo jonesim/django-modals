@@ -240,7 +240,7 @@ class FormModalMixin(BaseModalMixin):
                                      html=render_to_string(self.template_name, self.get_context_data()))
 
     def button_refresh_modal(self, **kwargs):
-        if self.slug.get('readonly'):
+        if self.slug.get('readonly') or kwargs.get('whole_modal'):
             return super().button_refresh_modal()
         else:
             form = self.get_form()
