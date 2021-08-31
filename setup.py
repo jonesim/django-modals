@@ -5,7 +5,7 @@ with open("readme.md", "r") as fh:
 
 setuptools.setup(
     name="django-nested-modals",
-    version="0.0.10",
+    version="0.0.11",
     author="Ian Jones",
     description="Django app to implement Bootstrap nested modals",
     long_description=long_description,
