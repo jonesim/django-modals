@@ -56,7 +56,7 @@ class BaseModalMixin(AjaxHelpers):
         else:
             context = {}
         context.update({'request': self.request, 'slug': self.slug})
-        context['modal_url'] = kwargs.get('modal_url', self.request.path)
+        context['modal_url'] = kwargs.get('modal_url', self.request.get_full_path())
         context['no_header_x'] = getattr(self, 'no_header_x', None)
         context['center_header'] = kwargs.get('center_header', getattr(self, 'center_header', None))
         context['size'] = kwargs.get('size', self.size)
