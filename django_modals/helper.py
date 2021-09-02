@@ -95,22 +95,18 @@ def modal_delete_javascript(url_name, pk):
     return mark_safe(button_javascript('delete', url_name=url_name, url_args=[pk]).replace('"', "'"))
 
 
-def ajax_modal_redirect(modal_name, slug='-'):
-    try:
-        modal_url = reverse(modal_name, kwargs={'slug': slug})
-    except NoReverseMatch:
-        if slug == '-':
-            modal_url = reverse(modal_name)
-        else:
-            raise NoReverseMatch
-    return [{'function': 'close'}, {'function': 'show_modal', 'modal': modal_url}]
-
-
 def reverse_modal(modal_name, slug='-'):
     try:
-        return reverse(modal_name, args=slug)
+        return reverse(modal_name, kwargs={'slug': slug})
     except NoReverseMatch:
-        return reverse(modal_name)
+        if slug == '-':
+            return reverse(modal_name)
+        else:
+            raise NoReverseMatch
+
+
+def ajax_modal_redirect(modal_name, slug='-'):
+    return [{'function': 'close'}, {'function': 'show_modal', 'modal': reverse_modal(modal_name, slug)}]
 
 
 def ajax_modal_replace(request, modal_name=None, modal_class=None, slug='-', ajax_function='overwrite_modal', **kwargs):
