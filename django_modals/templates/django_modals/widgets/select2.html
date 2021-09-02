@@ -21,5 +21,11 @@
                 "{{ widget.attrs.placeholder|default:'-' }}"
             )
         })()
+        {% comment %}
+            Below is tempprary fix due to issue reported in https://github.com/select2/select2/issues/5993
+        {% endcomment %}
+        $('#{{ widget.attrs.id }}').on('select2:open', () => {
+            document.querySelector('[aria-controls="select2-{{ widget.attrs.id }}-results"]').focus();
+        });
     </script>
 {% endspaceless %}
