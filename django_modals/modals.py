@@ -193,7 +193,7 @@ class FormModalMixin(BaseModalMixin):
         pass
 
     def form_valid(self, form):
-        org_id = self.object.id
+        org_id = self.object.id if hasattr(self, 'object') else None
         save_function = getattr(form, 'save', None)
         if save_function:
             save_function()
