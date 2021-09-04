@@ -32,6 +32,7 @@ urlpatterns = [
     path('modal/crud3/<str:slug>/', crud.CrudEditDelete.as_view(), name='crud_edit_delete'),
 
     path('modal/adaptive/', adaptive.AdaptiveModal.as_view(), name='adaptive_modal'),
+    path('modal/adaptive1/', adaptive.AdaptiveBooleanModal.as_view(), name='adaptive_modal_boolean'),
 
     path('modal/layout/<str:slug>/', layout.ModalHorizontal.as_view(), name='horizontal'),
     path('modal/layout1/<str:slug>/', layout.ModalSizes.as_view(), name='small'),
