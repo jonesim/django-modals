@@ -50,7 +50,6 @@ if (typeof django_modal == 'undefined') {
             init_modal_container($(command.selector))
         }
         ajax_helpers.command_functions.show_modal = function (command) {
-            ajax_helpers.ajax_busy = true;
             show_modal(command.modal);
         }
         ajax_helpers.command_functions.modal_html = function (command) {
@@ -191,6 +190,10 @@ if (typeof django_modal == 'undefined') {
 
         function show_modal(modal_url, slug, params) {
             var ajax_url;
+            if (ajax_helpers.ajax_busy){
+                return;
+            }
+            ajax_helpers.ajax_busy = true;
             if (typeof slug != 'undefined') {
                 ajax_url = modal_url + slug + '/?'
             } else {
