@@ -10,7 +10,8 @@
 */
 if (typeof django_modal == 'undefined') {
     var django_modal = function () {
-        let window_width = 1022
+        var window_width = 1022;
+        var timeout = 4000;
         var open_modals = 0;
         var modals = []
         var process_lock = false;
@@ -134,13 +135,13 @@ if (typeof django_modal == 'undefined') {
                 var closing_modal = modals.pop()
                 set_backdrop_z();
                 open_modals && $(document.body).addClass('modal-open');
-                ajax_helpers.ajax_busy = false;
+                ajax_helpers.set_ajax_busy(false, true);
                 if (open_modals > 0 && closing_modal.no_refresh !== true) {
                     send_inputs('refresh_modal')
                 }
             });
             modal_element.on('shown.bs.modal', function (event) {
-                ajax_helpers.ajax_busy = false;
+                ajax_helpers.set_ajax_busy(false, true);
             });
             disable_enter_key()
 
@@ -193,7 +194,7 @@ if (typeof django_modal == 'undefined') {
             if (ajax_helpers.ajax_busy){
                 return;
             }
-            ajax_helpers.ajax_busy = true;
+            ajax_helpers.set_ajax_busy(true, true);
             if (typeof slug != 'undefined') {
                 ajax_url = modal_url + slug + '/?'
             } else {
@@ -202,6 +203,7 @@ if (typeof django_modal == 'undefined') {
 
             $.ajax({
                 url: ajax_url + $.param(additional_parameters(params)),
+                timeout: django_modal.timeout,
             }).done(function (response) {
                 create_modal(response);
             })
@@ -243,13 +245,13 @@ if (typeof django_modal == 'undefined') {
                     data[property] = params[property]
                 }
                 var ajax_data = {'data': data, url: modal_url}
-                ajax_helpers.post_json(ajax_data)
+                ajax_helpers.post_json(ajax_data, django_modal.timeout)
             } else {
                 data = new FormData(forms[0])
                 for (property in params) {
                     data.append(property, params[property])
                 }
-                ajax_helpers.post_data(modal_url, data)
+                ajax_helpers.post_data(modal_url, data, django_modal.timeout)
             }
         }
 
@@ -322,8 +324,13 @@ if (typeof django_modal == 'undefined') {
         var modal_triggers = {}
 
         function reset_triggers(form_id){
+            var field;
             for (var f in django_modal.modal_triggers[form_id]){
-                alter_form($('#' + form_id + ' [name="' + f + '"]'))
+                field = $('#' + form_id + ' [name="' + f + '"]')
+                if (field.length > 1){
+                    field = $('#' + form_id + ' [name="' + f + '"]:checked')
+                }
+                alter_form(field)
             }
         }
 
@@ -378,6 +385,7 @@ if (typeof django_modal == 'undefined') {
             form_change_functions,
             reset_triggers,
             modal_div,
+            timeout,
         }
     }();
 }
