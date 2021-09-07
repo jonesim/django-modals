@@ -45,6 +45,8 @@ class CrispyFormMixin:
         self.layout_field_params = self.get_defaults('layout_field_params')
         # self.mode used when rendering fields e.g in flex divs
         self.mode = []
+        self.triggers = {}
+        self.trigger_fields = {}
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
@@ -165,7 +167,21 @@ class CrispyFormMixin:
         # noinspection PyAttributeOutsideInit
         self._errors = {}
 
+    def add_trigger(self, field, trigger, conditions):
+        self.triggers[field] = conditions
+        self.trigger_fields.setdefault(field, []).append(trigger)
+
     def __str__(self):
+        if self.triggers:
+            for f, triggers in self.trigger_fields.items():
+                for t in triggers:
+                    self.helper[f].update_attributes(**{t: 'django_modal.alter_form(this, arguments[0])'})
+            self.helper.layout.append(HTML(f'''<script>
+                $(document).off("modalPostLoad");
+                $(document).on("modalPostLoad",function(){{
+                django_modal.modal_triggers.{self.form_id}={json.dumps(self.triggers)};
+                django_modal.reset_triggers(\'{self.form_id}\')}})
+                </script>'''))
         return mark_safe(render_crispy_form(self))
 
 

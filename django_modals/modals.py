@@ -183,7 +183,7 @@ class FormModalMixin(BaseModalMixin):
     def form_invalid(self, form):
         if self.request.GET.get('formonly', False):
             form = self.get_form()
-            return HttpResponse(render_crispy_form(form))
+            return HttpResponse(str(form))
         return self.refresh_form(form)
 
     def create_object(self):
@@ -206,7 +206,7 @@ class FormModalMixin(BaseModalMixin):
         return self.command_response()
 
     def refresh_form(self, form):
-        self.add_command('html', selector=f'#{form.helper.form_id}', parent=True, html=render_crispy_form(form))
+        self.add_command('html', selector=f'#{form.helper.form_id}', parent=True, html=str(form))
         return self.command_response('modal_refresh_trigger', selector=f'#{form.helper.form_id}')
 
     def get_context_data(self, **kwargs):
@@ -216,30 +216,14 @@ class FormModalMixin(BaseModalMixin):
             context['header_title'] = context['form'].get_title()
         else:
             context['form'] = kwargs['message']
-        for f in self.field_attributes:
-            context['form'].helper[f].update_attributes(**self.field_attributes[f])
-        self.add_trigger_to_context(context)
         self.check_for_background_page(context)
         return context
-
-    def add_trigger(self, field, trigger, conditions):
-        self.field_attributes.setdefault(field, {})[trigger] = 'django_modal.alter_form(this, arguments[0])'
-        self.triggers[field] = conditions
-
-    def add_trigger_to_context(self, context):
-        if not self.triggers:
-            return
-        modal_triggers = f'django_modal.modal_triggers.{context["form"].form_id}={json.dumps(self.triggers)}'
-        reset_triggers = f'django_modal.reset_triggers(\'{context["form"].form_id}\')'
-        context['script'] = mark_safe(context.get('script', '') + f';{modal_triggers};{reset_triggers};')
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'process'):
             self.process = None
         # noinspection PyArgumentList
         super().__init__(*args, **kwargs)
-        self.field_attributes = {}
-        self.triggers = {}
 
     def button_make_edit(self, **_kwargs):
         self.slug['modal'] = 'editdelete'
@@ -524,7 +508,7 @@ class MultiFormModal(BaseModal):
 
     def refresh_form(self, forms):
         self.add_command('html', selector=f'#{forms[0].form_id}', parent=True,
-                         html=' '.join([render_crispy_form(f) for f in forms]))
+                         html=' '.join([str(f) for f in forms]))
         return self.command_response('modal_refresh_trigger', selector=f'#{forms[0].form_id}')
 
     def forms_valid(self, forms):
