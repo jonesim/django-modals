@@ -33,6 +33,7 @@ urlpatterns = [
 
     path('modal/adaptive/', adaptive.AdaptiveModal.as_view(), name='adaptive_modal'),
     path('modal/adaptive1/', adaptive.AdaptiveBooleanModal.as_view(), name='adaptive_modal_boolean'),
+    path('modal/adaptive2/', adaptive.AdaptiveSelectModal.as_view(), name='adaptive_modal_select'),
 
     path('modal/layout/<str:slug>/', layout.ModalHorizontal.as_view(), name='horizontal'),
     path('modal/layout1/<str:slug>/', layout.ModalSizes.as_view(), name='small'),
