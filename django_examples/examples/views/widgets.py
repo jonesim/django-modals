@@ -49,8 +49,8 @@ class WidgetExamples(MainMenu, DatatableView):
 
 class Select2PersonCompanyForm(ModelFormModal):
     model = Person
-    form_fields = ['company', 'first_name']
-    widgets = {'company': Select2}
+    form_fields = ['title', 'company', 'first_name']
+    widgets = {'company': Select2, 'title': Select2}
 
 
 class DatatableWidgetExample(ModelFormModal):
