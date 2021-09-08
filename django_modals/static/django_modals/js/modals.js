@@ -327,9 +327,6 @@ if (typeof django_modal == 'undefined') {
             var field;
             for (var f in django_modal.modal_triggers[form_id]){
                 field = $('#' + form_id + ' [name="' + f + '"]')
-                if (field.length > 1){
-                    field = $('#' + form_id + ' [name="' + f + '"]:checked')
-                }
                 alter_form(field)
             }
         }
@@ -342,16 +339,28 @@ if (typeof django_modal == 'undefined') {
             var element = $(field)
             var form_id = element.closest('form').attr('id')
             var config = django_modal.modal_triggers[form_id][element.attr('name')]
-            switch (element.prop('type')) {
-                case 'checkbox':
-                    if (element.is(':checked')) {
-                        value = 'checked'
-                    } else {
-                        value = 'unchecked'
+
+            if (element.length === 1) {
+                switch (element.prop('type')) {
+                    case 'checkbox':
+                        if (element.is(':checked')) {
+                            value = 'checked'
+                        } else {
+                            value = 'unchecked'
+                        }
+                        break;
+                    default:
+                        value = element.val()
+                }
+            } else if (element.length > 1) {
+                for (var f = 0; f < element.length; f++) {
+                    if ($(element[f]).prop('checked')) {
+                        value = $(element[f]).val()
+                        break
                     }
-                    break;
-                default:
-                    value = element.val()
+                }
+            } else {
+                value = null;
             }
             if (Array.isArray(config)) {
                 for (var c of config) {
