@@ -319,6 +319,11 @@ if (typeof django_modal == 'undefined') {
             clear: function (config) {
                 $(config.selector + ' input').val('')
             },
+            send_inputs: function (config, e) {
+                if (e !== undefined) {
+                    django_modal.send_inputs(config.button)
+                }
+            }
         }
 
         var modal_triggers = {}
@@ -364,21 +369,21 @@ if (typeof django_modal == 'undefined') {
             }
             if (Array.isArray(config)) {
                 for (var c of config) {
-                    perform_function(c, value)
+                    perform_function(c, value, e)
                 }
             } else {
-                perform_function(config, value)
+                perform_function(config, value, e)
             }
         }
 
-        function perform_function(config, value) {
+        function perform_function(config, value, e) {
             var html_function = config.values[value]
             if (html_function === undefined) {
                 if (config.default !== undefined) {
-                    form_change_functions[config.default](config)
+                    form_change_functions[config.default](config, e)
                 }
             } else {
-                form_change_functions[html_function](config)
+                form_change_functions[html_function](config, e)
             }
         }
 
