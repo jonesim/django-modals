@@ -4,7 +4,27 @@ from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 
 
-class Select2(Select):
+def widget_attrs(widget):
+    return ''.join([f' {n}' if v is True else f' {n}={v}' for n, v in widget['attrs'].items() if v is not False])
+
+
+class SelectGroupMixin:
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        options = []
+        for group_name, group_choices, group_index in context['widget']['optgroups']:
+            if group_name:
+                options.append(f'<optgroup label="{group_name}">')
+            for option in group_choices:
+                options.append(f'<option value="{option["value"]}"{widget_attrs(option)}>{option["label"]}</option>')
+            if group_name:
+                options.append('</optgroup>')
+        context['options_str'] = ''.join(options)
+        return context
+
+
+class Select2(SelectGroupMixin, Select):
     template_name = 'django_modals/widgets/select2.html'
 
     def get_context(self, name, value, attrs):
@@ -19,11 +39,11 @@ class Select2(Select):
         return context
 
 
-class TypedSelect2(TypedChoiceField):
+class TypedSelect2(SelectGroupMixin, TypedChoiceField):
     template_name = 'django_modals/widgets/select2.html'
 
 
-class Select2Multiple(SelectMultiple):
+class Select2Multiple(SelectGroupMixin, SelectMultiple):
     template_name = 'django_modals/widgets/select2.html'
     new_marker = 'new:'
 
