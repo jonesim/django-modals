@@ -87,10 +87,15 @@ if (typeof django_modal == 'undefined') {
         }
 
         function create_modal(modal_html) {
+            var modal_container
             open_modals += 1;
             modals.push({id: active_modal_container_id()})
-            var modal_container = $('<div>', {id: active_modal_container_id()}).appendTo('body');
-            modal_container.html(modal_html);
+            if (modal_html !== "") {
+                modal_container = $('<div>', {id: active_modal_container_id()}).appendTo('body');
+                modal_container.html(modal_html);
+            } else{
+                modal_container = $('#' + active_modal_container_id())
+            }
             if (open_modals === 1) {
                 var backdrop = $('<div>', {class: 'modal-backdrop fade'}).appendTo('body');
                 window.setTimeout(function () {

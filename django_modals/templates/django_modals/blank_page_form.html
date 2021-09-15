@@ -14,9 +14,12 @@
 {% block body %}
 {% endblock %}
 
+<div id="modal-1">
+    {{ form }}
+</div>
+
 <script>
-    html_form = `{{ form }}`
-    django_modal.create_modal(html_form);
+    django_modal.create_modal("");
 </script>
 
 </body>
