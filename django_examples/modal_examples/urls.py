@@ -15,9 +15,8 @@ import modal_examples.views.no_modal as no_modal
 
 
 urlpatterns = [
-
+    path('modal-redirect/', RedirectView.as_view(pattern_name='example1', ), name='django-nested-modals'),
     path('modal/classes/', include('modal_examples.views.basic')),
-
     path('modal/classes/models/', include('modal_examples.views.model')),
 
     path('modal/unbound1/', unbound_forms.UnboundModal.as_view(), name='unbound_modal'),
