@@ -4,7 +4,7 @@ from show_src_code.modals import ModelFormModal, BaseSourceCodeModal
 from django_modals.helper import modal_delete_javascript
 from django_modals.processes import PERMISSION_OFF, PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_EDIT
 
-from examples.models import Company
+from modal_examples.models import Company
 from .views import MainMenuTemplateView
 
 

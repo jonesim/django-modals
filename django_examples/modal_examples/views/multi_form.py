@@ -6,7 +6,7 @@ from show_src_code.modals import MultiFormModal
 from django_modals.fields import FieldEx
 from crispy_forms.layout import HTML
 from .views import MainMenuTemplateView
-from examples.models import Company, Person
+from modal_examples.models import Company, Person
 
 
 class MultiFormExampleView(MainMenuTemplateView):

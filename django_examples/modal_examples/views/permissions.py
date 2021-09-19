@@ -6,7 +6,7 @@ from django_modals.processes import PERMISSION_OFF, PERMISSION_ON, PROCESS_VIEW,
     PERMISSION_AUTHENTICATED, user_has_perm
 from django_modals.widgets.select2 import Select2Multiple
 
-from examples.models import Company
+from modal_examples.models import Company
 from show_src_code.modals import ModelFormModal
 from .views import MainMenuTemplateView
 

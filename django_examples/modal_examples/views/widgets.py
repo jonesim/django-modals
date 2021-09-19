@@ -12,7 +12,7 @@ from django_modals.widgets.jquery_datepicker import DatePicker
 
 from show_src_code.modals import ModelFormModal
 
-from examples.models import Company, Tags, Note, Person
+from modal_examples.models import Company, Tags, Note, Person
 from .views import MainMenu
 
 

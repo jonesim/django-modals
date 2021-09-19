@@ -12,7 +12,7 @@ from django_modals.widgets.select2 import Select2
 from django_modals.processes import PERMISSION_ON, PERMISSION_OFF, PROCESS_CREATE
 from django_modals.datatables import EditColumn, DeleteColumn
 from django_modals.url_helper import get_urls
-from examples.models import Company, Person
+from modal_examples.models import Company, Person
 
 from show_src_code.modals import ModelFormModal, MultiFormModal
 from .views import MainMenu
@@ -80,17 +80,35 @@ class ModalCompanyForm(ModelFormModal):
         super().__init__(*args, **kwargs)
 
 
+
+from django.forms.widgets import TextInput
+
+
+class CurrencyWidget(TextInput):
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if value:
+            value = str(int(value)/100.0)
+        return super().render(name, value, attrs, renderer)
+
+    def value_from_datadict(self, data, files, name):
+        return float(data['name']) * 100
+
+
+
 class ModalCompanyFormExtraField(ModelFormModal):
 
     model = Company
     modal_title = ['New', 'Edit']
-    form_fields = ['name']
+    form_fields = [('name', {'widget': CurrencyWidget}),]
 
     @staticmethod
     def form_setup(form, *_args, **_kwargs):
         form.fields['extra'] = CharField()
         form.fields['extra'].help_text = 'Field added in form_setup'
 
+    def form_valid(self, form):
+        print(form.cleaned_data)
 
 class ModalCompanyFormPeople(ModelFormModal):
     model = Company

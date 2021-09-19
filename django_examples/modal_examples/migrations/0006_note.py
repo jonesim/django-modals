@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('examples', '0005_company_active'),
+        ('modal_examples', '0005_company_active'),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date', models.DateField()),
                 ('notes', models.TextField()),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='examples.Company')),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modal_examples.Company')),
             ],
         ),
     ]

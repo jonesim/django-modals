@@ -8,7 +8,7 @@ from django_modals.form_helpers import SmallHelper, TwoColumnHelper, RegularHelp
 
 from show_src_code.modals import ModelFormModal
 
-from examples.models import Person, Note
+from modal_examples.models import Person, Note
 
 from .views import MainMenuTemplateView
 

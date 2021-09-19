@@ -1,5 +1,5 @@
 from show_src_code.modals import ModelFormModal
-from examples.models import Company
+from modal_examples.models import Company
 from .views import MainMenu
 
 

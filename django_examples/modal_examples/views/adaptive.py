@@ -34,14 +34,18 @@ class TestForm(CrispyForm):
 class AdaptiveModal(FormModal):
     form_class = TestForm
 
+    def button_test_X(self, **kwargs):
+        return self.command_response('')
+
     @staticmethod
     def form_setup(form, *_args, **_kwargs):
         form.add_trigger('select', 'onchange', [
-            {'selector': '#div_id_if_one', 'values': {'1': 'show'}, 'default': 'hide'},
-            {'selector': '#div_id_if_two', 'values': {'2': 'show'}, 'default': 'hide'},
-            {'selector': '#div_id_if_three', 'values': {'3': 'show'}, 'default': 'hide'},
-            {'selector': '#div_id_if_one,#div_id_if_two,#div_id_if_three', 'values': {'all': 'show'}},
-            {'selector': '#div_id_if_one', 'values': {'all': 'clear'}},
+            #{'selector': '#div_id_if_one', 'values': {'1': 'show'}, 'default': 'hide'},
+            #{'selector': '#div_id_if_two', 'values': {'2': 'show'}, 'default': 'hide'},
+            #{'selector': '#div_id_if_three', 'values': {'3': 'show'}, 'default': 'hide'},
+            #{'selector': '#div_id_if_one,#div_id_if_two,#div_id_if_three', 'values': {'all': 'show'}},
+            #{'selector': '#div_id_if_one', 'values': {'all': 'clear'}},
+            {'button': 'test_X', 'default': 'send_inputs', 'values': {}},
         ])
 
         # noinspection PyTypeChecker
@@ -99,5 +103,6 @@ class AdaptiveSelectModal(FormModal):
             {'selector': '#div_id_if_three', 'values': {'3': 'show'}, 'default': 'hide'},
             {'selector': '#div_id_if_one,#div_id_if_two,#div_id_if_three', 'values': {'all': 'show'}},
             {'selector': '#div_id_if_one', 'values': {'all': 'clear'}},
+
         ])
 

@@ -1,24 +1,24 @@
 from django.urls import path, include
 from django.views.generic.base import RedirectView
 
-import examples.views.basic as basic
-import examples.views.model as model_modals
-import examples.views.users as users
-import examples.views.permissions as permissions
-import examples.views.widgets as widgets
-import examples.views.layout as layout
-import examples.views.adaptive as adaptive
-import examples.views.multi_form as multi_form
-import examples.views.crud as crud
-import examples.views.unbound_forms as unbound_forms
-import examples.views.no_modal as no_modal
+import modal_examples.views.basic as basic
+import modal_examples.views.model as model_modals
+import modal_examples.views.users as users
+import modal_examples.views.permissions as permissions
+import modal_examples.views.widgets as widgets
+import modal_examples.views.layout as layout
+import modal_examples.views.adaptive as adaptive
+import modal_examples.views.multi_form as multi_form
+import modal_examples.views.crud as crud
+import modal_examples.views.unbound_forms as unbound_forms
+import modal_examples.views.no_modal as no_modal
 
 
 urlpatterns = [
 
-    path('modal/classes/', include('examples.views.basic')),
+    path('modal/classes/', include('modal_examples.views.basic')),
 
-    path('modal/classes/models/', include('examples.views.model')),
+    path('modal/classes/models/', include('modal_examples.views.model')),
 
     path('modal/unbound1/', unbound_forms.UnboundModal.as_view(), name='unbound_modal'),
     path('modal/unbound2/', unbound_forms.UnboundPaymentModal.as_view(), name='unbound_payment'),
