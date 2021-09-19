@@ -1,0 +1,2 @@
+recursive-include modal_examples *
+recursive-exclude modal_examples *.pyc
