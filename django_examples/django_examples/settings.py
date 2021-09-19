@@ -40,10 +40,11 @@ INSTALLED_APPS = [
     'django_datatables',
     'django_modals',
     'crispy_forms',
-    'examples',
+    'modal_examples',
     'ajax_helpers',
     'django_menus',
     'show_src_code',
+    'datatable_examples',
 ]
 
 MIDDLEWARE = [

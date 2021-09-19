@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic.base import RedirectView
 from django.contrib.auth import views
+from django.apps import apps
 
 auth_patterns = [
     path('password_change/', views.PasswordChangeView.as_view(), name='password_change'),
@@ -29,8 +30,12 @@ auth_patterns = [
 
 urlpatterns = [
     path('accounts/', include(auth_patterns)),
-    path('', include('examples.urls')),
     path('admin/', admin.site.urls),
     path('src/', include('show_src_code.urls')),
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
 ]
+
+a = apps.get_app_configs()
+for c in a:
+    if hasattr(c, 'urls'):
+        urlpatterns += [path('', include(c.urls))]
