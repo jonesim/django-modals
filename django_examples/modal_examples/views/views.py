@@ -4,7 +4,7 @@ from django_menus.menu import MenuMixin, MenuItem
 
 
 class MainMenu(AjaxHelpers, MenuMixin):
-    template_name = 'demo.html'
+    template_name = 'django_examples/demo.html'
 
     def setup_menu(self):
         self.add_menu('main_menu').add_items(
