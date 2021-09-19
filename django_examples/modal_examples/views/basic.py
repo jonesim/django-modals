@@ -57,7 +57,7 @@ class HelloTitleModal(Modal):
 
 class TemplateModalExample(TemplateModal):
 
-    modal_template = 'django_examples/modal_template.html'
+    modal_template = 'modal_examples/modal_template.html'
 
     def modal_context(self):
         return {'view': 'From view'}
@@ -65,7 +65,7 @@ class TemplateModalExample(TemplateModal):
 
 class TemplateModalAjax(TemplateModal):
 
-    modal_template = 'django_examples/modal_template_ajax.html'
+    modal_template = 'modal_examples/modal_template_ajax.html'
 
     def modal_context(self):
         return {'view': 'From view'}
@@ -76,7 +76,7 @@ class TemplateModalAjax(TemplateModal):
 
 class TemplateModalButtons(TemplateModal):
 
-    modal_template = 'django_examples/modal_template.html'
+    modal_template = 'modal_examples/modal_template.html'
     buttons = [modal_button('Custom Close', 'close', 'btn-warning')]
 
     def modal_context(self):

@@ -129,7 +129,7 @@ class ModalCompanyFormPeople(ModelFormModal):
         if self.object.id:
             form.modal_title = (f'Edit Company  <a href="{reverse("company", args=(self.object.id,))}">'
                                 f'{self.object.name}</a>')
-        return Field(*form.Meta.fields), HTML(render_to_string('django_examples/people.html', {'company': form.instance}))
+        return Field(*form.Meta.fields), HTML(render_to_string('modal_examples/people.html', {'company': form.instance}))
 
     def form_valid(self, form):
         if not self.object.id:
