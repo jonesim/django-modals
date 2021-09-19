@@ -1,40 +1,30 @@
-{% extends 'modal_examples/base.html' %}
+{% extends 'modal_examples/demo.html' %}
 {% load django_menu_tags ajax_helpers modal_tags datatable_tags src_code %}
-
-{% block body %}
-    <nav class="navbar navbar-expand-lg bg-dark navbar-dark active-bar">
-        {{ menus.main_menu.render }}
-        <div class="text-light">
-            {{ request.user }}
+{% block contents %}
+    <div class="m-4">
+        {{ menus.modals.render }}
+    </div>
+    <div class="m-4">
+        {% show_src_code 'user_source_code' 'user_view' button='VIEW Source code' %}
+    </div>
+    <hr>
+    <div class="d-flex">
+        <div style="min-width:320px">
+            {% filter_control datatables.user_table %}
         </div>
-    </nav>
-    {% block contents %}
-        <div class="m-4">
-            {{ menus.modals.render }}
+        <div class="px-4 d-block float-left">
+            {{ datatables.user_table.render|safe }}
         </div>
-        <div class="m-4">
-            {% show_src_code 'user_source_code' 'user_view' button='VIEW Source code' %}
+    </div>
+    <br>
+    <hr>
+    <br>
+    <div class="d-flex">
+        <div style="min-width:320px">
+            {% filter_control datatables.group_table %}
         </div>
-        <hr>
-        <div class="d-flex">
-            <div style="min-width:320px">
-                {% filter_control datatables.user_table %}
-            </div>
-            <div class="px-4 d-block float-left">
-                {{ datatables.user_table.render|safe }}
-            </div>
+        <div class="px-4 d-block float-left">
+            {{ datatables.group_table.render|safe }}
         </div>
-        <br>
-        <hr>
-        <br>
-        <div class="d-flex">
-            <div style="min-width:320px">
-                {% filter_control datatables.group_table %}
-            </div>
-            <div class="px-4 d-block float-left">
-                {{ datatables.group_table.render|safe }}
-            </div>
-        </div>
-    {% endblock %}
+    </div>
 {% endblock %}
-
