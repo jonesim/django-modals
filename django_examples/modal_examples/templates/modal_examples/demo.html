@@ -1,5 +1,5 @@
 {% extends 'modal_examples/base.html' %}
-{% load django_menu_tags ajax_helpers modal_tags datatable_tags %}
+{% load django_menu_tags ajax_helpers modal_tags datatable_tags src_code%}
 
 {% block body %}
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark active-bar">
@@ -16,6 +16,11 @@
             {{ request.user }}
         </div>
     </nav>
+
+    <div class="m-1 text-right">
+     <img src="{{ version_img }}">
+      <a class="btn btn-outline-secondary btn-sm" href="{{ home_page }}"><i class="fab fa-github text-dark"></i>GitHub</a>
+    </div>
     {% block contents %}
         <div class="m-4">
             {{ menus.modals.render }}

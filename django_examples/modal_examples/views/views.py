@@ -1,9 +1,9 @@
 from django.views.generic import TemplateView
 from ajax_helpers.mixins import AjaxHelpers
 from django_menus.menu import MenuMixin, MenuItem
+from show_src_code.view_mixins import DemoViewMixin
 
-
-class MainMenu(AjaxHelpers, MenuMixin):
+class MainMenu(DemoViewMixin, AjaxHelpers, MenuMixin):
     template_name = 'modal_examples/demo.html'
 
     def setup_menu(self):
