@@ -8,5 +8,8 @@ class ModalExampleConfig(PypiAppConfig):
     urls = 'modal_examples.urls'
 
     def ready(self):
-        from .import_data import import_data
-        import_data(self.path)
+        try:
+            from .import_data import import_data
+            import_data(self.path)
+        except:
+            pass
