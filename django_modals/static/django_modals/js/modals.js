@@ -65,9 +65,7 @@ if (typeof django_modal == 'undefined') {
             $(command.selector).trigger('modalPostLoad', [django_modal.active_modal_container_id()])
         }
 
-        ajax_helpers.command_functions.set_value = function(command){
-            $(command.selector).val(command.val)
-        }
+
 
         if (window.opener != null) {
             target = window.opener.location.href
