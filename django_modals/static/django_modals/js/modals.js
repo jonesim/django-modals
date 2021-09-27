@@ -54,6 +54,7 @@ if (typeof django_modal == 'undefined') {
             show_modal(command.modal);
         }
         ajax_helpers.command_functions.modal_html = function (command) {
+            ajax_helpers.ajax_busy = true
             create_modal(command.html);
         }
         ajax_helpers.command_functions.post_modal = function (command) {
