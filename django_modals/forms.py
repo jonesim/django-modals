@@ -27,11 +27,12 @@ class CrispyFormMixin:
 
     def __init__(self, *args, pk=None, no_buttons=None, modal_title=None, form_setup=None, slug=None,
                  request_user=None, form_id=None, process=None, layout_field_params=None, layout_field_classes=None,
-                 helper_class=HorizontalHelper, **kwargs):
+                 helper_class=HorizontalHelper, progress_bar=None, **kwargs):
         self.supplied_kwargs = locals()
         self.no_buttons = self.get_defaults('no_buttons')
         self.modal_title = self.get_defaults('modal_title')
         self._form_id = self.get_defaults('form_id')
+        self.progress_bar = self.get_defaults('progress_bar')
 
         self.user = request_user
         self.slug = slug
@@ -62,7 +63,11 @@ class CrispyFormMixin:
             return self.form_setup(self, *args, **kwargs)
 
     def submit_button(self, css_class=submit_class, button_text='Submit'):
-        return self.button(button_text, 'post_modal', css_class)
+        if self.progress_bar:
+            return self.button('submit', {'function': 'post_modal',
+                                          'options': {'progress': {'selector': f'#file_progress_bar'}}}, css_class)
+        else:
+            return self.button(button_text, 'post_modal', css_class)
 
     def delete_button(self, css_class=delete_class):
         if self.instance.pk is not None:

@@ -14,6 +14,24 @@ modal_buttons = {
     'delete': '<i class="fas fa-trash"></i>',
 }
 
+progress_bar_html = '''
+    <div class="progress" style="margin-top: 5px;">
+        <div id='file_progress_bar{}' class="progress-bar{}" role="progressbar" aria-valuenow="0" 
+            aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+        </div>
+    </div>
+'''
+
+
+def progress_bar(progress_id=None, css=''):
+    if progress_id is not None:
+        progress_id = '_' + str(progress_id)
+    else:
+        progress_id = ''
+    if css:
+        css = ' ' + css
+    return progress_bar_html.format(progress_id, css)
+
 
 def make_slug(*args, make_pk=False):
     slug = ''.join([str(a) for a in args])
