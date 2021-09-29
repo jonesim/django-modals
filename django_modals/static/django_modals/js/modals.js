@@ -58,15 +58,13 @@ if (typeof django_modal == 'undefined') {
             create_modal(command.html);
         }
         ajax_helpers.command_functions.post_modal = function (command) {
-            send_inputs(command.button);
+            send_inputs(command.button,command.options);
         }
 
         ajax_helpers.command_functions.modal_refresh_trigger = function (command) {
             disable_enter_key();
             $(command.selector).trigger('modalPostLoad', [django_modal.active_modal_container_id()])
         }
-
-
 
         if (window.opener != null) {
             target = window.opener.location.href
@@ -217,7 +215,7 @@ if (typeof django_modal == 'undefined') {
             })
         }
 
-        function send_inputs(button_name, callback, index) {
+        function send_inputs(button_name, options) {
             var params
             var property
             if (typeof (button_name) == 'object') {
@@ -233,9 +231,6 @@ if (typeof django_modal == 'undefined') {
             var modal_type = modalDiv.attr('data-modaltype')
             if (modal_type !== undefined){
                 params['modal_type'] = modal_type
-            }
-            if (typeof callback != 'undefined') {
-                modal_url = url_change(modal_url, 'modalstyle', 'windowform')
             }
             if (typeof (tinymce) != 'undefined') tinymce.triggerSave();
 
@@ -259,7 +254,7 @@ if (typeof django_modal == 'undefined') {
                 for (property in params) {
                     data.append(property, params[property])
                 }
-                ajax_helpers.post_data(modal_url, data, django_modal.timeout)
+                ajax_helpers.post_data(modal_url, data, django_modal.timeout, options)
             }
         }
 
