@@ -41,7 +41,7 @@ def make_slug(*args, make_pk=False):
 
 
 def show_modal(modal_name, *args, datatable=False, href=False, button=None, button_classes='btn btn-primary mx-1',
-               row=False):
+               row=False, font_awesome=None):
     try:
         javascript = f"django_modal.show_modal('{reverse(modal_name, args=[DUMMY_SLUG])}')"
     except NoReverseMatch:
@@ -57,6 +57,8 @@ def show_modal(modal_name, *args, datatable=False, href=False, button=None, butt
         javascript = 'javascript:' + javascript
     if button:
         button_text = modal_buttons.get(button, button)
+        if font_awesome:
+            button_text = f'<i class="{font_awesome}"></i> {button_text}'
         javascript = f'<a {css_classes(button_classes)} href="javascript:{javascript}">{button_text}</a>'
     if not slug:
         slug = '-'
