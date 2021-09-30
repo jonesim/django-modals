@@ -32,7 +32,7 @@ urlpatterns = [
     path('accounts/', include(auth_patterns)),
     path('admin/', admin.site.urls),
     path('src/', include('show_src_code.urls')),
-    path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
+    path('favicon.ico', RedirectView.as_view(url='/static/modal_examples/favicon.ico', permanent=True)),
 ]
 
 a = apps.get_app_configs()
