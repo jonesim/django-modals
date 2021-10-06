@@ -50,8 +50,8 @@ select[readonly].select2-hidden-accessible + .select2-container .select2-selecti
 
 .modal-header {
     background-color: #eeeeeef5;
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
 }
 
 .form-buttons {

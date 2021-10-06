@@ -13,15 +13,14 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.decorators import method_decorator
 
-from crispy_forms.utils import render_crispy_form
 
 from ajax_helpers.mixins import AjaxHelpers
 
 from .forms import ModelCrispyForm
 from .helper import render_modal, modal_button, modal_button_group, ajax_modal_redirect, modal_button_method, \
     ajax_modal_replace
-from .processes import PROCESS_CREATE, PROCESS_VIEW, PROCESS_EDIT, PROCESS_DELETE, \
-    PROCESS_EDIT_DELETE, PERMISSION_OFF, PERMISSION_DISABLE, user_has_perm, get_process, modal_url_type
+from .processes import PROCESS_CREATE, PROCESS_DELETE, PROCESS_EDIT_DELETE, PERMISSION_OFF, PERMISSION_DISABLE, \
+    get_process, modal_url_type
 
 
 class ModalException(Exception):
@@ -44,10 +43,6 @@ class BaseModalMixin(AjaxHelpers):
         if not hasattr(self, 'modal_mode'):
             self.modal_mode = True
         self.slug = {}
-
-    @staticmethod
-    def permission(process=None):
-        return True
 
     def get_context_data(self, **kwargs):
         if hasattr(super(), 'get_context_data'):
@@ -169,12 +164,30 @@ class TemplateModal(Modal):
 
     modal_template = None
 
-    @staticmethod
-    def modal_context():
-        return {}
+    def modal_context(self):
+        context = self.kwargs.get('context', {})
+        return context
 
     def modal_content(self):
         return render_to_string(self.modal_template, self.modal_context())
+
+    def __init__(self, modal_template=None, modal_title=None, size=None, **kwargs):
+        # These kwargs will be overwritten if called as_view()
+        self.kwargs = kwargs
+        if size:
+            self.size = size
+        if modal_title:
+            self.modal_title = modal_title
+        if modal_template:
+            self.modal_template = modal_template
+        super().__init__()
+
+    def modal_html(self, request):
+        self.request = request
+        context = self.get_context_data()
+        if 'message' in self.kwargs:
+            context['message'] = self.kwargs['message']
+        return render_to_string(self.template_name, context)
 
 
 class FormModalMixin(BaseModalMixin):
@@ -362,15 +375,6 @@ class ModelFormModal(SingleObjectMixin, FormModal):
     def button_delete(self, **_kwargs):
         return self.confirm(self.delete_message, self.delete_title, button_function='confirm_delete',
                             button_group_type='yes_cancel', size='md')
-
-    def permission(self, process=None):
-        if process is None:
-            process = self.process
-        perm_value = user_has_perm(self.__class__, self.request.user, process)
-        if not perm_value and process == PROCESS_EDIT:
-            self.process = PROCESS_VIEW
-            perm_value = self.permission(PROCESS_VIEW)
-        return perm_value
 
     def process_slug_kwargs(self):
         if 'pk' not in self.slug:

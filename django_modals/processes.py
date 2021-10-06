@@ -10,6 +10,7 @@ PERMISSION_ON = 1
 PERMISSION_OFF = 0
 PERMISSION_AUTHENTICATED = 3
 PERMISSION_STAFF = 4
+PERMISSION_METHOD = 5
 
 
 class ProcessSetup:
@@ -41,7 +42,9 @@ modal_url_type = {
 
 def user_has_perm(cls, user, process):
     permission_type = getattr(cls, process_data[process].class_attribute)
-    if permission_type == PERMISSION_OFF:
+    if permission_type == PERMISSION_METHOD:
+        permission = getattr(cls, 'permission')(user, process)
+    elif permission_type == PERMISSION_OFF:
         permission = True
     elif permission_type == PERMISSION_DISABLE:
         permission = False

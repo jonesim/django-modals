@@ -2,7 +2,7 @@ import json
 from django_modals.modals import Modal
 from django_modals.helper import ajax_modal_replace
 from .helper import progress_bar
-
+from .messages import AjaxMessagesMixin
 
 class UploadModal(Modal):
 
@@ -17,7 +17,7 @@ class UploadModal(Modal):
         return ''.join(progress_bars)
 
 
-class ModalAjaxFileMixin:
+class ModalAjaxFileMixin(AjaxMessagesMixin):
     ajax_commands = ['start_upload', 'upload']
 
     def upload_completed(self):
@@ -31,7 +31,7 @@ class ModalAjaxFileMixin:
             file = self.request.FILES['ajax_modal_file']
             upload_params = json.loads(response.get('upload_params', '{}'))
             index = int(response.pop('index'))
-            file_info = json.loads(response['file_info'])
+            file_info = [f for f in json.loads(response['file_info']) if f['size'] > 0]
             getattr(self, 'upload_' + request.POST['upload'])(file_info[index]['name'], file_info[index]['size'], file,
                                                               **upload_params)
             if len(file_info) > index + 1:
@@ -42,9 +42,13 @@ class ModalAjaxFileMixin:
         return super().post(request, *args, **kwargs)
 
     def start_upload_files(self, **kwargs):
+        files = [f for f in kwargs['files'] if f['size'] > 0]
+        if len(files) == 0:
+            return self.error_message('No files selected')
         self.response_commands.append(
             ajax_modal_replace(self.request, modal_class=UploadModal, ajax_function='modal_html',
-                               files=kwargs['files']))
+                               files=files))
+        kwargs['files'] = files
         self.response_commands.append(self.upload_file_command(0, **kwargs))
         return self.command_response()
 
