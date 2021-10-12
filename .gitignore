@@ -6,3 +6,6 @@ dist/
 /django/db.sqlite3
 /django_filtered_datatables.egg-info/
 
+/media/
+/django_nested_modals.egg-info/
+/django_examples/modal_examples.egg-info/
