@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, Permission
 from django.urls import reverse, resolve
 
 from django_modals.processes import PERMISSION_OFF, PERMISSION_ON, PROCESS_VIEW, PROCESS_EDIT, PERMISSION_STAFF, \
-    PERMISSION_AUTHENTICATED, user_has_perm
+    PERMISSION_AUTHENTICATED, PERMISSION_METHOD, PROCESS_DELETE, PROCESS_EDIT_DELETE, PROCESS_CREATE
 from django_modals.widgets.select2 import Select2Multiple
 
 from modal_examples.models import Company
@@ -22,9 +22,9 @@ class PermissionExamples(MainMenuTemplateView):
         )
         view_class = resolve(reverse(url_name, args=['-'])).func.view_class
         button_text = None
-        if user_has_perm(view_class, self.request.user, PROCESS_EDIT):
+        if view_class.user_has_perm(view_class, self.request.user, PROCESS_EDIT):
             button_text = '<i class="fas fa-pen"></i> Edit'
-        elif user_has_perm(view_class, self.request.user, PROCESS_VIEW):
+        elif view_class.user_has_perm(view_class, self.request.user, PROCESS_VIEW):
             button_text = '<i class="fas fa-search"></i> View'
         if button_text:
             self.menus[menu_name].add_items((f'{url_name},pk-{company_id}', button_text,
@@ -55,10 +55,9 @@ class PermissionExamples(MainMenuTemplateView):
         company = Company.objects.first()
         self.crud_menu('perms_default', 'default', company.id)
         self.crud_menu('perms_delete', 'delete', company.id)
-
         self.crud_menu('perms_auth', 'auth', company.id)
-
         self.crud_menu('perms_on', 'perms', company.id)
+        self.crud_menu('perms_method', 'method', company.id)
 
     def get_context_data(self, **kwargs):
 
@@ -111,3 +110,23 @@ class PermUser(ModelFormModal):
     @staticmethod
     def form_setup(form, *_args, **_kwargs):
         form.fields['user_permissions'].queryset = Permission.objects.filter(name__icontains='company')
+
+
+class MethodPermissions(ModelFormModal):
+
+    model = Company
+    form_fields = ['name']
+
+    permission_delete = PERMISSION_METHOD
+    permission_edit = PERMISSION_METHOD
+    permission_view = PERMISSION_METHOD
+    permission_create = PERMISSION_METHOD
+
+    def permission(self, user, process):
+        if process == PROCESS_CREATE:
+            return False
+        elif process == PROCESS_DELETE or process == PROCESS_EDIT_DELETE:
+            return False
+        elif process == PROCESS_EDIT:
+            return False
+        return True
