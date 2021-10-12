@@ -67,6 +67,7 @@ urlpatterns = [
     path('modal/perms2/<str:slug>/', permissions.CompanyPermissions.as_view(), name='perms_on'),
     path('modal/perms_user/<str:slug>/', permissions.PermUser.as_view(), name='perms_user'),
     path('modal/perms_auth/<str:slug>/', permissions.AuthenticatedStaffPermissions.as_view(), name='perms_auth'),
+    path('modal/perms_method/<str:slug>/', permissions.MethodPermissions.as_view(), name='perms_method'),
 
     path('modal/user/<str:slug>/', users.ModalUser.as_view(), name='user_modal'),
     path('modal/user_source_code/<str:slug>/', users.SourceCodeModal.as_view(), name='user_source_code'),

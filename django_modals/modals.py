@@ -13,14 +13,12 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.decorators import method_decorator
 
-
 from ajax_helpers.mixins import AjaxHelpers
 
+from . import processes
 from .forms import ModelCrispyForm
 from .helper import render_modal, modal_button, modal_button_group, ajax_modal_redirect, modal_button_method, \
     ajax_modal_replace
-from .processes import PROCESS_CREATE, PROCESS_DELETE, PROCESS_EDIT_DELETE, PERMISSION_OFF, PERMISSION_DISABLE, \
-    get_process, modal_url_type
 
 
 class ModalException(Exception):
@@ -242,7 +240,7 @@ class FormModalMixin(BaseModalMixin):
         self.slug['modal'] = 'editdelete'
         new_slug = '-'.join([f'{k}-{v}' for k, v in self.slug.items()])
         self.request.method = 'GET'
-        self.process = PROCESS_EDIT_DELETE
+        self.process = processes.PROCESS_EDIT_DELETE
         self.request.path = reverse(self.request.resolver_match.url_name, kwargs={'slug': new_slug})
         return self.command_response('overwrite_modal',
                                      html=render_to_string(self.template_name, self.get_context_data()))
@@ -319,10 +317,10 @@ class ModelFormModal(SingleObjectMixin, FormModal):
     delete_message = 'Are you sure you want to delete?'
     delete_title = 'Warning'
     field_classes = None
-    permission_delete = PERMISSION_DISABLE
-    permission_edit = PERMISSION_OFF
-    permission_view = PERMISSION_OFF
-    permission_create = PERMISSION_OFF
+    permission_delete = processes.PERMISSION_DISABLE
+    permission_edit = processes.PERMISSION_OFF
+    permission_view = processes.PERMISSION_OFF
+    permission_create = processes.PERMISSION_OFF
 
     @staticmethod
     def formfield_callback(f, **kwargs):
@@ -364,7 +362,7 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         pass
 
     def button_confirm_delete(self, **_kwargs):
-        if self.process in [PROCESS_DELETE, PROCESS_EDIT_DELETE]:
+        if self.process in [processes.PROCESS_DELETE, processes.PROCESS_EDIT_DELETE]:
             self.object.delete()
         self.object_delete()
         if not self.response_commands:
@@ -376,15 +374,49 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         return self.confirm(self.delete_message, self.delete_title, button_function='confirm_delete',
                             button_group_type='yes_cancel', size='md')
 
+    @staticmethod
+    def user_has_perm(cls_or_instance, user, process):
+        permission_type = getattr(cls_or_instance, processes.process_data[process].class_attribute)
+        if permission_type == processes.PERMISSION_METHOD:
+            # If permission method is not a staticmethod and function is called by class rather than instance
+            # send None instead of self
+            if inspect.isclass(cls_or_instance) and len(inspect.signature(cls_or_instance.permission).parameters) == 3:
+                permission = cls_or_instance.permission(None, user, process)
+            else:
+                permission = cls_or_instance.permission(user, process)
+        elif permission_type == processes.PERMISSION_OFF:
+            permission = True
+        elif permission_type == processes.PERMISSION_DISABLE:
+            permission = False
+        elif permission_type == processes.PERMISSION_AUTHENTICATED:
+            permission = user.is_authenticated
+        elif permission_type == processes.PERMISSION_STAFF:
+            permission = user.is_staff or user.is_superuser
+        else:
+            # noinspection PyProtectedMember
+            perms = [f'{cls_or_instance.model._meta.app_label}.{p}_{cls_or_instance.model._meta.model_name}'
+                     for p in processes.process_data[process].django_permission]
+            permission = user.has_perms(perms)
+        return permission
+
+    def get_process(self, user, process):
+        while True:
+            permission = self.user_has_perm(self, user, process)
+            if permission:
+                break
+            process = processes.process_data[process].fallback
+            if not process:
+                break
+        return permission, process
+
     def process_slug_kwargs(self):
         if 'pk' not in self.slug:
-            self.process = PROCESS_CREATE
+            self.process = processes.PROCESS_CREATE
         elif 'modal' in self.slug:
-            self.process = modal_url_type[self.slug['modal']]
+            self.process = processes.modal_url_type[self.slug['modal']]
         else:
             if self.process is None:
-                self.process = PROCESS_EDIT_DELETE
-        has_perm, self.process = get_process(self, self.request.user, self.process)
+                self.process = processes.PROCESS_EDIT_DELETE
 
         if self.model is None:
             self.model = self.form_class.get_model(self.slug)
@@ -402,6 +434,7 @@ class ModelFormModal(SingleObjectMixin, FormModal):
                     self.initial[i] = [self.slug[i]]
                 else:
                     setattr(self.object, i, self.slug[i])
+        has_perm, self.process = self.get_process(self.request.user, self.process)
         return has_perm
 
     def select2_ajax_search(self, page_len=10, filter_field=None, filter_search='istartswith', search=None, page=None,

@@ -38,34 +38,3 @@ modal_url_type = {
     'editdelete': PROCESS_EDIT_DELETE,
     'delete': PROCESS_DELETE,
 }
-
-
-def user_has_perm(cls, user, process):
-    permission_type = getattr(cls, process_data[process].class_attribute)
-    if permission_type == PERMISSION_METHOD:
-        permission = getattr(cls, 'permission')(user, process)
-    elif permission_type == PERMISSION_OFF:
-        permission = True
-    elif permission_type == PERMISSION_DISABLE:
-        permission = False
-    elif permission_type == PERMISSION_AUTHENTICATED:
-        permission = user.is_authenticated
-    elif permission_type == PERMISSION_STAFF:
-        permission = user.is_staff or user.is_superuser
-    else:
-        # noinspection PyProtectedMember
-        perms = [f'{cls.model._meta.app_label}.{p}_{cls.model._meta.model_name}'
-                 for p in process_data[process].django_permission]
-        permission = user.has_perms(perms)
-    return permission
-
-
-def get_process(cls, user, process):
-    while True:
-        permission = user_has_perm(cls, user, process)
-        if permission:
-            break
-        process = process_data[process].fallback
-        if not process:
-            break
-    return permission, process
