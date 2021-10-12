@@ -142,3 +142,6 @@ CSRF_COOKIE_HTTPONLY = False
 DATE_FORMAT = 'd/m/Y'
 DATE_INPUT_FORMATS = ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_ROOT = '/media/'
+MEDIA_URL = '/media/'

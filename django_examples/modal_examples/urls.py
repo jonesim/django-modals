@@ -1,6 +1,7 @@
 from django.urls import path, include
 from django.views.generic.base import RedirectView
 
+import modal_examples.views.file_upload as file_upload
 import modal_examples.views.basic as basic
 import modal_examples.views.model as model_modals
 import modal_examples.views.users as users
@@ -12,12 +13,15 @@ import modal_examples.views.multi_form as multi_form
 import modal_examples.views.crud as crud
 import modal_examples.views.unbound_forms as unbound_forms
 import modal_examples.views.no_modal as no_modal
+import modal_examples.views.ajax as ajax
 
 
 urlpatterns = [
     path('modal-redirect/', RedirectView.as_view(pattern_name='basic'), name='django-nested-modals'),
     path('modal/classes/', include('modal_examples.views.basic')),
     path('modal/classes/models/', include('modal_examples.views.model')),
+
+    path('modal/upload/', file_upload.UploadModal.as_view(), name='upload_modal'),
 
     path('modal/unbound1/', unbound_forms.UnboundModal.as_view(), name='unbound_modal'),
     path('modal/unbound2/', unbound_forms.UnboundPaymentModal.as_view(), name='unbound_payment'),
@@ -102,6 +106,8 @@ urlpatterns = [
     path('layout', layout.Layout.as_view(), name='layout'),
     path('crud', crud.CrudExamples.as_view(), name='crud'),
     path('unbound', unbound_forms.UnboundExamples.as_view(), name='unbound'),
+    path('Upload', file_upload.Upload.as_view(), name='upload'),
+    path('Ajax', ajax.AjaxExamples.as_view(), name='ajax'),
 
     path('nomodal/<slug:slug>', no_modal.NoModal.as_view(), name='no_modal'),
     path('', RedirectView.as_view(url='Basic')),

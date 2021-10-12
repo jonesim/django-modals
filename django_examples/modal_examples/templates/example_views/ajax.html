@@ -1,0 +1,13 @@
+{% extends 'modal_examples/demo.html' %}
+{% load modal_tags ajax_helpers src_code %}
+{% block contents %}
+
+    <div class="m-4">
+        {% ajax_button 'Info Modal' 'info' %}
+        {% ajax_button 'Warning Modal' 'warning' css_class='btn btn-warning' %}
+        {% ajax_button 'Error Modal' 'error' css_class='btn btn-danger' %}
+    </div>
+    <div class="m-4">
+        {% show_src_code 'show_src_code:source_code_modal' view_class %}
+    </div>
+{% endblock %}

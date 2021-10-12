@@ -1,0 +1,41 @@
+{% extends 'modal_examples/demo.html' %}
+{% load modal_tags %}
+{% block contents %}
+
+    <div class="m-4">
+        <form>
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="validatedCustomFile" required>
+                <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
+                <div class="invalid-feedback">Example invalid custom file feedback</div>
+            </div>
+        </form>
+
+        <button class="mt-2 btn btn-primary" onclick="ajax_helpers.upload_file('#validatedCustomFile')">Upload File</button>
+
+        <script>
+            $('.custom-file-input').on('change', function (e) {
+                var fileName = $("#validatedCustomFile")[0].files[0].name;
+                var nextSibling = e.target.nextElementSibling;
+                nextSibling.innerText = fileName;
+            });
+        </script>
+
+        <div id="dropdiv" class="text-center mt-2" style="width:300px;height: 200px;background-color: #fffa90">
+            <br>Drag files here
+        </div>
+
+        <script>
+            drag = new ajax_helpers.drag_drop('#dropdiv')
+        </script>
+
+        <a href="{% show_modal 'upload_modal' href=True %}" class="mr-1 mb-1 btn btn-primary"><span>Simple</span></a>
+
+        <div class="mt-5">
+            {% for f in files %}
+                <p>{{ f }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

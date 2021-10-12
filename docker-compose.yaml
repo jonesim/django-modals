@@ -5,6 +5,7 @@ services:
   build:
    context: ./
   volumes:
+   - ./media/:/media
    - ./django_examples/:/app
    - ./django_modals/:/modals/django_modals
    - /var/run/docker.sock:/var/run/docker.sock
