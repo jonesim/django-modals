@@ -27,7 +27,7 @@ class CrispyFormMixin:
 
     def __init__(self, *args, pk=None, no_buttons=None, modal_title=None, form_setup=None, slug=None,
                  request_user=None, form_id=None, process=None, layout_field_params=None, layout_field_classes=None,
-                 helper_class=HorizontalHelper, progress_bar=None, **kwargs):
+                 helper_class=HorizontalHelper, progress_bar=None, header_html=None, **kwargs):
         self.supplied_kwargs = locals()
         self.no_buttons = self.get_defaults('no_buttons')
         self.modal_title = self.get_defaults('modal_title')
@@ -48,6 +48,7 @@ class CrispyFormMixin:
         self.mode = []
         self.triggers = {}
         self.trigger_fields = {}
+        self.header_html = [HTML(header_html)] if header_html else []
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
@@ -135,7 +136,7 @@ class CrispyFormMixin:
                     self.fields[a].required = self.layout_field_params[a].pop('required')
         if layout:
             if isinstance(layout, (tuple, list)):
-                self.helper.layout = Layout(*layout)
+                self.helper.layout = Layout(*self.header_html, *layout)
             else:
                 self.helper.layout = Layout(layout)
         else:
@@ -147,7 +148,7 @@ class CrispyFormMixin:
                 field_args.update(getattr(self.fields[f].widget, 'crispy_kwargs', {}))
                 # Class can be set in widget otherwise use FieldEx
                 fields.append(getattr(self.fields[f].widget, 'crispy_field_class', FieldEx)(f, **field_args))
-            self.helper.layout = Layout(*fields)
+            self.helper.layout = Layout(*self.header_html, *fields)
         if getattr(self.helper, 'fields_wrap_class', None):
             # noinspection PyUnresolvedReferences
             self.helper[:].wrap_together(Div, css_class=self.helper.fields_wrap_class)

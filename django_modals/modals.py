@@ -1,6 +1,5 @@
 import json
 import inspect
-import collections
 from django.forms.fields import Field
 from django.forms.models import modelform_factory, fields_for_model
 from django.http import HttpResponse, JsonResponse
@@ -463,8 +462,31 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         return JsonResponse({'results': results, 'pagination': {'more': len(choices) > len(results)}})
 
 
-MultiForm = collections.namedtuple('MultiForm', ['model', 'fields', 'id', 'initial', 'widgets'],
-                                   defaults=[None, None, None, {}, []])
+class MultiForm:
+
+    def __init__(self, model, fields, form_id=None, initial=None, widgets=None, **kwargs):
+        self.model = model
+        self.fields = fields
+        self.kwargs = kwargs
+        self.form_id = form_id
+        self.initial = initial if initial else {}
+        self.widgets = widgets if widgets else {}
+
+    def make_form_id(self, used_ids):
+        if not self.form_id:
+            self.form_id = self.model.__name__ + 'Form'
+            if self.form_id in used_ids:
+                self.form_id += '_{}'
+                count = 1
+                while self.form_id.format(count) in used_ids:
+                    count += 1
+                self.form_id = self.form_id.format(count)
+        used_ids.append(self.form_id)
+
+    def get_kwargs(self):
+        kwargs = {'form_id': self.form_id, 'initial': self.initial, 'no_buttons': True}
+        kwargs.update(self.kwargs)
+        return kwargs
 
 
 class MultiFormModal(BaseModal):
@@ -488,17 +510,6 @@ class MultiFormModal(BaseModal):
         super().__init__(*args, **kwargs)
         self.form_setup_args = []
 
-    @staticmethod
-    def make_form_id(form, used_ids):
-        form_id = form.model.__name__ + 'Form'
-        if form_id not in used_ids:
-            return form_id
-        form_id += '_{}'
-        count = 1
-        while form_id.format(count) in used_ids:
-            count += 1
-        return form_id.format(count)
-
     def get_form_kwargs(self):
         all_kwargs = []
         used_ids = []
@@ -507,16 +518,11 @@ class MultiFormModal(BaseModal):
         else:
             form_data = {}
         for f in self.forms:
-            form_id = f.id
-            if not form_id:
-                form_id = self.make_form_id(f, used_ids)
-            used_ids.append(form_id)
-            kwargs = f.initial.copy()
-            kwargs['form_id'] = form_id
-            kwargs['no_buttons'] = True
+            f.make_form_id(used_ids)
+            kwargs = f.get_kwargs()
             if self.request.method in ('POST', 'PUT'):
                 kwargs.update({
-                    'data': form_data[form_id],
+                    'data': form_data[f.form_id],
                     # 'files': self.request.FILES,
                 })
             if hasattr(self, 'form_setup') and callable(self.form_setup):
@@ -532,7 +538,10 @@ class MultiFormModal(BaseModal):
         for c, s in enumerate(self.form_setup_args):
             kwargs = form_kwargs[c]
             kwargs.update(s['processed_form_fields'].form_init_kwargs())
-            forms.append(s['form_class'](**kwargs))
+            form = s['form_class'](**kwargs)
+            for field_name, field in form.fields.items():
+                field.widget.attrs.update({'id': f'id_{c}_{field_name}'})
+            forms.append(form)
         return forms
 
     def get_context_data(self, **kwargs):
