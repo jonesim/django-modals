@@ -111,10 +111,17 @@ if (typeof django_modal == 'undefined') {
         }
 
         function disable_enter_key(){
-            $('form input').keydown(function (e) {
+            $('input', modal_div()).keydown(function (e) {
                 if (e.keyCode === 13) {
                     e.preventDefault();
-                    $('.modal-submit')[0].click()
+                    var form_no_enter = $('form', modal_div()).attr('no-enter')
+                    var flag_no_enter = (form_no_enter !== undefined) && (form_no_enter !== false)
+                    if ($(this).hasClass('no-enter') || flag_no_enter){
+                        var el = $('input, button', modal_div())
+                        el[el.index(this) + 1].focus()
+                    } else {
+                        $('.modal-submit')[0].click()
+                    }
                     return false;
                 }
             });
