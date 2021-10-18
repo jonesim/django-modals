@@ -117,7 +117,7 @@ if (typeof django_modal == 'undefined') {
                     var form_no_enter = $('form', modal_div()).attr('no-enter')
                     var flag_no_enter = (form_no_enter !== undefined) && (form_no_enter !== false)
                     if ($(this).hasClass('no-enter') || flag_no_enter){
-                        var el = $('input, button', modal_div())
+                        var el = $('input, button, select', modal_div())
                         el[el.index(this) + 1].focus()
                     } else {
                         $('.modal-submit')[0].click()
