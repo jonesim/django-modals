@@ -63,22 +63,23 @@ class CrispyFormMixin:
         if self.form_setup:
             return self.form_setup(self, *args, **kwargs)
 
-    def submit_button(self, css_class=submit_class, button_text='Submit'):
+    def submit_button(self, css_class=submit_class, button_text='Submit', **kwargs):
         if self.progress_bar:
             return self.button('submit', {'function': 'post_modal',
-                                          'options': {'progress': {'selector': f'#file_progress_bar'}}}, css_class)
+                                          'options': {'progress': {'selector': f'#file_progress_bar'}}}, css_class,
+                               **kwargs)
         else:
-            return self.button(button_text, 'post_modal', css_class)
+            return self.button(button_text, 'post_modal', css_class, **kwargs)
 
-    def delete_button(self, css_class=delete_class):
+    def delete_button(self, css_class=delete_class, **kwargs):
         if self.instance.pk is not None:
-            return self.button('Delete', {'function': 'post_modal', 'button': 'delete'}, css_class)
+            return self.button('Delete', {'function': 'post_modal', 'button': 'delete'}, css_class, **kwargs)
 
-    def cancel_button(self, css_class=cancel_class):
-        return self.button('Cancel', 'close', css_class)
+    def cancel_button(self, css_class=cancel_class, **kwargs):
+        return self.button('Cancel', 'close', css_class, **kwargs)
 
-    def view_edit_button(self, css_class=edit_class):
-        return self.button('Edit', {'function': 'post_modal', 'button': 'make_edit'}, css_class)
+    def view_edit_button(self, css_class=edit_class, **kwargs):
+        return self.button('Edit', {'function': 'post_modal', 'button': 'make_edit'}, css_class, **kwargs)
 
     def button(self, title, commands, css_class, **kwargs):
         if self.no_buttons:
