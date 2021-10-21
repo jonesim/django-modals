@@ -410,6 +410,9 @@ class ModelFormModal(SingleObjectMixin, FormModal):
                 break
         return permission, process
 
+    def get_model(self):
+        pass
+
     def process_slug_kwargs(self):
         if 'pk' not in self.slug:
             self.process = processes.PROCESS_CREATE
@@ -420,7 +423,10 @@ class ModelFormModal(SingleObjectMixin, FormModal):
                 self.process = processes.PROCESS_EDIT_DELETE
 
         if self.model is None:
-            self.model = self.form_class.get_model(self.slug)
+            if self.form_class:
+                self.model = self.form_class.get_model(self.slug)
+            else:
+                self.model = self.get_model()
         if 'pk' in self.kwargs:
             self.object = self.get_object()
         else:
