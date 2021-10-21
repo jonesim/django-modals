@@ -333,10 +333,8 @@ class ModelFormModal(SingleObjectMixin, FormModal):
             return form_class(**kwargs)
         return f.formfield(**kwargs)
 
-    def __init__(self, *args, **kwargs):
-        self.form_init_args = {}
+    def get_form_class(self):
         if not self.form_class:
-
             processed_form_fields = ProcessFormFields(self.form_fields, widgets=getattr(self, 'widgets', None),
                                                       field_classes=getattr(self, 'field_classes', None),
                                                       labels=getattr(self, 'labels', None),
@@ -347,6 +345,10 @@ class ModelFormModal(SingleObjectMixin, FormModal):
             self.form_class = modelform_factory(self.model, form=self.base_form, fields=processed_form_fields.fields,
                                                 formfield_callback=self.formfield_callback,
                                                 **processed_form_fields.extra_kwargs())
+        return self.form_class
+
+    def __init__(self, *args, **kwargs):
+        self.form_init_args = {}
         super().__init__(*args, **kwargs)
         self.object = None
 
