@@ -96,3 +96,30 @@ class MultipleChoiceFieldAddValues(MultipleChoiceField):
 
     def widget_attrs(self, widget):
         return {'new_marker': Select2Multiple.new_marker, 'tags': True}
+
+
+class ChoiceFieldAddValues(ChoiceField):
+
+    new_marker = 'new:'
+
+    def __init__(self, choices=None, model=None, display_field=None, widget=None, **kwargs):
+        if model and display_field:
+            choices = model.objects.values_list('id', display_field)
+        if not widget:
+            self.widget = Select2(attrs={'new_marker': 'new:', 'tags': True})
+        super().__init__(choices=choices, **kwargs)
+
+    def clean(self, value):
+        return value
+
+    def bound_data(self, data, initial):
+        if self.new_data(data):
+            if self.choices[-1][1] != self.new_data(data):
+                self.choices.append((data, self.new_data(data)))
+        return super().bound_data(data,initial)
+
+    @classmethod
+    def new_data(cls, value):
+        if value.startswith(cls.new_marker):
+            return value[len(cls.new_marker):]
+
