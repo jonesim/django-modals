@@ -413,6 +413,12 @@ class ModelFormModal(SingleObjectMixin, FormModal):
     def get_model(self):
         pass
 
+    def get_queryset(self):
+        query = super().get_queryset()
+        if hasattr(self.model, 'query_filter'):
+            return self.model.query_filter(query, self.request, modal=self)
+        return query
+
     def process_slug_kwargs(self):
         if 'pk' not in self.slug:
             self.process = processes.PROCESS_CREATE
