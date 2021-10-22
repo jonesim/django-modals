@@ -43,6 +43,8 @@ class CrispyFormMixin:
         self.buttons = []
         self.helper_class = helper_class
         self.process = process
+        self.lazy_layout = False
+
         self.layout_field_params = self.get_defaults('layout_field_params')
         # self.mode used when rendering fields e.g in flex divs
         self.mode = []
@@ -135,14 +137,15 @@ class CrispyFormMixin:
             for a in self.layout_field_params:
                 if 'required' in self.layout_field_params[a]:
                     self.fields[a].required = self.layout_field_params[a].pop('required')
-        if layout:
+        if layout and not self.lazy_layout:
             if isinstance(layout, (tuple, list)):
                 self.helper.layout = Layout(*self.header_html, *layout)
             else:
                 self.helper.layout = Layout(layout)
         else:
             fields = []
-            for f in self.fields:
+            layout_fields = layout if layout else self.fields
+            for f in layout_fields:
                 field_args = {}
                 if self.layout_field_params and f in self.layout_field_params:
                     field_args.update(self.layout_field_params[f])
