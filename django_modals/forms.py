@@ -13,7 +13,7 @@ from .fields import FieldEx
 
 class CrispyFormMixin:
     Meta: object
-    fields: list
+    fields: dict
     submit_class = 'btn-success modal-submit'
     cancel_class = 'btn-secondary modal-cancel'
     delete_class = 'btn-danger modal-delete'
@@ -177,6 +177,11 @@ class CrispyFormMixin:
     def add_trigger(self, field, trigger, conditions):
         self.triggers[field] = conditions
         self.trigger_fields.setdefault(field, []).append(trigger)
+
+    def reorder_fields(self, *key_order):
+        if len(key_order) == 1 and isinstance(key_order[0], (list, tuple)):
+            key_order = key_order[0]
+        self.fields = {k: self.fields[k] for k in key_order}
 
     def __str__(self):
         if self.triggers:
