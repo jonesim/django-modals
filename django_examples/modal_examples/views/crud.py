@@ -57,9 +57,6 @@ class CrudRead(ModelFormModal):
     form_fields = ['name', 'active']
     process = PROCESS_VIEW
 
-    def form_setup(self, form, *_args, **_kwargs):
-        form.reorder_fields(['active', 'name'])
-
 
 class CrudEdit(ModelFormModal):
 
