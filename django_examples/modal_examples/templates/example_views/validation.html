@@ -1,0 +1,11 @@
+{% extends 'modal_examples/demo.html' %}
+{% load django_menu_tags ajax_helpers modal_tags datatable_tags src_code %}
+
+{% block contents %}
+    <div class="m-4">
+        <h4>Validation using clean</h4>
+        <br>
+        {% show_modal 'validation_clean_modal' id button="Don't type NA" font_awesome='fas fa-edit' %}
+    </div>
+    <hr>
+{% endblock %}

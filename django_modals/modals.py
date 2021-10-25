@@ -258,6 +258,8 @@ class FormModalMixin(BaseModalMixin):
         kwargs['no_buttons'] = self.request.GET.get('no_buttons')
         if hasattr(self, 'form_setup') and callable(self.form_setup):
             kwargs['form_setup'] = self.form_setup
+        if hasattr(self, 'clean') and callable(self.clean):
+            kwargs['clean'] = self.clean
         kwargs.update({k: getattr(self, k, None) for k in ['modal_title', 'slug']})
         if hasattr(self, 'helper_class'):
             kwargs['helper_class'] = self.helper_class

@@ -27,7 +27,7 @@ class CrispyFormMixin:
 
     def __init__(self, *args, pk=None, no_buttons=None, modal_title=None, form_setup=None, slug=None,
                  request_user=None, form_id=None, process=None, layout_field_params=None, layout_field_classes=None,
-                 helper_class=HorizontalHelper, progress_bar=None, header_html=None, **kwargs):
+                 helper_class=HorizontalHelper, progress_bar=None, header_html=None, clean=None, **kwargs):
         self.supplied_kwargs = locals()
         self.no_buttons = self.get_defaults('no_buttons')
         self.modal_title = self.get_defaults('modal_title')
@@ -49,6 +49,7 @@ class CrispyFormMixin:
         self.triggers = {}
         self.trigger_fields = {}
         self.header_html = [HTML(header_html)] if header_html else []
+        self.clean_method = clean
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
@@ -182,6 +183,12 @@ class CrispyFormMixin:
         if len(key_order) == 1 and isinstance(key_order[0], (list, tuple)):
             key_order = key_order[0]
         self.fields = {k: self.fields[k] for k in key_order}
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.clean_method:
+            self.clean_method(cleaned_data)
+        return cleaned_data
 
     def __str__(self):
         if self.triggers:

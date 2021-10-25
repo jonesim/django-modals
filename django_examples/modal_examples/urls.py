@@ -11,6 +11,7 @@ import modal_examples.views.layout as layout
 import modal_examples.views.adaptive as adaptive
 import modal_examples.views.multi_form as multi_form
 import modal_examples.views.crud as crud
+import modal_examples.views.validation as validation
 import modal_examples.views.unbound_forms as unbound_forms
 import modal_examples.views.no_modal as no_modal
 import modal_examples.views.ajax as ajax
@@ -33,6 +34,8 @@ urlpatterns = [
     path('modal/crud1/<str:slug>/', crud.CrudRead.as_view(), name='crud_read'),
     path('modal/crud2/<str:slug>/', crud.CrudEdit.as_view(), name='crud_edit'),
     path('modal/crud3/<str:slug>/', crud.CrudEditDelete.as_view(), name='crud_edit_delete'),
+
+    path('modal/validation_clean/<str:slug>/', validation.ValidationClean.as_view(), name='validation_clean_modal'),
 
     path('modal/adaptive/', adaptive.AdaptiveModal.as_view(), name='adaptive_modal'),
     path('modal/adaptive1/', adaptive.AdaptiveBooleanModal.as_view(), name='adaptive_modal_boolean'),
@@ -108,6 +111,7 @@ urlpatterns = [
     path('crud', crud.CrudExamples.as_view(), name='crud'),
     path('unbound', unbound_forms.UnboundExamples.as_view(), name='unbound'),
     path('Upload', file_upload.Upload.as_view(), name='upload'),
+    path('Validation', validation.ValidationExamples.as_view(), name='validation'),
     path('Ajax', ajax.AjaxExamples.as_view(), name='ajax'),
 
     path('nomodal/<slug:slug>', no_modal.NoModal.as_view(), name='no_modal'),
