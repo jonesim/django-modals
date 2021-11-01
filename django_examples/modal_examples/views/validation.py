@@ -16,6 +16,6 @@ class ValidationClean(ModelFormModal):
     form_fields = ['name', 'active']
     process = PROCESS_EDIT
 
-    def clean(self, cleaned_data):
+    def clean(self, form, cleaned_data):
         if cleaned_data['name'] == 'NA':
             raise ValidationError("Can't enter NA")

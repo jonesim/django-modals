@@ -187,7 +187,7 @@ class CrispyFormMixin:
     def clean(self):
         cleaned_data = super().clean()
         if self.clean_method:
-            self.clean_method(cleaned_data)
+            self.clean_method(self, cleaned_data)
         return cleaned_data
 
     def __str__(self):
