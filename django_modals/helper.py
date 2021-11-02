@@ -55,7 +55,7 @@ def show_modal(modal_name, *args, datatable=False, href=False, button=None, butt
             slug += '-row-%row%'
     if href:
         javascript = 'javascript:' + javascript
-    if button:
+    if button is not None:
         button_text = modal_buttons.get(button, button)
         if font_awesome:
             button_text = f'<i class="{font_awesome}"></i> {button_text}'
