@@ -77,7 +77,8 @@ class BaseModalMixin(AjaxHelpers):
             raise ModalException('User does not have permission')
 
     def button_refresh_modal(self, **_kwargs):
-        return self.command_response(ajax_modal_replace(self.request, modal_class=self.__class__))
+        return self.command_response(ajax_modal_replace(self.request, modal_class=self.__class__,
+                                                        slug=self.kwargs.get('slug', '-')))
 
     def button_group(self):
         button_kwargs = {
