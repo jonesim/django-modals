@@ -99,7 +99,7 @@ class FieldEx(Field):
         extra_context.update(self.extra_classes)
 
         if self.prepended_text or self.appended_text:
-            template = "%s/layout/prepended_appended_text.html" % template_pack
+            template = self.get_prepended_appended_template_name(template_pack)
             self.add_to_context(context, extra_context, input_size='input-group-sm',
                                 crispy_prepended_text=self.prepended_text, crispy_appended_text=self.appended_text)
         else:
@@ -118,6 +118,10 @@ class FieldEx(Field):
         for k in self.org_context:
             context[k] = self.org_context[k]
         return content
+
+    @staticmethod
+    def get_prepended_appended_template_name(template_pack):
+        return "%s/layout/prepended_appended_text.html" % template_pack
 
     @staticmethod
     def add_placeholders(fields, form_fields):
