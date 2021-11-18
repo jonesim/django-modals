@@ -9,7 +9,14 @@ var select2_widget = function() {
         django_modal.show_modal(modal_url);
     }
 
-    function initselect2(select_id, ajax, tags, data, placeholder) {
+    function initselect2(select_id, ajax, tags, data, placeholder, html_template) {
+
+        if (html_template === undefined) {
+            html_template = function html_template(text) {
+              return "<span>" + text.text + "</span>";
+            };
+        }
+
         var select_element = $("#" + select_id);
         var modal_container = select_element.closest(".modal-content");
         if (modal_container.length === 0) {
@@ -29,10 +36,10 @@ var select2_widget = function() {
 
         if (data !== undefined || ajax) {
             select2_params.templateSelection = function (text) {
-                return $("<span>" + text.text + "</span>");
+                return $(html_template(text));
             };
             select2_params.templateResult = function (text) {
-                return $("<span>" + text.text + "</span>");
+                return $(html_template(text));
             };
             select2_params.escapeMarkup = function (text) {
                 return text;
