@@ -197,10 +197,7 @@ class FormModalMixin(BaseModalMixin):
             return HttpResponse(str(form))
         return self.refresh_form(form)
 
-    def create_object(self):
-        pass
-
-    def update_object(self):
+    def post_save(self, created):
         pass
 
     def form_valid(self, form):
@@ -208,10 +205,7 @@ class FormModalMixin(BaseModalMixin):
         save_function = getattr(form, 'save', None)
         if save_function:
             save_function()
-        if org_id:
-            self.update_object()
-        else:
-            self.create_object()
+        self.post_save(created=org_id is None)
         if not self.response_commands:
             self.add_command('reload')
         return self.command_response()
