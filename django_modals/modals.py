@@ -30,7 +30,7 @@ class BaseModalMixin(AjaxHelpers):
     button_group_class = None
     button_container_class = None
     menu_config = {'href_format': "javascript:django_modal.show_modal('{}')"}
-    ajax_commands = ['button', 'select2']
+    ajax_commands = ['button', 'select2', 'ajax']
     button_group_css = None
     size = 'lg'
     no_parent_template = 'django_modals/blank_page_form.html'
