@@ -34,7 +34,7 @@ class Select2(SelectGroupMixin, Select):
             context['widget']['attrs']['style'] = 'width:100%'
         elif 'width' not in existing_style:
             context['widget']['attrs']['style'] = existing_style + ';width:100%'
-        if not self.attrs.get('ajax') and hasattr(self, 'select_data'):
+        if hasattr(self, 'select_data'):
             context['widget']['select_data'] = mark_safe(json.dumps(self.select_data))
         return context
 
