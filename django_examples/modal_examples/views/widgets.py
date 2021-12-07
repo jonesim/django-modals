@@ -6,6 +6,7 @@ from django_datatables.widgets import DataTableReorderWidget, DataTableWidget
 from django_datatables.datatables import DatatableView
 
 from django_modals.helper import show_modal
+from django_modals.widgets.colour_picker import ColourPickerWidget
 from django_modals.widgets.select2 import Select2, Select2Multiple, MultipleChoiceFieldAddValues
 from django_modals.widgets.widgets import Toggle, TinyMCE
 from django_modals.widgets.jquery_datepicker import DatePicker
@@ -14,6 +15,7 @@ from show_src_code.modals import ModelFormModal
 
 from modal_examples.models import Company, Tags, Note, Person
 from .views import MainMenu
+from ..models import CompanyColour
 
 
 class WidgetExamples(MainMenu, DatatableView):
@@ -250,3 +252,10 @@ class TagsCompanyFormAddValues(ModelFormModal):
         form.cleaned_data['company'] = form.cleaned_data['company']['existing']
         response = super().form_valid(form)
         return response
+
+
+class CompanyColourModal(ModelFormModal):
+    model = CompanyColour
+    form_fields = ['company', 'colour']
+    widgets = {'company': Select2,
+               'colour': ColourPickerWidget}

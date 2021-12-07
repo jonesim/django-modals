@@ -58,3 +58,8 @@ class Note(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     date = models.DateField()
     notes = models.TextField()
+
+
+class CompanyColour(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    colour = models.CharField(max_length=10)

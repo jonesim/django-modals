@@ -45,6 +45,12 @@
             <a class="btn btn-primary" href="{% show_modal 'datatable_rev' company_id href=True %}">Datatable Reverse</a>
             <a class="btn btn-primary" href="{% show_modal 'datatable_reorder' href=True %}">Reorder</a>
         </div>
+
+        <h4>Colour</h4>
+        <div class="ml-4">
+            {% show_modal 'company_colour_modal' button_classes='btn btn-primary' button='Company Colour' %}
+        </div>
+
     </div>
 
 {% endblock %}

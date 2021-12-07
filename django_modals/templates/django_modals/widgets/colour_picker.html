@@ -1,0 +1,27 @@
+
+<input id="id_{{ widget.name }}" autocomplete="off" type="text" {% if widget.value != None %}
+       value="{{ widget.value|stringformat:'s' }}"{% endif %}onkeydown="return false" name="{{ widget.name }}"
+        {% include "django/forms/widgets/attrs.html" %}>
+
+
+
+<script>
+    function {{ widget.name }}_get_random_colour_field(field) {
+      let letters = '0123456789ABCDEF';
+      let color = '';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      field.val(color);
+      field.trigger('change');
+      return false;
+    }
+
+    $(document).ready(function () {
+         $('#id_{{ widget.name }}').parent().colorpicker({
+                'hexNumberSignPrefix': '','useHashPrefix': false, 'useAlpha': false
+            });
+    });
+
+</script>
+

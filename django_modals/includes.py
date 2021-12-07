@@ -43,6 +43,11 @@ class TinyMce(SourceBase):
     js_path = ''
 
 
+class ColourPicker(SourceBase):
+    static_path = 'django_modals/bootstrap-colorpicker/'
+    filename = 'bootstrap-colorpicker'
+
+
 packages = {
     'select2': [Select2, Select2Widget],
 }
