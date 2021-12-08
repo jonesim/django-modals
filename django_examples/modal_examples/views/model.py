@@ -12,6 +12,7 @@ from django_modals.widgets.select2 import Select2
 from django_modals.processes import PERMISSION_ON, PERMISSION_OFF, PROCESS_CREATE
 from django_modals.datatables import EditColumn, DeleteColumn
 from django_modals.url_helper import get_urls
+from django_modals.mixins import ScratchPad
 from modal_examples.models import Company, Person
 
 from show_src_code.modals import ModelFormModal, MultiFormModal
@@ -69,7 +70,7 @@ class ModelExamples(MainMenu, DatatableView):
         )
 
 
-class ModalCompanyForm(ModelFormModal):
+class ModalCompanyForm(ScratchPad, ModelFormModal):
 
     model = Company
     form_fields = ['name', 'active']
