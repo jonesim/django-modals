@@ -1,0 +1,32 @@
+<div id="scratchpad" class="scratchpad-container modal-content">
+    <div class="scratchpad-header modal-header">
+        <div class="modal-title">
+            Scratch Pad
+        </div>
+        <button type="button" onclick="scratch_close()"><i class="fas fa-times pt-1"></i>
+        </button>
+    </div>
+    <div id="paste-area" tabindex="0">
+        <textarea style="display:block" tabindex="0" rows="8" class="w-100"></textarea>
+    </div>
+</div>
+<script>
+    function scratch_close() {
+        $("#scratchpad").remove();
+    }
+    var scratchpad = $("#scratchpad")[0];
+    var viewportOffset = scratchpad.getBoundingClientRect();
+    scratchpad.style.top = (0 - viewportOffset.top + 30) + 'px';
+    scratchpad.style.left = (document.documentElement.clientWidth - viewportOffset.left - 400) + 'px';
+    $('.scratchpad-container').draggable({handle: ".scratchpad-header"});
+    $("#paste-area").on('focusin', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    });
+
+    var data_entry_timeout
+    $("input").on('keyup', function(e) {
+        window.clearTimeout(data_entry_timeout)
+        data_entry_timeout = window.setTimeout(function(e){django_modal.send_inputs('check_company')} , 800)
+    })
+</script>

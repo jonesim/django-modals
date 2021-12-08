@@ -460,3 +460,29 @@ form.was-validated select:valid ~ .select2-container--bootstrap4 .select2-select
 .select2-container--bootstrap4 .select2-selection__clear:hover {
     background-color: #afafaf;
 }
+
+.scratchpad-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    background-color: #f1f1f1;
+    border: 1px solid #d3d3d3;
+    text-align: center;
+    width: 350px;
+}
+
+.scratchpad-header {
+    padding: 10px;
+    cursor: move;
+    z-index: 10001;
+}
+
+.scratchpad-container textarea{
+    outline: none !important;
+    border:1px solid white;
+}
+
+.scratchpad-container textarea:focus{
+    border-color: white;
+}
