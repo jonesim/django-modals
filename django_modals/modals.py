@@ -128,6 +128,8 @@ class Modal(BaseModal):
         return self.kwargs.get('message', '')
 
     def get_modal_buttons(self):
+        if 'buttons' in self.kwargs:
+            return self.kwargs['buttons']
         button_group_type = self.kwargs.get('button_group_type')
         if button_group_type == 'confirm':
             return [
