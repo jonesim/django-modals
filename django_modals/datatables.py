@@ -1,8 +1,8 @@
 from django_datatables.columns import ColumnBase
 from django_datatables.helpers import render_replace
 
-from django_modals.helper import modal_buttons, modal_delete_javascript
-from .helper import show_modal
+from django_modals.helper import modal_buttons, modal_delete_javascript, show_modal
+
 
 
 class ModalLink(ColumnBase):
