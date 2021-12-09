@@ -333,7 +333,11 @@ if (typeof django_modal == 'undefined') {
                 if (e !== undefined) {
                     django_modal.send_inputs(config.button)
                 }
+            },
+            html: function (config, e, value) {
+                $(config.selector).html(value);
             }
+
         }
 
         var modal_triggers = {}
@@ -387,13 +391,25 @@ if (typeof django_modal == 'undefined') {
         }
 
         function perform_function(config, value, e) {
+            var parameters;
             var html_function = config.values[value]
+
             if (html_function === undefined) {
-                if (config.default !== undefined) {
-                    form_change_functions[config.default](config, e)
+                var default_config = config.default;
+
+                if (default_config !== undefined) {
+                    if (default_config instanceof Array) {
+                        parameters = default_config[1]
+                        default_config = default_config[0]
+                    }
+                    form_change_functions[default_config](config, e, parameters)
                 }
             } else {
-                form_change_functions[html_function](config, e)
+                if (html_function instanceof Array) {
+                    parameters = html_function[1]
+                    html_function = html_function[0]
+                }
+                form_change_functions[html_function](config, e, parameters)
             }
         }
 

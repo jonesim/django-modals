@@ -17,6 +17,7 @@ class AdaptiveView(MainMenuTemplateView):
             ('adaptive_modal', 'Adaptive Modal'),
             ('adaptive_modal_boolean', 'Adaptive Modal Boolean'),
             ('adaptive_modal_select', 'Adaptive Select'),
+            ('adaptive_label_change_modal', 'Label Change'),
         )
 
 
@@ -106,3 +107,24 @@ class AdaptiveSelectModal(FormModal):
 
         ])
 
+
+class LabelChangeForm(CrispyForm):
+
+    class Meta:
+        modal_title = 'Test Title'
+
+    select = ChoiceField(choices=(('1', 'one'), ('2', 'two'), ('3', 'three'), ('all', 'all')))
+    test_field = CharField(required=True)
+
+
+class LabelChangeModal(FormModal):
+    form_class = LabelChangeForm
+
+    @staticmethod
+    def form_setup(form, *_args, **_kwargs):
+        form.add_trigger('select', 'onchange', [
+            {'selector': 'label[for=id_test_field]',
+             'values': {'1': ('html', 'one'),
+                        '2': ('html', 'two'),
+                        '3': ('html', '3')}, 'default': ('html', 'na')},
+        ])
