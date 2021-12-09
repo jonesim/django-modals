@@ -128,6 +128,22 @@ class CrispyFormMixin:
     def field_section(self, *args):
         return Div(*args, css_class=self.helper.field_class)
 
+    def format_layout_fields(self, *layout_fields):
+        if len(layout_fields) == 1 and isinstance(layout_fields[0], (list, tuple)):
+            layout_fields = layout_fields[0]
+        fields = []
+        for f in layout_fields:
+            if isinstance(f, str):
+                field_args = {}
+                if self.layout_field_params and f in self.layout_field_params:
+                    field_args.update(self.layout_field_params[f])
+                field_args.update(getattr(self.fields[f].widget, 'crispy_kwargs', {}))
+                # Class can be set in widget otherwise use FieldEx
+                fields.append(getattr(self.fields[f].widget, 'crispy_field_class', FieldEx)(f, **field_args))
+            else:
+                fields.append(f)
+        self.helper.layout = Layout(*self.header_html, *fields)
+
     def setup_modal(self, *args, **kwargs):
         self.helper = self.helper_class(self)
         self.helper.form_id = self.form_id
@@ -138,19 +154,11 @@ class CrispyFormMixin:
                     self.fields[a].required = self.layout_field_params[a].pop('required')
         if layout:
             if isinstance(layout, (tuple, list)):
-                self.helper.layout = Layout(*self.header_html, *layout)
+                self.format_layout_fields(*layout)
             else:
                 self.helper.layout = Layout(layout)
         else:
-            fields = []
-            for f in self.fields:
-                field_args = {}
-                if self.layout_field_params and f in self.layout_field_params:
-                    field_args.update(self.layout_field_params[f])
-                field_args.update(getattr(self.fields[f].widget, 'crispy_kwargs', {}))
-                # Class can be set in widget otherwise use FieldEx
-                fields.append(getattr(self.fields[f].widget, 'crispy_field_class', FieldEx)(f, **field_args))
-            self.helper.layout = Layout(*self.header_html, *fields)
+            self.format_layout_fields(*self.fields.keys())
         if getattr(self.helper, 'fields_wrap_class', None):
             # noinspection PyUnresolvedReferences
             self.helper[:].wrap_together(Div, css_class=self.helper.fields_wrap_class)
