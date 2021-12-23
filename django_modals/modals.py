@@ -42,11 +42,8 @@ class BaseModalMixin(AjaxHelpers):
         self.slug = {}
 
     def get_context_data(self, **kwargs):
-        if hasattr(super(), 'get_context_data'):
-            # noinspection PyUnresolvedReferences
-            context = super().get_context_data(**kwargs)
-        else:
-            context = {}
+        # noinspection PyUnresolvedReferences
+        context = super().get_context_data(**kwargs) if hasattr(super(), 'get_context_data') else {}
         context.update({'request': self.request, 'slug': self.slug})
         context['modal_url'] = kwargs.get('modal_url', self.request.get_full_path())
         context['no_header_x'] = getattr(self, 'no_header_x', None)
