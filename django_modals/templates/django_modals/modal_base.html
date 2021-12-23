@@ -21,7 +21,7 @@
                             </button>
                         {% endif %}
                         {% if scratchpad %}
-                            <button type="button" onclick="django_modal.send_inputs('scratchpad')" title="Scratch Pad">
+                            <button type="button" onclick="ajax_helpers.post_json({url:django_modal.modal_div().attr('data-url'), data:{button:'scratchpad', scratchpad:$('#scratchpad').length}})" title="Scratch Pad">
                                 <i class="far fa-sticky-note pt-1"></i>
                             </button>
                         {% endif %}
