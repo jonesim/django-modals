@@ -68,12 +68,13 @@ class FieldEx(Field):
         return {c: kwargs.pop(c) for c in ['label_class', 'field_class', 'form_class', 'form_show_labels',
                                            'wrapper_class'] if c in kwargs}
 
-    def __init__(self, *args, auto_placeholder=None, prepended_text=None, appended_text=None, **kwargs):
+    def __init__(self, *args, auto_placeholder=None, prepended_text=None, appended_text=None, extra_context=None,
+                 **kwargs):
         self.auto_placeholder = auto_placeholder
         self.prepended_text = prepended_text
         self.appended_text = appended_text
         self.extra_classes = self.get_extra_classes(kwargs)
-        self.org_context = None
+        self.org_context = extra_context if extra_context else {}
         super().__init__(*args, **kwargs)
 
     def add_to_context(self, context, extra_context, check_override=False, **kwargs):
@@ -86,7 +87,6 @@ class FieldEx(Field):
                     extra_context[key] = kwargs[key]
 
     def render(self, form, form_style, context, template_pack=TEMPLATE_PACK, extra_context=None, **kwargs):
-        self.org_context = {}
         if self.auto_placeholder or (self.auto_placeholder is None and getattr(form.helper, 'auto_placeholder', False)):
             self.add_placeholders(self.fields, form.fields)
         if extra_context is None:
