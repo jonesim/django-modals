@@ -104,6 +104,10 @@ class FieldEx(Field):
                                 crispy_prepended_text=self.prepended_text, crispy_appended_text=self.appended_text)
         else:
             template = self.get_template_name(template_pack)
+
+        for k in self.org_context:
+            context[k] = self.org_context[k]
+
         content = self.get_rendered_fields(
             form,
             form_style,
@@ -114,9 +118,6 @@ class FieldEx(Field):
             extra_context=extra_context,
             **kwargs,
         )
-
-        for k in self.org_context:
-            context[k] = self.org_context[k]
         return content
 
     @staticmethod
