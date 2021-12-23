@@ -1,10 +1,11 @@
 version: "3"
 services:
 
- django:
+ django: &django
   build:
    context: ./
   volumes:
+   - shared_temp:/tmp
    - ./media/:/media
    - ./django_examples/:/app
    - ./django_modals/:/modals/django_modals
@@ -15,5 +16,17 @@ services:
   ports:
    - 8007:8007
 
+ redis:
+   image: redis:5.0.7-alpine
 
+ celery:
+   <<: *django
+   image: modal_celeryworker
+   command: celery -A django_examples worker -l info
+   labels:
+     - "none"
+   ports:
+    - 80
 
+volumes:
+  shared_temp: {}

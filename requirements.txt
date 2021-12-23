@@ -1,6 +1,6 @@
 Django==3.2.7
 django-crispy-forms==1.12.0
-django-ajax-helpers==0.0.15
+django-ajax-helpers==0.0.16
 django-filtered-datatables==0.0.18
 django-tab-menus==0.0.13
 django-show-source-code==0.0.7
@@ -11,3 +11,5 @@ django-show-source-code==0.0.7
 # gunicorn
 # django-ajax-helpers @ git+git://github.com/jonesim/ajax-helpers@710e229172ef708d824c6679abe8a955459eeaf3
 datatable-examples @ git+git://github.com/jonesim/django-datatables@e0535792137acef57160447e235fc0c45c8500b3#subdirectory=django
+celery==4.4.0
+redis==3.3.11
