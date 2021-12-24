@@ -3,7 +3,6 @@ from django_modals.widgets.select2 import Select2
 from django_modals.modals import MultiForm
 
 from show_src_code.modals import MultiFormModal
-from django_modals.fields import FieldEx
 from crispy_forms.layout import HTML
 from .views import MainMenuTemplateView
 from modal_examples.models import Company, Person
@@ -37,8 +36,7 @@ class ModalCompanyPerson(MultiFormModal):
             message = 'This is the 2nd person form'
         else:
             message = ''
-        # noinspection PyTypeChecker
-        return [HTML(f'<p>{message}</p>')] + [FieldEx(f) for f in form.fields]
+        return [HTML(f'<p>{message}</p>'), *form.fields]
 
     def forms_valid(self, valid_forms):
         company = valid_forms['CompanyForm'].save()
