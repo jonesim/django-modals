@@ -15,8 +15,7 @@ class Upload(ModalAjaxFileMixin, MainMenuTemplateView):
     template_name = 'example_views/upload.html'
 
     @staticmethod
-    def upload_files(filename, _size, file, **kwargs):
-        print(kwargs)
+    def upload_files(filename, _size, file, **_kwargs):
         path = '/media/' + filename
         with open(path, 'wb+') as destination:
             destination.write(file.read())
@@ -40,3 +39,8 @@ class UploadForm(CrispyForm):
 class UploadModal(FormModal):
     form_class = UploadForm
     modal_title = 'Upload Form'
+
+    # Due to timeout in modals.js this will not upload large files
+
+    def form_valid(self, form):
+        print(form.cleaned_data)
