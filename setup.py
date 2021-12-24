@@ -5,7 +5,7 @@ with open("readme.md", "r") as fh:
 
 setuptools.setup(
     name="django-nested-modals",
-    version="0.0.16",
+    version="0.0.17",
     author="Ian Jones",
     description="Django app to implement Bootstrap nested modals",
     long_description=long_description,
@@ -19,5 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=['django-ajax-helpers>=0.0.13', 'django-crispy-forms'],
+    install_requires=['django-ajax-helpers>=0.0.16', 'django-crispy-forms'],
 )
