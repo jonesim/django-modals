@@ -15,7 +15,9 @@ import modal_examples.views.validation as validation
 import modal_examples.views.unbound_forms as unbound_forms
 import modal_examples.views.no_modal as no_modal
 import modal_examples.views.ajax as ajax
-
+import modal_examples.views.celery_tasks as celery_tasks
+from django_modals.task_modals import TaskModal
+from .tasks import DemoTask
 
 urlpatterns = [
     path('modal-redirect/', RedirectView.as_view(pattern_name='basic'), name='django-nested-modals'),
@@ -101,6 +103,9 @@ urlpatterns = [
     path('modal/forward1/<slug:slug>/', basic.ForwardingExample1.as_view(), name='forward_example1'),
     path('modal/forward2/<slug:slug>/', basic.ForwardingExample2.as_view(), name='forward_example2'),
 
+    path('modal/task/<str:slug>/', TaskModal.as_view(task=DemoTask), name='demo_task_modal'),
+    path('get_file/<str:task_id>/', celery_tasks.GetTaskFile.as_view(), name='get_task_file'),
+
     path('multi-form', multi_form.MultiFormExampleView.as_view(), name='multi_form'),
     path('adaptive', adaptive.AdaptiveView.as_view(), name='adaptive'),
 
@@ -115,6 +120,7 @@ urlpatterns = [
     path('Upload', file_upload.Upload.as_view(), name='upload'),
     path('Validation', validation.ValidationExamples.as_view(), name='validation'),
     path('Ajax', ajax.AjaxExamples.as_view(), name='ajax'),
+    path('Tasks', celery_tasks.TaskViews.as_view(), name='tasks'),
 
     path('nomodal/<slug:slug>', no_modal.NoModal.as_view(), name='no_modal'),
     path('', RedirectView.as_view(url='Basic')),
