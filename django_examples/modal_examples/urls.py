@@ -16,6 +16,7 @@ import modal_examples.views.unbound_forms as unbound_forms
 import modal_examples.views.no_modal as no_modal
 import modal_examples.views.ajax as ajax
 import modal_examples.views.celery_tasks as celery_tasks
+import modal_examples.views.base64_examples as base64_examples
 from django_modals.task_modals import TaskModal
 from .tasks import DemoTask
 
@@ -103,6 +104,8 @@ urlpatterns = [
     path('modal/forward1/<slug:slug>/', basic.ForwardingExample1.as_view(), name='forward_example1'),
     path('modal/forward2/<slug:slug>/', basic.ForwardingExample2.as_view(), name='forward_example2'),
 
+    path('modal/b64/<str:base64>/', base64_examples.B64Modal.as_view(), name='base64_modal'),
+
     path('modal/task/<str:slug>/', TaskModal.as_view(task=DemoTask), name='demo_task_modal'),
     path('get_file/<str:task_id>/', celery_tasks.GetTaskFile.as_view(), name='get_task_file'),
 
@@ -121,6 +124,7 @@ urlpatterns = [
     path('Validation', validation.ValidationExamples.as_view(), name='validation'),
     path('Ajax', ajax.AjaxExamples.as_view(), name='ajax'),
     path('Tasks', celery_tasks.TaskViews.as_view(), name='tasks'),
+    path('base64', base64_examples.B64.as_view(), name='base64'),
 
     path('nomodal/<slug:slug>', no_modal.NoModal.as_view(), name='no_modal'),
     path('', RedirectView.as_view(url='Basic')),
