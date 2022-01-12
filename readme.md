@@ -1,4 +1,4 @@
-[![PyPI version](https://badge.fury.io/py/django-nested-modals.svg)](https://badge.fury.io/py/django-nested-modals)
+[![PyPI version](https://badge.fury.io/py/django-advanced-report-builder.svg)](https://badge.fury.io/py/django-advanced-report-builder)
 
 Add to installed apps in settings   
 `'bootstrap_modals',`
