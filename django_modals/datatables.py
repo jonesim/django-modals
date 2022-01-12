@@ -14,7 +14,7 @@ class ModalLink(ColumnBase):
         modal_kwargs = {}
         if row_modify:
             modal_kwargs['row'] = True
-        modal_call = show_modal(modal_name, *modal_args, datatable=not base64, href=True, **modal_kwargs)
+        modal_call = show_modal(modal_name, *modal_args, datatable=True, base64=True , href=True, **modal_kwargs)
         css_class = f' class="{css_class}"' if css_class is not None else ""
         link = f'<a href="{modal_call}"{css_class}>{{}}</a>'
 
