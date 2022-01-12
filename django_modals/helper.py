@@ -1,4 +1,5 @@
 import json
+from base64 import urlsafe_b64encode
 from ajax_helpers.templatetags.ajax_helpers import button_javascript
 from django.urls import reverse, resolve, NoReverseMatch
 from django.template.loader import render_to_string
@@ -40,19 +41,25 @@ def make_slug(*args, make_pk=False):
     return slug
 
 
-def show_modal(modal_name, *args, datatable=False, href=False, button=None, button_classes='btn btn-primary mx-1',
-               row=False, font_awesome=None):
+def show_modal(modal_name, *args, base64=False, datatable=False, href=False, button=None,
+               button_classes='btn btn-primary mx-1', row=False, font_awesome=None):
     try:
         javascript = f"django_modal.show_modal('{reverse(modal_name, args=[DUMMY_SLUG])}')"
     except NoReverseMatch:
         javascript = f"django_modal.show_modal('{reverse(modal_name)}')"
-    slug = make_slug(*args)
+    if base64:
+        slug = urlsafe_b64encode(json.dumps(base64).encode('utf8')).decode('ascii')
+    else:
+        slug = make_slug(*args)
     if datatable:
-        if slug:
-            slug += '-'
-        slug += 'pk-%ref%'
-        if row:
-            slug += '-row-%row%'
+        if base64:
+            slug = '%ref%'
+        else:
+            if slug:
+                slug += '-'
+            slug += 'pk-%ref%'
+            if row:
+                slug += '-row-%row%'
     if href:
         javascript = 'javascript:' + javascript
     if button is not None:

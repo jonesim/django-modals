@@ -4,28 +4,27 @@ from django_datatables.helpers import render_replace
 from django_modals.helper import modal_buttons, modal_delete_javascript, show_modal
 
 
-
 class ModalLink(ColumnBase):
 
-    def __init__(self, *, modal_name,  field='id', row_modify=False, button_text=None, modal_args=(), css_class=None,
-                 **kwargs):
+    def __init__(self, *, modal_name,  field='id', row_modify=False, base64=False, button_text=None, modal_args=(),
+                 css_class=None, row=False, **kwargs):
         if not self.initialise(locals()):
             return
         super().__init__(**self.kwargs)
         modal_kwargs = {}
         if row_modify:
             modal_kwargs['row'] = True
-        modal_call = show_modal(modal_name, *modal_args, datatable=True, href=True, **modal_kwargs)
+        modal_call = show_modal(modal_name, *modal_args, datatable=not base64, href=True, **modal_kwargs)
         css_class = f' class="{css_class}"' if css_class is not None else ""
         link = f'<a href="{modal_call}"{css_class}>{{}}</a>'
 
         if button_text:
             self.options['render'] = [
-                render_replace(column=self.column_name, html=link.format(button_text), var='%ref%'),
+                render_replace(column=self.column_name, html=link.format(button_text), var='%ref%', row=row),
             ]
         else:
             self.options['render'] = [
-                render_replace(column=f'{self.column_name}:0', html=link.format('%1%'), var='%ref%'),
+                render_replace(column=f'{self.column_name}:0', html=link.format('%1%'), var='%ref%', row=row),
                 render_replace(column=f'{self.column_name}:1')
             ]
 
