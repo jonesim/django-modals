@@ -124,7 +124,7 @@ def modal_delete_javascript(url_name, pk):
 
 def reverse_modal(modal_name, slug='-'):
     try:
-        return reverse(modal_name, kwargs={'slug': slug})
+        return reverse(modal_name, args=[slug])
     except NoReverseMatch:
         if slug == '-':
             return reverse(modal_name)
