@@ -54,7 +54,7 @@ class BaseModalMixin(AjaxHelpers):
         return context
 
     def split_slug(self, kwargs):
-        if 'slug' in kwargs:
+        if 'slug' in kwargs and kwargs['slug'] != '-':
             s = kwargs['slug'].split('-')
             if len(s) == 1:
                 self.slug['pk'] = s[0]
