@@ -1,4 +1,5 @@
 import base64
+import binascii
 import json
 import inspect
 from django.forms.fields import Field
@@ -68,7 +69,10 @@ class BaseModalMixin(AjaxHelpers):
 
     def split_base64(self, kwargs):
         if 'base64' in kwargs:
-            base64_data = json.loads(base64.urlsafe_b64decode(self.kwargs['base64']))
+            try:
+                base64_data = json.loads(base64.urlsafe_b64decode(self.kwargs['base64']))
+            except binascii.Error:
+                raise ModalException('Error in modal base64 decode - This modal requires base64 not a slug')
             if not isinstance(base64_data, dict):
                 base64_data = {'base64': base64_data}
             self.slug.update(base64_data)
