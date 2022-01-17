@@ -24,16 +24,21 @@ class SelectGroupMixin:
         return context
 
 
+def add_width(style):
+    no_space_style = style.replace(' ', '')
+    if not style:
+        return 'width:100%'
+    elif not no_space_style.startswith('width:') and ';width:' not in no_space_style:
+        return style + ';width:100%'
+    return style
+
+
 class Select2(SelectGroupMixin, Select):
     template_name = 'django_modals/widgets/select2.html'
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        existing_style = context['widget']['attrs'].get('style', '')
-        if not existing_style:
-            context['widget']['attrs']['style'] = 'width:100%'
-        elif 'width' not in existing_style:
-            context['widget']['attrs']['style'] = existing_style + ';width:100%'
+        context['widget']['attrs']['style'] = add_width(context['widget']['attrs'].get('style', ''))
         if hasattr(self, 'select_data'):
             context['widget']['select_data'] = mark_safe(json.dumps(self.select_data))
         return context
@@ -52,6 +57,11 @@ class Select2Multiple(SelectGroupMixin, SelectMultiple):
         if tags:
             kwargs.setdefault('attrs', {}).update({'new_marker': self.new_marker, 'tags': True})
         super().__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['widget']['attrs']['style'] = add_width(context['widget']['attrs'].get('style', ''))
+        return context
 
 
 class ModelSelect2ChoiceField(ChoiceField):
