@@ -24,6 +24,10 @@ progress_bar_html = '''
 '''
 
 
+def base64_json(slug_dict):
+    return urlsafe_b64encode(json.dumps(slug_dict).encode("utf8")).decode("ascii")
+
+
 def progress_bar(progress_id=None, css=''):
     if progress_id is not None:
         progress_id = '_' + str(progress_id)
@@ -48,7 +52,7 @@ def show_modal(modal_name, *args, base64=False, datatable=False, href=False, but
     except NoReverseMatch:
         javascript = f"django_modal.show_modal('{reverse(modal_name)}')"
     if base64:
-        slug = urlsafe_b64encode(json.dumps(base64).encode('utf8')).decode('ascii')
+        slug = base64_json(base64)
     else:
         slug = make_slug(*args)
     if datatable:
@@ -124,7 +128,7 @@ def modal_delete_javascript(url_name, pk):
 
 def reverse_modal(modal_name, slug='-', base64=None):
     if base64:
-        slug = urlsafe_b64encode(json.dumps(base64).encode('utf8')).decode('ascii')
+        slug = base64_json(base64)
     try:
         return reverse(modal_name, args=[slug])
     except NoReverseMatch:
