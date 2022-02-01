@@ -248,7 +248,14 @@ if (typeof django_modal == 'undefined') {
                     var form_data = new FormData(f)
                     data[f.id] = {}
                     for (var d of form_data.entries()) {
-                        data[f.id][d[0]] = d[1]
+                        if (Array.isArray(data[f.id][d[0]])) {
+                            data[f.id][d[0]].push(d[1])
+                        } else if (data[f.id][d[0]] != undefined)
+                        {
+                            data[f.id][d[0]] = [data[f.id][d[0]], d[1]]
+                        } else{
+                            data[f.id][d[0]] = d[1]
+                        }
                     }
                 }
                 for (property in params) {

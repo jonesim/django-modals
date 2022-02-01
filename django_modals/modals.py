@@ -512,6 +512,21 @@ class MultiForm:
         return kwargs
 
 
+class DictGetList(dict):
+    """
+    Adds getlist to dict to make dict work more like Django's MultiValueDict
+    """
+    def getlist(self, key, default=None):
+        try:
+            values = super().__getitem__(key)
+        except KeyError:
+            if default is None:
+                return []
+            return default
+        else:
+            return values if isinstance(values, list) else [values]
+
+
 class MultiFormModal(BaseModal):
     template_name = 'django_modals/multi_form.html'
     modal_title = ''
@@ -538,6 +553,9 @@ class MultiFormModal(BaseModal):
         used_ids = []
         if self.request.method in ('POST', 'PUT'):
             form_data = json.loads(self.request.body)
+            for f in form_data:
+                if isinstance(form_data[f], dict):
+                    form_data[f] = DictGetList(**form_data[f])
         else:
             form_data = {}
         for f in self.forms:
