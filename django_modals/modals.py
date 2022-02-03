@@ -487,13 +487,14 @@ class ModelFormModal(SingleObjectMixin, FormModal):
 
 class MultiForm:
 
-    def __init__(self, model, fields, form_id=None, initial=None, widgets=None, **kwargs):
+    def __init__(self, model, fields, form_id=None, initial=None, widgets=None, pk=None, **kwargs):
         self.model = model
         self.fields = fields
         self.kwargs = kwargs
         self.form_id = form_id
         self.initial = initial if initial else {}
         self.widgets = widgets if widgets else {}
+        self.pk = pk
 
     def make_form_id(self, used_ids):
         if not self.form_id:
@@ -508,6 +509,8 @@ class MultiForm:
 
     def get_kwargs(self):
         kwargs = {'form_id': self.form_id, 'initial': self.initial, 'no_buttons': True}
+        if self.pk:
+            kwargs.update({'instance': self.model.objects.get(pk=self.pk)})
         kwargs.update(self.kwargs)
         return kwargs
 
@@ -566,7 +569,13 @@ class MultiFormModal(BaseModal):
                     'data': form_data[f.form_id],
                     # 'files': self.request.FILES,
                 })
-            if hasattr(self, 'form_setup') and callable(self.form_setup):
+            if hasattr(f, 'clean') and callable(f.clean):
+                kwargs['clean'] = f.clean
+            elif hasattr(self, 'clean') and callable(self.clean):
+                kwargs['clean'] = self.clean
+            if hasattr(f, 'form_setup') and callable(f.form_setup):
+                kwargs['form_setup'] = f.form_setup
+            elif hasattr(self, 'form_setup') and callable(self.form_setup):
                 kwargs['form_setup'] = self.form_setup
             all_kwargs.append(kwargs)
         all_kwargs[-1]['no_buttons'] = False
