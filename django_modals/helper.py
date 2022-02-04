@@ -104,7 +104,7 @@ def modal_button(title, commands, css_class='btn-primary'):
     else:
         params = commands
     return mark_safe(f'''<button onclick='django_modal.process_commands_lock({json.dumps(params)})' 
-            class="btn {css_class}">{title}</button>''')
+            class="btn {css_class}" type="button">{title}</button>''')
 
 
 def modal_button_method(title, method_name, css_class='btn-primary', **kwargs):
