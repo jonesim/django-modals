@@ -445,6 +445,7 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         if 'pk' in self.kwargs:
             self.object = self.get_object()
         else:
+            self.initial = self.initial.copy()
             self.object = self.model()
             # noinspection PyProtectedMember
             fields = self.model._meta.get_fields()
