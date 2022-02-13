@@ -128,10 +128,11 @@ if (typeof django_modal == 'undefined') {
         }
 
         function init_modal_container(modal_container){
+            var left_pos;
             var modal_element = modal_container.children();
             modal_element.css('z-index', 1040 + (10 * open_modals));
             modal_element.modal({'backdrop': false})
-            modal_dialog = $('.modal-dialog', modal_element).first()
+            var modal_dialog = $('.modal-dialog', modal_element).first()
             if ((document.documentElement.clientWidth - modal_dialog.width()) > 20){
                 left_pos = open_modals*10 - 20
             } else {
@@ -171,8 +172,8 @@ if (typeof django_modal == 'undefined') {
 
         function additional_parameters(params) {
             if (typeof (params) == 'undefined') params = {};
-            params.modal_id = active_modal_container_id()
-            //params.modal_page_url = window.location.pathname;
+            params.modal_id = active_modal_container_id();
+            params.modal_page_url = window.location.pathname;
             //params.modal_querystring = window.location.search;
             return params;
         }
