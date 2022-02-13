@@ -87,11 +87,12 @@ if (typeof django_modal == 'undefined') {
     };
 
     ajax_helpers.command_functions.modal_html = function (command) {
+      ajax_helpers.ajax_busy = true;
       create_modal(command.html);
     };
 
     ajax_helpers.command_functions.post_modal = function (command) {
-      send_inputs(command.button);
+      send_inputs(command.button, command.options);
     };
 
     ajax_helpers.command_functions.modal_refresh_trigger = function (command) {
@@ -118,14 +119,20 @@ if (typeof django_modal == 'undefined') {
     }
 
     function create_modal(modal_html) {
+      var modal_container;
       open_modals += 1;
       modals.push({
         id: active_modal_container_id()
       });
-      var modal_container = $('<div>', {
-        id: active_modal_container_id()
-      }).appendTo('body');
-      modal_container.html(modal_html);
+
+      if (modal_html !== "") {
+        modal_container = $('<div>', {
+          id: active_modal_container_id()
+        }).appendTo('body');
+        modal_container.html(modal_html);
+      } else {
+        modal_container = $('#' + active_modal_container_id());
+      }
 
       if (open_modals === 1) {
         var backdrop = $('<div>', {
@@ -148,16 +155,26 @@ if (typeof django_modal == 'undefined') {
     }
 
     function disable_enter_key() {
-      $('form input').keydown(function (e) {
+      $('input', modal_div()).keydown(function (e) {
         if (e.keyCode === 13) {
           e.preventDefault();
-          $('.modal-submit')[0].click();
+          var form_no_enter = $('form', modal_div()).attr('no-enter');
+          var flag_no_enter = form_no_enter !== undefined && form_no_enter !== false;
+
+          if ($(this).hasClass('no-enter') || flag_no_enter) {
+            var el = $('input, button, select', modal_div());
+            el[el.index(this) + 1].focus();
+          } else {
+            $('.modal-submit')[0].click();
+          }
+
           return false;
         }
       });
     }
 
     function init_modal_container(modal_container) {
+      var left_pos;
       var modal_element = modal_container.children();
       modal_element.css('z-index', 1040 + 10 * open_modals);
       modal_element.modal({
@@ -166,9 +183,9 @@ if (typeof django_modal == 'undefined') {
       var modal_dialog = $('.modal-dialog', modal_element).first();
 
       if (document.documentElement.clientWidth - modal_dialog.width() > 20) {
-        var left_pos = open_modals * 10 - 20;
+        left_pos = open_modals * 10 - 20;
       } else {
-        var left_pos = 5;
+        left_pos = 5;
         modal_dialog.width(document.documentElement.clientWidth - 20);
       }
 
@@ -213,8 +230,8 @@ if (typeof django_modal == 'undefined') {
 
     function additional_parameters(params) {
       if (typeof params == 'undefined') params = {};
-      params.modal_id = active_modal_container_id(); //params.modal_page_url = window.location.pathname;
-      //params.modal_querystring = window.location.search;
+      params.modal_id = active_modal_container_id();
+      params.modal_page_url = window.location.pathname; //params.modal_querystring = window.location.search;
 
       return params;
     }
@@ -267,7 +284,7 @@ if (typeof django_modal == 'undefined') {
       });
     }
 
-    function send_inputs(button_name, callback, index) {
+    function send_inputs(button_name, options) {
       var params;
       var property;
 
@@ -288,10 +305,6 @@ if (typeof django_modal == 'undefined') {
 
       if (modal_type !== undefined) {
         params['modal_type'] = modal_type;
-      }
-
-      if (typeof callback != 'undefined') {
-        modal_url = url_change(modal_url, 'modalstyle', 'windowform');
       }
 
       if (typeof tinymce != 'undefined') tinymce.triggerSave();
@@ -315,7 +328,14 @@ if (typeof django_modal == 'undefined') {
             try {
               for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
                 var d = _step2.value;
-                data[f.id][d[0]] = d[1];
+
+                if (Array.isArray(data[f.id][d[0]])) {
+                  data[f.id][d[0]].push(d[1]);
+                } else if (data[f.id][d[0]] != undefined) {
+                  data[f.id][d[0]] = [data[f.id][d[0]], d[1]];
+                } else {
+                  data[f.id][d[0]] = d[1];
+                }
               }
             } catch (err) {
               _iterator2.e(err);
@@ -345,7 +365,7 @@ if (typeof django_modal == 'undefined') {
           data.append(property, params[property]);
         }
 
-        ajax_helpers.post_data(modal_url, data, django_modal.timeout);
+        ajax_helpers.post_data(modal_url, data, django_modal.timeout, options);
       }
     }
 
@@ -414,6 +434,14 @@ if (typeof django_modal == 'undefined') {
       },
       clear: function clear(config) {
         $(config.selector + ' input').val('');
+      },
+      send_inputs: function send_inputs(config, e) {
+        if (e !== undefined) {
+          django_modal.send_inputs(config.button);
+        }
+      },
+      html: function html(config, e, value) {
+        $(config.selector).html(value);
       }
     };
     var modal_triggers = {};
@@ -469,7 +497,7 @@ if (typeof django_modal == 'undefined') {
         try {
           for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
             var c = _step3.value;
-            perform_function(c, value);
+            perform_function(c, value, e);
           }
         } catch (err) {
           _iterator3.e(err);
@@ -477,19 +505,32 @@ if (typeof django_modal == 'undefined') {
           _iterator3.f();
         }
       } else {
-        perform_function(config, value);
+        perform_function(config, value, e);
       }
     }
 
-    function perform_function(config, value) {
+    function perform_function(config, value, e) {
+      var parameters;
       var html_function = config.values[value];
 
       if (html_function === undefined) {
-        if (config.default !== undefined) {
-          form_change_functions[config.default](config);
+        var default_config = config.default;
+
+        if (default_config !== undefined) {
+          if (default_config instanceof Array) {
+            parameters = default_config[1];
+            default_config = default_config[0];
+          }
+
+          form_change_functions[default_config](config, e, parameters);
         }
       } else {
-        form_change_functions[html_function](config);
+        if (html_function instanceof Array) {
+          parameters = html_function[1];
+          html_function = html_function[0];
+        }
+
+        form_change_functions[html_function](config, e, parameters);
       }
     }
 
