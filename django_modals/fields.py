@@ -24,11 +24,15 @@ class MultiFieldRow(Div):
                  field_class='input-group-sm', **kwargs):
         self.label = label
         extra_classes = FieldEx.get_extra_classes(locals())
+        self.kwargs = kwargs
         super().__init__(*fields, css_class='row')
 
     def render(self, form, form_style, context, template_pack=TEMPLATE_PACK, **kwargs):
         form.mode = form.mode + ['no_labels', 'flex']
-        self.fields = Label(self.label), Div(FieldEx(*self.fields), css_class=form.helper.field_class + ' d-flex')
+        self.fields = Label(self.label), Div(
+            FieldEx(*self.fields),
+            css_class=self.kwargs.get('css_class', form.helper.field_class) + ' d-flex'
+        )
         render_result = super().render(form, form_style, context, template_pack=TEMPLATE_PACK, **kwargs)
         form.mode = form.mode[:-2]
         return render_result
