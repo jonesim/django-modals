@@ -371,13 +371,18 @@ class ModelFormModal(SingleObjectMixin, FormModal):
     def object_delete(self):
         pass
 
-    def button_confirm_delete(self, **_kwargs):
+    def button_confirm_delete(self, **kwargs):
         if self.process in [processes.PROCESS_DELETE, processes.PROCESS_EDIT_DELETE]:
             self.object.delete()
         self.object_delete()
         if not self.response_commands:
-            self.add_command('close', no_refresh=True)
-            self.add_command('reload')
+            if 'modal_querystring' in kwargs and 'on_delete=' in kwargs['modal_querystring']:
+                self.add_command('redirect', url=kwargs['modal_querystring'][
+                                                 kwargs['modal_querystring'].find('on_delete=') + 7:
+                                                 ].split('&')[0])
+            else:
+                self.add_command('close', no_refresh=True)
+                self.add_command('reload')
         return self.command_response()
 
     def button_delete(self, **_kwargs):
