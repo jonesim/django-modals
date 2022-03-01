@@ -174,7 +174,9 @@ if (typeof django_modal == 'undefined') {
             if (typeof (params) == 'undefined') params = {};
             params.modal_id = active_modal_container_id();
             params.modal_page_url = window.location.pathname;
-            //params.modal_querystring = window.location.search;
+            if (window.location.search !== undefined && window.location.search !==null && window.location.search !==''){
+                params.modal_querystring = window.location.search;
+            }
             return params;
         }
 
