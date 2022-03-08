@@ -49,7 +49,7 @@ class CrispyFormMixin:
         self.triggers = {}
         self.trigger_fields = {}
         self.header_html = [HTML(header_html)] if header_html else []
-        self.clean_method = clean
+        self._clean_method = clean
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
@@ -194,8 +194,8 @@ class CrispyFormMixin:
 
     def clean(self):
         cleaned_data = super().clean()
-        if self.clean_method:
-            self.clean_method(self, cleaned_data)
+        if self._clean_method:
+            self._clean_method(self, cleaned_data)
         return cleaned_data
 
     def __str__(self):
