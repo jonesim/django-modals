@@ -1,23 +1,33 @@
-var select2_widget = function() {
+var select2_widget = function () {
 
-    function add_CSRF(xhr) {
-        xhr.setRequestHeader("X-CSRFToken", ajax_helpers.getCookie("csrftoken"));
-    }
+    function initselect2(select_id, ajax, tags, data, placeholder, html_template, selected_ajax) {
 
-    function modal(modal_url) {
-
-        django_modal.show_modal(modal_url);
-    }
-
-    function initselect2(select_id, ajax, tags, data, placeholder, html_template) {
+        function strip_id(org_id) {
+            if (org_id.substring(0, 3) === 'id_') {
+                return org_id.substring(3);
+            } else {
+                return org_id;
+            }
+        }
 
         if (html_template === undefined) {
             html_template = function html_template(text) {
-              return "<span>" + text.text + "</span>";
+                return "<span>" + text.text + "</span>";
             };
         }
 
         var select_element = $("#" + select_id);
+        if (selected_ajax) {
+            select_element.on('select2:select', function () {
+                ajax_helpers.post_json({
+                    data: {
+                        select2: strip_id(select_id) + '_selected',
+                        data: select_element.select2('data')
+                    }
+                });
+            });
+        }
+
         var modal_container = select_element.closest(".modal-content");
         if (modal_container.length === 0) {
             modal_container = $(document.body);
@@ -73,7 +83,7 @@ var select2_widget = function() {
                     $($("#" + select_id).closest("form")).serializeArray().map(function (x) {
                         ajax_data[x.name] = x.value;
                     });
-                    ajax_data.select2 = select_id.substring(3);
+                    ajax_data.select2 = strip_id(select_id);
                     ajax_data.search = params.term;
                     ajax_data.page = params.page || 1;
                     return JSON.stringify(ajax_data);
@@ -86,7 +96,6 @@ var select2_widget = function() {
         });
     }
     return {
-    	initselect2: initselect2,
-    	modal: modal
+        initselect2: initselect2,
     };
 }();

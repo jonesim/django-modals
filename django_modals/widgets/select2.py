@@ -1,6 +1,7 @@
 import json
 from django.forms import Select, ChoiceField, TypedChoiceField, SelectMultiple, MultipleChoiceField
 from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 from django.utils.safestring import mark_safe
 
 
@@ -8,9 +9,14 @@ def widget_attrs(widget):
     return ''.join([f' {n}' if v is True else f' {n}={v}' for n, v in widget['attrs'].items() if v is not False])
 
 
+def select2_ajax_result(results):
+    return JsonResponse({'results': [{'id': r[0], 'text': r[1]} for r in results]})
+
+
 class SelectGroupMixin:
 
     def get_context(self, name, value, attrs):
+        # noinspection PyUnresolvedReferences
         context = super().get_context(name, value, attrs)
         options = []
         for group_name, group_choices, group_index in context['widget']['optgroups']:
@@ -126,10 +132,9 @@ class ChoiceFieldAddValues(ChoiceField):
         if self.new_data(data):
             if self.choices[-1][1] != self.new_data(data):
                 self.choices.append((data, self.new_data(data)))
-        return super().bound_data(data,initial)
+        return super().bound_data(data, initial)
 
     @classmethod
     def new_data(cls, value):
         if value.startswith(cls.new_marker):
             return value[len(cls.new_marker):]
-

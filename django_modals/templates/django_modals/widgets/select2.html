@@ -16,7 +16,8 @@
                 {enabled: {{widget.attrs.tags|yesno:"true,false" }}, new_marker: "{{ widget.attrs.new_marker}}"},
                 data,
                 "{{ widget.attrs.placeholder|default:'-' }}",
-                {{ widget.attrs.html_template|safe|default:"undefined" }}
+                {{ widget.attrs.html_template|safe|default:"undefined" }},
+                {{ widget.attrs.selected_ajax|yesno:"true,false" }},
             )
         })()
         {% comment %}
