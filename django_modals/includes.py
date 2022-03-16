@@ -43,6 +43,11 @@ class TinyMce(SourceBase):
     js_path = ''
 
 
+class MonthPicker(SourceBase):
+    static_path = 'django_modals/jquery-month-picker/'
+    filename = 'MonthPicker.min'
+
+
 class ColourPicker(SourceBase):
     static_path = 'django_modals/bootstrap-colorpicker/'
     filename = 'bootstrap-colorpicker'
