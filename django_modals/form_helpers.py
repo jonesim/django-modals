@@ -9,6 +9,11 @@ class WrapperHelper(FormHelper):
             items['wrapper_class'] = self.wrapper_class
         return items
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if hasattr(self, 'form_attrs'):
+            self.attrs = self.form_attrs
+
 
 class TwoColumnHelper(WrapperHelper):
 
@@ -60,3 +65,7 @@ class TwoColumnRegularHelper(RegularHelper):
 
 class NoLabelsRegularHelper(RegularHelper):
     form_show_labels = False
+
+
+class HorizontalNoEnterHelper(HorizontalHelper):
+    form_attrs = {'no_enter': True}
