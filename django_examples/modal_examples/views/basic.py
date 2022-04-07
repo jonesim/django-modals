@@ -29,7 +29,8 @@ class ModalConfirm(Modal):
         return 'Custom buttons with confirm stacked modal'
 
     def get_modal_buttons(self):
-        return [modal_button_method('Confirm', 'confirm_message'), modal_button('Cancel', 'close', 'btn-secondary')]
+        return [modal_button_method('Confirm', 'confirm_message', font_awesome='fas fa-check'),
+                modal_button('Cancel', 'close', 'btn-secondary', font_awesome='fas fa-times')]
 
     def button_confirm_message(self, **_kwargs):
         return self.confirm('Confirm message - Confirming will execute button_confirm method')
