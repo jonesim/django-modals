@@ -32,6 +32,7 @@ class ModalLink(ColumnBase):
 class EditColumn(ModalLink):
     def __init__(self, modal_name, button_text='Edit', css_class='btn btn-sm btn-primary', title='',
                  no_col_search=True, **kwargs):
+        button_text = button_text if button_text else modal_buttons['edit']
         super().__init__(modal_name=modal_name, button_text=button_text, title=title, no_col_search=no_col_search,
                          css_class=css_class, **kwargs)
         self.column_defs = {
