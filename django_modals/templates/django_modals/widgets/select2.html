@@ -17,7 +17,7 @@
                 data,
                 "{{ widget.attrs.placeholder|default:'-' }}",
                 {{ widget.attrs.html_template|safe|default:"undefined" }},
-                {{ widget.attrs.selected_ajax|yesno:"true,false" }},
+                {% if widget.attrs.selected_ajax == True %}true{% else %}"{{ widget.attrs.selected_ajax|default:"false" }}"{% endif %},
             )
         })()
         {% comment %}
@@ -27,4 +27,11 @@
             document.querySelector('[aria-controls="select2-{{ widget.attrs.id }}-results"]').focus();
         });
     </script>
+    {% if widget.attrs.height %}
+    <style>
+        .selection [aria-labelledby="select2-{{ widget.attrs.id }}-container"].select2-selection--single {
+            height: {{ widget.attrs.height }}!important;
+        }
+    </style>
+    {% endif %}
 {% endspaceless %}

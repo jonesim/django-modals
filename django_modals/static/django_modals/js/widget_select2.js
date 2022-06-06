@@ -17,7 +17,7 @@ var select2_widget = function () {
         }
 
         var select_element = $("#" + select_id);
-        if (selected_ajax) {
+        if (selected_ajax===true) {
             select_element.on('select2:select', function () {
                 ajax_helpers.post_json({
                     data: {
@@ -25,6 +25,10 @@ var select2_widget = function () {
                         data: select_element.select2('data')
                     }
                 });
+            });
+        } else if (selected_ajax==='form'){
+            select_element.on('select2:select', function () {
+                django_modal.send_inputs({select2: strip_id(select_id) + '_selected'})
             });
         }
 
