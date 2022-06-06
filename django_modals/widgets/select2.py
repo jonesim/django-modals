@@ -129,7 +129,7 @@ class ChoiceFieldAddValues(ChoiceField):
         return value
 
     def bound_data(self, data, initial):
-        if self.new_data(data):
+        if data and self.new_data(data):
             if self.choices[-1][1] != self.new_data(data):
                 self.choices.append((data, self.new_data(data)))
         return super().bound_data(data, initial)
