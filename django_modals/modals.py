@@ -2,6 +2,8 @@ import base64
 import binascii
 import json
 import inspect
+
+from ajax_helpers.utils import is_ajax
 from django.forms.fields import Field
 from django.forms.models import modelform_factory, fields_for_model
 from django.http import HttpResponse, JsonResponse
@@ -99,7 +101,7 @@ class BaseModalMixin(AjaxHelpers):
         return modal_button_group(self.buttons, **button_kwargs)
 
     def check_for_background_page(self, context):
-        if not self.request.is_ajax() and self.modal_mode:
+        if not is_ajax(self.request) and self.modal_mode:
             context['modal_type'] = 'no-parent'
             context['no_header_x'] = True
             context['form'] = render_modal(template_name=self.template_name, **context)
