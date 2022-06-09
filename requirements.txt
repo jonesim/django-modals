@@ -1,15 +1,15 @@
 Django==3.2.7
 django-crispy-forms==1.12.0
-django-ajax-helpers==0.0.16
+# django-ajax-helpers==0.0.16
 django-filtered-datatables==0.0.18
 django-tab-menus==0.0.13
 django-show-source-code==0.0.8
 
 # git+git://github.com/jonesim/django-datatables@5d04857
-# django-filtered-datatables @ git+git://github.com/jonesim/django-datatables@5d0485776983d93a09b7409246044a873db0454e
+# django-filtered-datatables @ git+https://github.com/jonesim/django-datatables@5d0485776983d93a09b7409246044a873db0454e
 # gunicorn
-# django-ajax-helpers @ git+git://github.com/jonesim/ajax-helpers@710e229172ef708d824c6679abe8a955459eeaf3
-datatable-examples @ git+git://github.com/jonesim/django-datatables@e0535792137acef57160447e235fc0c45c8500b3#subdirectory=django
+django-ajax-helpers @ git+https://github.com/jonesim/ajax-helpers@ce720aaa850f371f773efaccb53c05623419e981
+datatable-examples @ git+https://github.com/jonesim/django-datatables@e0535792137acef57160447e235fc0c45c8500b3#subdirectory=django
 celery==4.4.0
 redis==3.3.11
-ajax-examples @ git+git://github.com/jonesim/ajax-helpers@e80a69d09374195269df467142ae0e1a289cba8f#subdirectory=django_examples
+ajax-examples @ git+https://github.com/jonesim/ajax-helpers@e80a69d09374195269df467142ae0e1a289cba8f#subdirectory=django_examples
