@@ -495,13 +495,16 @@ class ModelFormModal(SingleObjectMixin, FormModal):
 
 class MultiForm:
 
-    def __init__(self, model, fields, form_id=None, initial=None, widgets=None, pk=None, **kwargs):
+    def __init__(self, model, fields, form_id=None, initial=None, widgets=None, pk=None, field_classes=None,
+                 labels=None, **kwargs):
         self.model = model
         self.fields = fields
         self.kwargs = kwargs
         self.form_id = form_id
         self.initial = initial if initial else {}
         self.widgets = widgets if widgets else {}
+        self.field_classes = field_classes if field_classes else {}
+        self.labels = labels if labels else {}
         self.pk = pk
 
     def make_form_id(self, used_ids):
@@ -547,7 +550,8 @@ class MultiFormModal(BaseModal):
 
     def get_form_classes(self):
         for f in self.forms:
-            processed_form_fields = ProcessFormFields(f.fields, widgets=f.widgets)
+            processed_form_fields = ProcessFormFields(f.fields, widgets=f.widgets, field_classes=f.field_classes,
+                                                      labels=f.labels)
             self.form_setup_args.append({
                 'form_class': modelform_factory(f.model, form=self.base_form, fields=processed_form_fields.fields,
                                                 **processed_form_fields.extra_kwargs()),
