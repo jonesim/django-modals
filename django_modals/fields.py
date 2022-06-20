@@ -67,6 +67,7 @@ class Label:
 
 
 class FieldEx(Field):
+    template = "%s/field.html"
     @staticmethod
     def get_extra_classes(kwargs):
         return {c: kwargs.pop(c) for c in ['label_class', 'field_class', 'form_class', 'form_show_labels',
