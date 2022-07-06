@@ -50,6 +50,7 @@ class CrispyFormMixin:
         self.trigger_fields = {}
         self.header_html = [HTML(header_html)] if header_html else []
         self._clean_method = clean
+        self.html_above_buttons = ''
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
@@ -171,6 +172,7 @@ class CrispyFormMixin:
             if self.process in [PROCESS_EDIT_DELETE, PROCESS_DELETE]:
                 self.buttons.append(self.delete_button())
             self.buttons.append(self.cancel_button())
+        self.helper.layout.append(HTML(self.html_above_buttons))
         if self.buttons:
             self.append_buttons(self.buttons)
         if self.process in [PROCESS_VIEW, PROCESS_VIEW_EDIT]:
