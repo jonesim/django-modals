@@ -331,10 +331,10 @@ if (typeof django_modal == 'undefined') {
                 $(config.selector).show()
             },
             disable: function (config) {
-                $(config.selector + ' input').attr('disabled', true)
+                $(config.selector).attr('disabled', true)
             },
             enable: function (config) {
-                $(config.selector + ' input').attr('disabled', false)
+                $(config.selector).attr('disabled', false)
             },
             clear: function (config) {
                 $(config.selector + ' input').val('')
