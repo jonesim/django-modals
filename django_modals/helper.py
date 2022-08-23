@@ -59,7 +59,9 @@ def show_modal(modal_name, *args, base64=False, datatable=False, href=False, but
         if base64:
             slug = '%ref%'
         else:
-            if slug:
+            if slug == '-':
+                slug = ''
+            elif slug:
                 slug += '-'
             slug += 'pk-%ref%'
             if row:
