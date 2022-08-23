@@ -45,8 +45,15 @@ def make_slug(*args, make_pk=False):
     return slug
 
 
+def attr(attributes, tooltip):
+    attributes = {} if attributes is None else attributes
+    if tooltip:
+        attributes.update({'title': tooltip, 'data-tooltip': 'tooltip', 'data-placement': 'top'})
+    return attributes
+
+
 def show_modal(modal_name, *args, base64=False, datatable=False, href=False, button=None,
-               button_classes='btn btn-primary mx-1', row=False, font_awesome=None):
+               button_classes='btn btn-primary mx-1', row=False, font_awesome=None, attributes=None, tooltip=None):
     try:
         javascript = f"django_modal.show_modal('{reverse(modal_name, args=[DUMMY_SLUG])}')"
     except NoReverseMatch:
@@ -70,9 +77,12 @@ def show_modal(modal_name, *args, base64=False, datatable=False, href=False, but
         javascript = 'javascript:' + javascript
     if button is not None:
         button_text = modal_buttons.get(button, button)
+        attributes = attr(attributes, tooltip)
+        text_attributes = ' ' + ' '.join([f'{k}="{v}"' for k, v in attributes.items()]) if attributes else ''
         if font_awesome:
             button_text = f'<i class="{font_awesome}"></i> {button_text}'
-        javascript = f'<a {css_classes(button_classes)} href="javascript:{javascript}">{button_text}</a>'
+        javascript = (f'<a {css_classes(button_classes)}{text_attributes} '
+                      f'href="javascript:{javascript}">{button_text}</a>')
     if not slug:
         slug = '-'
     return javascript.replace(DUMMY_SLUG, slug)
