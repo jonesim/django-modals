@@ -2,6 +2,7 @@ import json
 from django.forms import Select, ChoiceField, TypedChoiceField, SelectMultiple, MultipleChoiceField
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 
@@ -90,7 +91,7 @@ class ModelSelect2ChoiceField(ChoiceField):
     def prepare_value(self, value):
         if value:
             model_object = self.model.objects.get(pk=value)
-            self.choices = ((model_object.id, str(model_object)),)
+            self.choices = ((model_object.id, escape(str(model_object))),)
         return super().prepare_value(value)
 
 
