@@ -78,6 +78,7 @@ class BaseModalMixin(AjaxHelpers):
             if not isinstance(base64_data, dict):
                 base64_data = {'base64': base64_data}
             self.slug.update(base64_data)
+            self.kwargs.update(base64_data)
 
     def dispatch(self, request, *args, **kwargs):
         self.split_slug(kwargs)
@@ -379,9 +380,9 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         self.object_delete()
         if not self.response_commands:
             if 'modal_querystring' in kwargs and 'on_delete=' in kwargs['modal_querystring']:
-                self.add_command('redirect', url=kwargs['modal_querystring'][
-                                                 kwargs['modal_querystring'].find('on_delete=') + 7:
-                                                 ].split('&')[0])
+                self.add_command('redirect', url=base64.urlsafe_b64decode(kwargs['modal_querystring'][
+                                                 kwargs['modal_querystring'].find('on_delete=') + 10:
+                                                 ].split('&')[0]).decode('ascii'))
             else:
                 self.add_command('close', no_refresh=True)
                 self.add_command('reload')
