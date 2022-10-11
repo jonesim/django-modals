@@ -7,6 +7,7 @@
         menubar: false,
         statusbar: false,
         plugins: "textcolor",
-        toolbar: "undo redo | styleselect | bold  italic | fontselect | fontsizeselect forecolor backcolor"
+        toolbar: "undo redo | styleselect | bold  italic | fontselect | fontsizeselect forecolor backcolor",
+        {% if widget.attrs.height %}height:{{ widget.attrs.height }}{% endif %}
     });
 </script>
