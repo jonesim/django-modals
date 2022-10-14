@@ -4,9 +4,14 @@ from django_modals.forms import CrispyForm
 from django_modals.fields import FieldEx
 
 from crispy_forms.layout import HTML
+from show_src_code.modals import ModelFormModal
+
+from django_modals.widgets.select2 import Select2
 from django_modals.widgets.widgets import Toggle
 from .views import MainMenuTemplateView
 from show_src_code.modals import FormModal
+
+from ..models import CompanyColour
 
 
 class AdaptiveView(MainMenuTemplateView):
@@ -18,6 +23,7 @@ class AdaptiveView(MainMenuTemplateView):
             ('adaptive_modal_boolean', 'Adaptive Modal Boolean'),
             ('adaptive_modal_select', 'Adaptive Select'),
             ('adaptive_label_change_modal', 'Label Change'),
+            ('adaptive_ajax_modal,-', 'Adaptive Ajax'),
         )
 
 
@@ -128,3 +134,21 @@ class LabelChangeModal(FormModal):
                         '2': ('html', 'two'),
                         '3': ('html', '3')}, 'default': ('html', 'na')},
         ])
+
+
+class AdaptiveAjaxModal(ModelFormModal):
+    ajax_commands = ['button', 'tooltip', 'timer', 'ajax', 'select2']
+    model = CompanyColour
+    form_fields = ['company']
+    widgets = {'company': Select2(attrs={'selected_ajax': 'form'})}
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **self.kwargs)
+
+    @staticmethod
+    def form_setup(form, *_args, **_kwargs):
+        form.fields['company_id'] = CharField(required=False)
+        form.fields['company_id'].widget.attrs['disabled'] = 'disabled'
+
+    def select2_company_selected(self, **kwargs):
+        return self.command_response('set_value', selector='#id_company_id', val=f'{kwargs["company"]}')
