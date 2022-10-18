@@ -83,10 +83,12 @@ class CrispyFormMixin:
     def view_edit_button(self, css_class=edit_class, **kwargs):
         return self.button('Edit', {'function': 'post_modal', 'button': 'make_edit'}, css_class, **kwargs)
 
-    def button(self, title, commands, css_class, **kwargs):
+    def button(self, title, commands, css_class, font_awesome=None, **kwargs):
         if self.no_buttons:
             return HTML('')
         else:
+            if font_awesome:
+                title = f'<i class="{font_awesome}"></i> {title}'
             if type(commands) == str:
                 params = [{'function': commands}]
             elif type(commands) == dict:
