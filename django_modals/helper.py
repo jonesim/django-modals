@@ -108,7 +108,7 @@ def crispy_modal_link(modal_name, text, div=False, div_classes='', button_classe
     return link
 
 
-def modal_button(title, commands, css_class='btn-primary', font_awesome=None):
+def modal_button(title, commands, css_class='btn-primary', font_awesome=None, tooltip=None):
     if type(commands) == str:
         params = [{'function': commands}]
     elif type(commands) == dict:
@@ -118,8 +118,9 @@ def modal_button(title, commands, css_class='btn-primary', font_awesome=None):
 
     if font_awesome:
         title = f'<i class="{font_awesome}"></i> {title}'
+    tooltip_html = f' data-tooltip="tooltip" title="{tooltip}"' if tooltip else ''
     return mark_safe(f'''<button onclick='django_modal.process_commands_lock({json.dumps(params)})' 
-            class="btn {css_class}" type="button">{title}</button>''')
+            class="btn {css_class}" type="button"{tooltip_html}>{title}</button>''')
 
 
 def modal_button_method(title, method_name, css_class='btn-primary', font_awesome=None, **kwargs):
