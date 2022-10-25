@@ -1,9 +1,9 @@
-<textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+<textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %} data-widget>
 {% if widget.value %}{{ widget.value }}{% endif %}</textarea>
 <script>
-    tinymce.remove('[name={{ widget.name }}]');
+    tinymce.remove('[name={{ widget.name }}][data-widget]');
     tinymce.init({
-        selector: '[name={{ widget.name }}]',
+        selector: '[name={{ widget.name }}][data-widget]',
         menubar: false,
         statusbar: false,
         plugins: "textcolor",
