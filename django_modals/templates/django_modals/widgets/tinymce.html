@@ -1,9 +1,13 @@
 <textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %} data-widget>
 {% if widget.value %}{{ widget.value }}{% endif %}</textarea>
 <script>
-    tinymce.remove('[name={{ widget.name }}][data-widget]');
+    var modal_selector = ''
+    if (django_modal.active_modal_container_id != 'modal-0'){
+        modal_selector = '#' + django_modal.active_modal_container_id() + ' '
+    }
+    tinymce.remove(modal_selector + '[name={{ widget.name }}]');
     tinymce.init({
-        selector: '[name={{ widget.name }}][data-widget]',
+        selector: modal_selector + '[name={{ widget.name }}]',
         menubar: false,
         statusbar: false,
         plugins: "textcolor",
