@@ -9,14 +9,17 @@ var select2_widget = function () {
                 return org_id;
             }
         }
-
         if (html_template === undefined) {
             html_template = function html_template(text) {
                 return "<span>" + text.text + "</span>";
             };
         }
-
-        var select_element = $("#" + select_id);
+        var select_element
+        if (django_modal.active_modal_container_id() != 'modal-0'){
+           select_element = $("#" + select_id, '#' + django_modal.active_modal_container_id());
+        } else {
+            select_element = $("#" + select_id);
+        }
         if (selected_ajax===true) {
             select_element.on('select2:select', function () {
                 ajax_helpers.post_json({
