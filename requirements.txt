@@ -2,13 +2,14 @@ Django==3.2.7
 django-crispy-forms==1.12.0
 # django-ajax-helpers==0.0.16
 django-filtered-datatables==0.0.18
-django-tab-menus==0.0.13
+# django-tab-menus==0.0.15
+git+https://github.com/jonesim/django-menus.git@ffb1cd7e76e65f64cddfa4669214501f25bbea40
 django-show-source-code==0.0.8
 
 # git+git://github.com/jonesim/django-datatables@5d04857
 # django-filtered-datatables @ git+https://github.com/jonesim/django-datatables@5d0485776983d93a09b7409246044a873db0454e
 # gunicorn
-django-ajax-helpers @ git+https://github.com/jonesim/ajax-helpers@ce720aaa850f371f773efaccb53c05623419e981
+django-ajax-helpers @ git+https://github.com/jonesim/ajax-helpers@a6b64eec0cac9a878ca7d649ddc39c3ec64e2ec0
 datatable-examples @ git+https://github.com/jonesim/django-datatables@e0535792137acef57160447e235fc0c45c8500b3#subdirectory=django
 celery==4.4.0
 redis==3.3.11

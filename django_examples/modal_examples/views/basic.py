@@ -1,3 +1,6 @@
+from django_menus.menu import AjaxButtonMenuItem
+
+from django_modals.decorators import ConfirmAjaxMethod
 from django_modals.url_helper import get_urls
 from django_modals.helper import modal_button, modal_button_method, ajax_modal_redirect
 from .views import MainMenuTemplateView
@@ -21,6 +24,15 @@ class Basic(MainMenuTemplateView):
             ('template_modal_ajax,-', 'Template Modal with ajax button'),
             ('TemplateModalButtons,-', 'Template Modal with ajax button'),
         )
+
+        self.add_menu('confirm', 'buttons', ).add_items(
+            AjaxButtonMenuItem(button_name='confirm',
+                               menu_display='Confirm ajax method')
+        )
+
+    @ConfirmAjaxMethod(message="Would you like to confirm?")
+    def button_confirm(self, **_kwargs):
+        return self.command_response('message', text='confirmed')
 
 
 class ModalConfirm(Modal):
