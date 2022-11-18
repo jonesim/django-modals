@@ -1,6 +1,6 @@
 var select2_widget = function () {
 
-    function initselect2(select_id, ajax, tags, data, placeholder, html_template, selected_ajax) {
+    function initselect2(select_id, ajax, tags, data, placeholder, html_template, selected_ajax, cleared_ajax) {
 
         function strip_id(org_id) {
             if (org_id.substring(0, 3) === 'id_') {
@@ -32,6 +32,20 @@ var select2_widget = function () {
         } else if (selected_ajax==='form'){
             select_element.on('select2:select', function () {
                 django_modal.send_inputs({select2: strip_id(select_id) + '_selected'})
+            });
+        }
+        if (cleared_ajax===true) {
+            select_element.on('select2:clear', function () {
+                ajax_helpers.post_json({
+                    data: {
+                        select2: strip_id(select_id) + '_cleared',
+                        data: select_element.select2('data')
+                    }
+                });
+            });
+        } else if (cleared_ajax==='form'){
+            select_element.on('select2:clear', function () {
+                django_modal.send_inputs({select2: strip_id(select_id) + '_cleared'})
             });
         }
 
