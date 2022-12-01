@@ -586,6 +586,8 @@ class MultiFormModal(BaseModal):
                 kwargs['clean'] = f.clean
             elif hasattr(self, 'clean') and callable(self.clean):
                 kwargs['clean'] = self.clean
+            if hasattr(self, 'get_instances') and callable(self.get_instances):
+                kwargs['instance'] = self.get_instances(f.form_id)
             if hasattr(f, 'form_setup') and callable(f.form_setup):
                 kwargs['form_setup'] = f.form_setup
             elif hasattr(self, 'form_setup') and callable(self.form_setup):
