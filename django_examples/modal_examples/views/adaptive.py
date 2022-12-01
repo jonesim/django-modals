@@ -140,7 +140,7 @@ class AdaptiveAjaxModal(ModelFormModal):
     ajax_commands = ['button', 'tooltip', 'timer', 'ajax', 'select2']
     model = CompanyColour
     form_fields = ['company']
-    widgets = {'company': Select2(attrs={'selected_ajax': 'form'})}
+    widgets = {'company': Select2(attrs={'selected_ajax': 'form', 'cleared_ajax': 'form'})}
 
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **self.kwargs)
@@ -152,3 +152,6 @@ class AdaptiveAjaxModal(ModelFormModal):
 
     def select2_company_selected(self, **kwargs):
         return self.command_response('set_value', selector='#id_company_id', val=f'{kwargs["company"]}')
+
+    def select2_company_cleared(self, **kwargs):
+        return self.command_response('set_value', selector='#id_company_id', val='N/A')
