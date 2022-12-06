@@ -368,6 +368,8 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         kwargs = super().get_form_kwargs()
         if hasattr(self, 'object'):
             kwargs.update({'instance': self.object})
+        if hasattr(self, 'form_id'):
+            kwargs.update({'form_id': self.form_id})
         kwargs.update(self.form_init_args)
         return kwargs
 
