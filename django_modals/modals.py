@@ -236,6 +236,7 @@ class FormModalMixin(BaseModalMixin):
             context['header_title'] = context['form'].get_title()
         else:
             context['form'] = kwargs['message']
+        context['focus'] = getattr(self, 'focus', True)
         self.check_for_background_page(context)
         return context
 

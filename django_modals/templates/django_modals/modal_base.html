@@ -1,4 +1,4 @@
-<div class="modal show fade" tabindex="-1" role="dialog" aria-hidden="true" data-url="{{ modal_url }}" data-backdrop="static" data-keyboard="false" {% if modal_type %}data-modaltype="{{ modal_type }}"{% endif %}>
+<div class="modal show fade" tabindex="-1" role="dialog" aria-hidden="true" data-url="{{ modal_url }}" data-backdrop="static" data-keyboard="false" {% if modal_type %}data-modaltype="{{ modal_type }}"{% endif %} data-focus="{{ focus|yesno:"true,false" }}">
     {{ ajax_helpers_script }}
     {% block style %}
         {{ style }}

@@ -67,6 +67,7 @@ class ModelExamples(MainMenu, DatatableView):
         self.add_menu('field_setup', 'buttons', ).add_items(
             ('PersonFieldSetup,-', 'Field Setup'),
             ('PersonViewSetup,-', 'View Setup'),
+            ('NoFocusSetup,-', 'No Focus Setup'),
         )
 
 
@@ -237,6 +238,18 @@ class PersonViewSetup(ModelFormModal):
     @staticmethod
     def form_setup(form, *_args, **_kwargs):
         form.fields['title'].widget.attrs = {'placeholder': 'Title - placeholder set in form setup'}
+
+
+class NoFocusSetup(ModelFormModal):
+    model = Person
+    focus = False
+
+    form_fields = [
+        'title',
+        'first_name',
+        'surname',
+        'company',
+    ]
 
 
 urlpatterns = get_urls(__name__)

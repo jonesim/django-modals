@@ -155,7 +155,11 @@ if (typeof django_modal == 'undefined') {
                 }
             });
             modal_element.on('shown.bs.modal', function (event) {
-                $(this).find('input[type!="hidden"],select').first().focus();
+                var modalDiv = modal_div()
+                var data_focus = modalDiv.attr('data-focus');
+                if(typeof (data_focus) == 'undefined' || data_focus === 'true') {
+                    $(this).find('input[type!="hidden"],select').first().focus();
+                }
                 ajax_helpers.set_ajax_busy(false, true);
             });
             disable_enter_key()
