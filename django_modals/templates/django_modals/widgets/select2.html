@@ -17,6 +17,7 @@
                 data,
                 "{{ widget.attrs.placeholder|default:'-' }}",
                 {{ widget.attrs.html_template|safe|default:"undefined" }},
+                {{ widget.attrs.html_result_template|safe|default:"undefined" }},
                 {% if widget.attrs.selected_ajax == True %}true{% else %}"{{ widget.attrs.selected_ajax|default:"false" }}"{% endif %},
                 {% if widget.attrs.cleared_ajax == True %}true{% else %}"{{ widget.attrs.cleared_ajax|default:"false" }}"{% endif %},
             )

@@ -69,6 +69,7 @@ urlpatterns = [
     path('modal/widgets9/<str:slug>/', widgets.DatatableWidgetReverseExample.as_view(), name='datatable_rev'),
     path('modal/widgets10/<str:slug>/', widgets.AjaxPersonCompanyForm.as_view(), name='people_ajax'),
     path('modal/widgets11/<str:slug>/', widgets.Select2PersonCompanyForm.as_view(), name='people_select2'),
+    path('modal/widgets13/<str:slug>/', widgets.AjaxTemplateForm.as_view(), name='ajax_html_template'),
     path('modal/colour/<str:slug>/', widgets.CompanyColourModal.as_view(), name='company_colour_modal'),
 
     path('modal/perms/<str:slug>/', permissions.DefaultCompany.as_view(), name='perms_default'),

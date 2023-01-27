@@ -1,6 +1,6 @@
 var select2_widget = function () {
 
-    function initselect2(select_id, ajax, tags, data, placeholder, html_template, selected_ajax, cleared_ajax) {
+    function initselect2(select_id, ajax, tags, data, placeholder, html_template, html_result_template, selected_ajax, cleared_ajax) {
 
         function strip_id(org_id) {
             if (org_id.substring(0, 3) === 'id_') {
@@ -13,6 +13,9 @@ var select2_widget = function () {
             html_template = function html_template(text) {
                 return "<span>" + text.text + "</span>";
             };
+        }
+        if (html_result_template === undefined) {
+            html_result_template = html_template
         }
         var select_element
         if (django_modal.active_modal_container_id() != 'modal-0'){
@@ -70,7 +73,7 @@ var select2_widget = function () {
                 return $(html_template(text));
             };
             select2_params.templateResult = function (text) {
-                return $(html_template(text));
+                return $(html_result_template(text));
             };
             select2_params.escapeMarkup = function (text) {
                 return text;

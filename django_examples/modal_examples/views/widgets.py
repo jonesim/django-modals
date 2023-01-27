@@ -40,6 +40,7 @@ class WidgetExamples(MainMenu, DatatableView):
             (f'ajax_widgets_company,pk-{tag.id}', 'AJAX'),
             (f'people_ajax,-', 'PEOPLE AJAX'),
             (f'people_ajax,57', 'EDIT PEOPLE AJAX'),
+            (f'ajax_html_template,-', 'HTML Template'),
         )
 
     def get_context_data(self, **kwargs):
@@ -104,11 +105,27 @@ class DatatableReorderWidgetExample(ModelFormModal):
 class AjaxTagsCompanyForm(ModelFormModal):
     model = Tags
     form_fields = ['tag', 'company']
-    widgets = {'company': Select2Multiple(attrs={'ajax': True})}
+    widgets = {'company': Select2Multiple(attrs={'ajax': True,
+                                                 'html_template': """function(text) {return "<span>" + text.id + "</span>";}""",
+                                                 'html_result_template': """function(text) {return "<span>" + text.text + "</span>";}""",
+                                                 })}
 
     def select2_company(self, **kwargs):
         return self.select2_ajax_search(filter_field='name', **kwargs)
 
+
+class AjaxTemplateForm(ModelFormModal):
+    model = Tags
+    form_fields = ['tag',
+                   'company']
+    widgets = {'company': Select2Multiple(
+        attrs={'ajax': True,
+               'html_template': """function(text) {return "<span>" + text.text + "</span>";}""",
+               'html_result_template': """function(text) {return "<span>" +  text.id + ": " +text.text + "</span>";}""",
+               })}
+
+    def select2_company(self, **kwargs):
+        return self.select2_ajax_search(filter_field='name', **kwargs)
 
 class PeopleField(ChoiceField):
 
