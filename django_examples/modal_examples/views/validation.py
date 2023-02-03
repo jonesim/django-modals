@@ -13,9 +13,11 @@ class ValidationExamples(MainMenuTemplateView):
 class ValidationClean(ModelFormModal):
 
     model = Company
-    form_fields = ['name', 'active']
+    form_fields = [('name', {'help_text': "Type na or NA"}), 'active']
     process = PROCESS_EDIT
 
     def clean(self, form, cleaned_data):
         if cleaned_data.get('name') == 'NA':
-            raise ValidationError("Can't enter NA")
+            raise ValidationError("This is a form error")
+        if cleaned_data.get('name') == 'na':
+            form.add_error('name', "This is a field error")
