@@ -29,11 +29,18 @@
             document.querySelector('[aria-controls="select2-{{ widget.attrs.id }}-results"]').focus();
         });
     </script>
-    {% if widget.attrs.height %}
-    <style>
-        .selection [aria-labelledby="select2-{{ widget.attrs.id }}-container"].select2-selection--single {
-            height: {{ widget.attrs.height }}!important;
-        }
+    {% if widget.attrs.height or widget.attrs.dropdown_height %}
+        <style>
+        {% if widget.attrs.height %}
+            .selection [aria-labelledby="select2-{{ widget.attrs.id }}-container"].select2-selection--single {
+                height: {{ widget.attrs.height }}!important;
+            }
+        {% endif %}
+        {% if widget.attrs.dropdown_height %}
+            #select2-{{ widget.attrs.id }}-results {
+                max-height: {{ widget.attrs.dropdown_height }}!important;
+            }
+        {% endif %}
     </style>
     {% endif %}
 {% endspaceless %}
