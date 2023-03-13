@@ -1,7 +1,6 @@
 var select2_widget = function () {
 
     function initselect2(select_id, ajax, tags, data, placeholder, html_template, html_result_template, selected_ajax, cleared_ajax) {
-
         function strip_id(org_id) {
             if (org_id.substring(0, 3) === 'id_') {
                 return org_id.substring(3);
@@ -104,9 +103,16 @@ var select2_widget = function () {
                 contentType: "application/json",
                 data: function (params) {
                     var ajax_data = {};
+                    var raw_values = {}
                     $($("#" + select_id).closest("form")).serializeArray().map(function (x) {
                         ajax_data[x.name] = x.value;
+                        if(!raw_values.hasOwnProperty(x.name)) {
+                            raw_values[x.name] = [x.value];
+                        } else {
+                            raw_values[x.name].push(x.value)
+                        }
                     });
+                    ajax_data.raw_values = raw_values;
                     ajax_data.select2 = strip_id(select_id);
                     ajax_data.search = params.term;
                     ajax_data.page = params.page || 1;
