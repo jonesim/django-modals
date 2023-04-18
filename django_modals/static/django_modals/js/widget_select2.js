@@ -1,6 +1,6 @@
 var select2_widget = function () {
 
-    function initselect2(select_id, ajax, tags, data, placeholder, html_template, html_result_template, selected_ajax, cleared_ajax) {
+    function initselect2(select_id, ajax, tags, data, placeholder, html_template, html_result_template, selected_ajax, cleared_ajax, keyboard_open) {
         function strip_id(org_id) {
             if (org_id.substring(0, 3) === 'id_') {
                 return org_id.substring(3);
@@ -124,6 +124,20 @@ var select2_widget = function () {
         $(".select2-selection__rendered").hover(function () {
             $(this).removeAttr("title");
         });
+        if (keyboard_open) {
+            $('.select2-selection', select_element.next()).keydown((ev) => {
+                if (ev.which < 32)
+                    return;
+                var target = jQuery(ev.target).closest('.select2-container');
+                if (!target.length)
+                    return;
+                target = target.prev();
+                target.select2('open');
+                var search = target.data('select2').dropdown.$search ||
+                    target.data('select2').selection.$search;
+                search.focus();
+            });
+        }
     }
     return {
         initselect2: initselect2,
