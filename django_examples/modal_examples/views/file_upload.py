@@ -31,6 +31,7 @@ class UploadForm(CrispyForm):
 
     class Meta:
         progress_bar = True
+        post_timeout = 30000
 
     def post_init(self, *args, **kwargs):
         return ['File', HTML(progress_bar())]

@@ -231,6 +231,11 @@ if (typeof django_modal == 'undefined') {
         }
 
         function send_inputs(button_name, options) {
+            var timeout = django_modal.timeout;
+            if (typeof (options) != 'undefined' && typeof (options["post_timeout"])  != 'undefined') {
+                timeout = options["post_timeout"];
+            }
+
             var params
             var property
             if (typeof (button_name) == 'object') {
@@ -270,13 +275,13 @@ if (typeof django_modal == 'undefined') {
                     data[property] = params[property]
                 }
                 var ajax_data = {'data': data, url: modal_url}
-                ajax_helpers.post_json(ajax_data, django_modal.timeout)
+                ajax_helpers.post_json(ajax_data, timeout)
             } else {
                 data = new FormData(forms[0])
                 for (property in params) {
                     data.append(property, params[property])
                 }
-                ajax_helpers.post_data(modal_url, data, django_modal.timeout, options)
+                ajax_helpers.post_data(modal_url, data, timeout, options)
             }
         }
 

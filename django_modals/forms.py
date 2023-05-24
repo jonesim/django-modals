@@ -33,6 +33,7 @@ class CrispyFormMixin:
         self.modal_title = self.get_defaults('modal_title')
         self._form_id = self.get_defaults('form_id')
         self.progress_bar = self.get_defaults('progress_bar')
+        self.post_timeout = self.get_defaults('post_timeout')
 
         self.user = request_user
         self.slug = slug
@@ -66,10 +67,13 @@ class CrispyFormMixin:
             return self.form_setup(self, *args, **kwargs)
 
     def submit_button(self, css_class=submit_class, button_text='Submit', **kwargs):
+        options = {}
         if self.progress_bar:
-            return self.button('submit', {'function': 'post_modal',
-                                          'options': {'progress': {'selector': f'#file_progress_bar'}}}, css_class,
-                               **kwargs)
+            options['progress'] = {'selector': f'#file_progress_bar'}
+        if self.post_timeout is not None:
+            options['post_timeout'] = self.post_timeout
+        if len(options) > 0:
+            return self.button('submit', {'function': 'post_modal', 'options': options}, css_class, **kwargs)
         else:
             return self.button(button_text, 'post_modal', css_class, **kwargs)
 
