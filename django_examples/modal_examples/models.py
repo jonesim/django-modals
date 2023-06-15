@@ -58,6 +58,7 @@ class Note(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     date = models.DateField()
     notes = models.TextField()
+    completed = models.BooleanField(default=False)
 
 
 class CompanyColour(models.Model):
