@@ -1,0 +1,19 @@
+{% extends 'modal_examples/demo.html' %}
+{% load datatable_tags %}
+{% block contents %}
+
+    <div class="m-4">
+        <h4>Formsets</h4>
+        <br>
+        {{ menus.modals.render }}
+    </div>
+
+    <h2 class="m-4">Companies</h2>
+    <div class="d-flex">
+        <div class="px-4 d-block float-left w-50">
+            {{ datatable.render }}
+        </div>
+    </div>
+
+
+{% endblock %}

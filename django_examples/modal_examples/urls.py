@@ -17,6 +17,7 @@ import modal_examples.views.no_modal as no_modal
 import modal_examples.views.ajax as ajax
 import modal_examples.views.celery_tasks as celery_tasks
 import modal_examples.views.base64_examples as base64_examples
+import modal_examples.views.formset as formset
 from django_modals.task_modals import TaskModal
 from .tasks import DemoTask
 
@@ -127,6 +128,8 @@ urlpatterns = [
     path('Ajax', ajax.AjaxExamples.as_view(), name='ajax'),
     path('Tasks', celery_tasks.TaskViews.as_view(), name='tasks'),
     path('base64', base64_examples.B64.as_view(), name='base64'),
+    path('formset', formset.FormsetView.as_view(), name='formset'),
+    path('formset/<slug:slug>/', formset.FormsetCompanyModal.as_view(), name='formset_modal'),
 
     path('nomodal/<slug:slug>', no_modal.NoModal.as_view(), name='no_modal'),
     path('', RedirectView.as_view(url='Basic')),

@@ -53,6 +53,11 @@ class ColourPicker(SourceBase):
     filename = 'bootstrap-colorpicker'
 
 
+class JFormset(SourceBase):
+    static_path = 'django_modals/'
+    js_filename = 'jquery.formset.js'
+
+
 packages = {
     'select2': [Select2, Select2Widget],
 }

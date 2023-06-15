@@ -1,0 +1,17 @@
+{% extends 'django_modals/modal_base.html' %}
+
+{% block modal_content %}
+    <script>
+        $(document).off("modalPostLoad");
+    </script>
+    {{ contents }}
+    {{ form }}
+    <script type="text/javascript">
+        $(document).on("modalPostLoad", function () {
+            $('#{{ form.form_id }} tbody tr').formset({
+                prefix: '{{ form.formset.prefix }}'
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,25 +1,27 @@
 import base64
-import binascii
-import json
 import inspect
+import json
 
+import binascii
+from ajax_helpers.mixins import AjaxHelpers
 from ajax_helpers.utils import is_ajax
+from crispy_forms.layout import Fieldset, HTML
+from django.forms import all_valid
 from django.forms.fields import Field
-from django.forms.models import modelform_factory, fields_for_model
+from django.forms.models import modelform_factory, fields_for_model, inlineformset_factory
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.generic.base import TemplateResponseMixin, TemplateView
-from django.views.generic.edit import BaseFormView
-from django.views.generic.detail import SingleObjectMixin
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django.utils.decorators import method_decorator
-
-from ajax_helpers.mixins import AjaxHelpers
+from django.utils.safestring import mark_safe
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.generic.base import TemplateResponseMixin, TemplateView
+from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import BaseFormView
 
 from . import processes
-from .forms import ModelCrispyForm
+from .form_helpers import RegularHelper
+from .forms import ModelCrispyForm, BaseInlineCrispyFormSet
 from .helper import render_modal, modal_button, modal_button_group, ajax_modal_redirect, modal_button_method, \
     ajax_modal_replace
 
@@ -495,6 +497,90 @@ class ModelFormModal(SingleObjectMixin, FormModal):
         else:
             results = [{'id': str(c.id), 'text': str(c)} for c in choices[:page_len]]
         return JsonResponse({'results': results, 'pagination': {'more': len(choices) > len(results)}})
+
+
+class ModelFormModalFormSet(ModelFormModal):
+
+    template_name = 'django_modals/modal_formset_base.html'
+    extra_rows = 1
+    min_num = None
+    absolute_max = None
+    formset_can_delete = True
+    formset_form = BaseInlineCrispyFormSet
+    formset_model = None
+    formset_fields = None
+    formset_field_classes = None
+    formset_help_texts = None
+    formset_title = ''
+    formset_widgets = None
+    formset_error_messages = None
+    formset_labels = None
+    formset_helper = RegularHelper
+
+    def get_form_set_query(self):
+        return None
+
+    def form_setup(self, form, *_args, **_kwargs):
+        form.formset = self.setup_formset()
+        return [f for f in form.fields.keys()] + self.get_formset_layout(formset=form.formset)
+
+    def get_formset_layout(self, formset):
+        html = formset.get_html()
+        return [Fieldset(self.formset_title, HTML(html))]
+
+    def formset_field_callback(self, f, **kwargs):
+        return self.formfield_callback(f, **kwargs)
+
+    def setup_formset(self):
+
+        processed_form_fields = ProcessFormFields(self.formset_fields, widgets=getattr(self, 'formset_widgets', None),
+                                                  field_classes=getattr(self, 'formset_field_classes', None),
+                                                  labels=getattr(self, 'formset_labels', None),
+                                                  help_texts=getattr(self, 'formset_help_texts', None),
+                                                  error_messages=getattr(self, 'formset_error_messages', None))
+
+        formset_factory = inlineformset_factory(parent_model=self.model,
+                                                model=self.formset_model,
+                                                formset=self.formset_form,
+                                                extra=self.extra_rows,
+                                                can_delete=self.formset_can_delete,
+                                                min_num=self.min_num,
+                                                absolute_max=self.absolute_max,
+                                                fields=processed_form_fields.fields,
+                                                **processed_form_fields.extra_kwargs(),
+                                                formfield_callback=self.formset_field_callback)
+        org_id = self.object.pk if hasattr(self, 'object') else None
+
+        if self.request.method.lower() == 'post':
+            data = self.request.POST
+        else:
+            data = None
+
+        if org_id:
+            formset = formset_factory(data=data,
+                                      queryset=self.get_form_set_query(),
+                                      instance=self.get_object(),
+                                      helper_class=self.formset_helper)
+        else:
+            formset = formset_factory(data=data,
+                                      helper_class=self.formset_helper)
+        return formset
+
+    def form_valid(self, form):
+
+        formset = form.formset
+        if all_valid(formset):
+            org_id = self.object.pk if hasattr(self, 'object') else None
+            save_function = getattr(form, 'save', None)
+            if save_function:
+                formset.instance = save_function()
+            formset.save()
+            self.post_save(created=org_id is None, form=form)
+            if not self.response_commands:
+                self.add_command('reload')
+            return self.command_response()
+        else:
+            return self.form_invalid(form)
 
 
 class MultiForm:

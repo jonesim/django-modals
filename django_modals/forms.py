@@ -1,9 +1,10 @@
 import json
 from django import forms
 from django.apps import apps
+from django.template import Context
 from django.utils.safestring import mark_safe
 
-from crispy_forms.layout import HTML, Layout, Div
+from crispy_forms.layout import HTML, Layout, Div, Field
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.utils import render_crispy_form
 from .form_helpers import HorizontalHelper
@@ -233,3 +234,36 @@ class ModelCrispyForm(CrispyFormMixin, forms.ModelForm):
 
 class CrispyForm(CrispyFormMixin, forms.Form):
     pass
+
+
+class BaseInlineCrispyFormSet(CrispyFormMixin, forms.BaseInlineFormSet):
+
+    def setup_modal(self, *args, **kwargs):
+        self.fields = self.empty_form.fields
+        self.helper = self.helper_class(self)
+        self.helper.template = 'bootstrap/table_inline_formset.html'
+        self.helper.form_id = self.form_id
+        layout = self.post_init(*args, **kwargs)
+        if self.layout_field_params:
+            for a in self.layout_field_params:
+                if 'required' in self.layout_field_params[a]:
+                    self.fields[a].required = self.layout_field_params[a].pop('required')
+        if layout:
+            if isinstance(layout, (tuple, list)):
+                self.format_layout_fields(*layout)
+            else:
+                self.helper.layout = Layout(layout)
+        else:
+            self.format_layout_fields(*self.fields.keys())
+        if getattr(self.helper, 'fields_wrap_class', None):
+            # noinspection PyUnresolvedReferences
+            self.helper[:].wrap_together(Div, css_class=self.helper.fields_wrap_class)
+
+    def get_html(self):
+        for form in self.forms:
+            form.helper = self.helper
+            form.mode = self.mode
+        return render_crispy_form(self)
+
+
+
