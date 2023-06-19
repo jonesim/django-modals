@@ -241,7 +241,7 @@ class BaseInlineCrispyFormSet(CrispyFormMixin, forms.BaseInlineFormSet):
     def setup_modal(self, *args, **kwargs):
         self.fields = self.empty_form.fields
         self.helper = self.helper_class(self)
-        self.helper.template = 'bootstrap/table_inline_formset.html'
+        self.helper.template = 'django_modals/formset/table_inline_formset.html'
         self.helper.form_id = self.form_id
         layout = self.post_init(*args, **kwargs)
         if self.layout_field_params:
