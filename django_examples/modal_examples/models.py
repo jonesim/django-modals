@@ -59,6 +59,7 @@ class Note(models.Model):
     date = models.DateField()
     notes = models.TextField()
     completed = models.BooleanField(default=False)
+    price = models.IntegerField(default=0)
 
 
 class CompanyColour(models.Model):

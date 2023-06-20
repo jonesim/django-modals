@@ -525,7 +525,7 @@ class ModelFormModalFormSet(ModelFormModal):
         return [f for f in form.fields.keys()] + self.get_formset_layout(formset=form.formset)
 
     def get_formset_layout(self, formset):
-        html = formset.get_html()
+        html = formset.render()
         return [Fieldset(self.formset_title, HTML(html))]
 
     def formset_field_callback(self, f, **kwargs):
@@ -538,6 +538,8 @@ class ModelFormModalFormSet(ModelFormModal):
                                                   labels=getattr(self, 'formset_labels', None),
                                                   help_texts=getattr(self, 'formset_help_texts', None),
                                                   error_messages=getattr(self, 'formset_error_messages', None))
+
+        self.form_init_args = processed_form_fields.form_init_kwargs()
 
         formset_factory = inlineformset_factory(parent_model=self.model,
                                                 model=self.formset_model,
@@ -560,10 +562,12 @@ class ModelFormModalFormSet(ModelFormModal):
             formset = formset_factory(data=data,
                                       queryset=self.get_form_set_query(),
                                       instance=self.get_object(),
-                                      helper_class=self.formset_helper)
+                                      helper_class=self.formset_helper,
+                                      layout_field_params=processed_form_fields.layout_field_params)
         else:
             formset = formset_factory(data=data,
-                                      helper_class=self.formset_helper)
+                                      helper_class=self.formset_helper,
+                                      layout_field_params=processed_form_fields.layout_field_params)
         return formset
 
     def form_valid(self, form):
