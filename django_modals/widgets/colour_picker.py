@@ -11,7 +11,13 @@ class ColourPickerFieldEx(FieldEx):
 
 class ColourPickerWidget(TextInput):
     template_name = 'django_modals/widgets/colour_picker.html'
+    formset_field_template = "django_modals/widgets/colour_picker_append.html"
+
     crispy_kwargs = {'field_class': 'col-sm-3',
                      'appended_text': ' ',
                      'input_size': 'input-group-sm'}
     crispy_field_class = ColourPickerFieldEx
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        return context

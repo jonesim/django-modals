@@ -1,12 +1,11 @@
+{% load modal_tags %}
 
-<input id="id_{{ widget.name }}" autocomplete="off" type="text" {% if widget.value != None %}
+<input id="id_{{ widget.attrs.id }}" autocomplete="off" type="text" {% if widget.value != None %}
        value="{{ widget.value|stringformat:'s' }}"{% endif %}onkeydown="return false" name="{{ widget.name }}"
         {% include "django/forms/widgets/attrs.html" %}>
 
-
-
 <script>
-    function {{ widget.name }}_get_random_colour_field(field) {
+    function   {{ widget.attrs.id|function_friendly }}_get_random_colour_field(field) {
       let letters = '0123456789ABCDEF';
       let color = '';
       for (let i = 0; i < 6; i++) {
@@ -18,10 +17,9 @@
     }
 
     $(document).ready(function () {
-         $('#id_{{ widget.name }}').parent().colorpicker({
+         $('#id_{{ widget.attrs.id }}').parent().colorpicker({
                 'hexNumberSignPrefix': '','useHashPrefix': false, 'useAlpha': false
             });
     });
 
 </script>
-

@@ -60,6 +60,7 @@ class Note(models.Model):
     notes = models.TextField()
     completed = models.BooleanField(default=False)
     price = models.IntegerField(default=0)
+    colour = models.CharField(max_length=10, null=True, blank=True)
 
 
 class CompanyColour(models.Model):

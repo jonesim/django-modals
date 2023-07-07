@@ -23,3 +23,8 @@ def modal_delete(url_name, slug=None, text=None, **kwargs):
 @register.simple_tag
 def modal_button_method(title, method_name, **kwargs):
     return modal_button_method_helper(title, method_name, **kwargs)
+
+
+@register.filter()
+def function_friendly(value):
+    return mark_safe(value.replace('-', '_'))

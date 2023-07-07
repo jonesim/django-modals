@@ -1,9 +1,10 @@
-{% load crispy_forms_field %}
+{% load crispy_forms_field modal_tags %}
 
 {% if field.is_hidden %}
     {{ field }}
 {% else %}
-    <div id="div_{{ field.auto_id }}"
+
+    <{% if tag %}{{ tag }}{% else %}div{% endif %} id="div_{{ field.auto_id }}"
          class="form-group{% if wrapper_class %} {{ wrapper_class }}{% endif %}{% if 'form-horizontal' in form_class %} row{% endif %}{% if form_group_wrapper_class %} {{ form_group_wrapper_class }}{% endif %}{% if field.css_classes %} {{ field.css_classes }}{% endif %}">
 
         {% if field.label and form_show_labels %}
@@ -30,7 +31,7 @@
                         <span class="input-group-text colorpicker-input-addon"><i></i></span>
                         <span class="input-group-text">
                             <a href="#"
-                               onclick="return {{ field.name }}_get_random_colour_field($(this).closest('div').find('input'));"><i
+                               onclick="return {{ field.auto_id|function_friendly }}_get_random_colour_field($(this).closest('div').find('input'));"><i
                                     class="fas fa-random"></i></a></span>
                      </span>
                 {% endif %}
@@ -45,5 +46,6 @@
             {% endif %}
         </div>
 
-    </div>
+
+    </{% if tag %}{{ tag }}{% else %}div{% endif %}>
 {% endif %}
