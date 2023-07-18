@@ -13,7 +13,7 @@ class ColourPickerWidget(TextInput):
     template_name = 'django_modals/widgets/colour_picker.html'
     formset_field_template = "django_modals/widgets/colour_picker_append.html"
 
-    crispy_kwargs = {'field_class': 'col-sm-3',
+    crispy_kwargs = {'field_class': 'col-sm-12 col-md-4 col-lg-3',
                      'appended_text': ' ',
                      'input_size': 'input-group-sm'}
     crispy_field_class = ColourPickerFieldEx
