@@ -22,13 +22,21 @@
                     </div>
                 {% endif %}
                 {% if field|is_select and use_custom_control %}
-                    {% crispy_field field 'class' 'custom-select' %}
+                    {% if field.errors %}
+                        {% crispy_field field 'class' 'custom-select is-invalid' %}
+                    {% else %}
+                        {% crispy_field field 'class' 'custom-select' %}
+                    {% endif %}
                 {% else %}
-                    {% crispy_field field 'class' 'form-control' %}
+                    {% if field.errors %}
+                        {% crispy_field field 'class' 'form-control is-invalid' %}
+                    {% else %}
+                        {% crispy_field field 'class' 'form-control' %}
+                    {% endif %}
                 {% endif %}
                 {% if crispy_appended_text %}
                     <span class="input-group-append">
-                        <span class="input-group-text colorpicker-input-addon"><i></i></span>
+                        <span class="input-group-text" id="{{ field.auto_id|function_friendly }}_picker"><i class="fas fa-square" style="font-size: 1.5em;"></i></span>
                         <span class="input-group-text">
                             <a href="#"
                                onclick="return {{ field.auto_id|function_friendly }}_get_random_colour_field($(this).closest('div').find('input'));"><i

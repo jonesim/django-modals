@@ -49,8 +49,9 @@ class MonthPicker(SourceBase):
 
 
 class ColourPicker(SourceBase):
-    static_path = 'django_modals/bootstrap-colorpicker/'
-    filename = 'bootstrap-colorpicker'
+    static_path = 'django_modals/pickr/'
+    js_filename = 'pickr.es5.min.js'
+    css_filename = 'classic.min.css'
 
 
 class JFormset(SourceBase):

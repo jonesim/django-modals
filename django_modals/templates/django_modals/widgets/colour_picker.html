@@ -5,21 +5,80 @@
         {% include "django/forms/widgets/attrs.html" %}>
 
 <script>
-    function   {{ widget.attrs.id|function_friendly }}_get_random_colour_field(field) {
-      let letters = '0123456789ABCDEF';
-      let color = '';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      field.val(color);
-      field.trigger('change');
-      return false;
+    var pickr = null;
+    function setup_{{ widget.attrs.id|function_friendly }}() {
+        var defaultHexColour = '{{ widget.value }}';
+        if(defaultHexColour === 'None' || defaultHexColour === '') {
+            defaultHexColour = '000000'
+        }
+        $('#{{ widget.attrs.id|function_friendly }}_picker .fas.fa-square').css('color','#' + defaultHexColour);
+
+        pickr = Pickr.create({
+            el: '#{{ widget.attrs.id|function_friendly }}_picker',
+            theme: 'classic', // or 'monolith', or 'nano'
+            container: $('#id_{{ widget.attrs.id }}').closest('.modal-content')[0],
+            default: '#' + defaultHexColour,
+            useAsButton: true,
+            {#swatches: [#}
+            {#    'rgba(244, 67, 54, 1)',#}
+            {#    'rgba(233, 30, 99, 0.95)',#}
+            {#    'rgba(156, 39, 176, 0.9)',#}
+            {#    'rgba(103, 58, 183, 0.85)',#}
+            {#    'rgba(63, 81, 181, 0.8)',#}
+            {#    'rgba(33, 150, 243, 0.75)',#}
+            {#    'rgba(3, 169, 244, 0.7)',#}
+            {#    'rgba(0, 188, 212, 0.7)',#}
+            {#    'rgba(0, 150, 136, 0.75)',#}
+            {#    'rgba(76, 175, 80, 0.8)',#}
+            {#    'rgba(139, 195, 74, 0.85)',#}
+            {#    'rgba(205, 220, 57, 0.9)',#}
+            {#    'rgba(255, 235, 59, 0.95)',#}
+            {#    'rgba(255, 193, 7, 1)'#}
+            {#],#}
+
+            components: {
+                // Main components
+                preview: true,
+                opacity: true,
+                hue: true,
+                // Input / output Options
+                interaction: {
+                    hex: false,
+                    rgba: false,
+                    hsla: false,
+                    hsva: false,
+                    cmyk: false,
+                    input: true,
+                    clear: false,
+                    save: true
+                }
+            }
+        });
+
+        pickr.on('save', (color, instance) => {
+            var hexColour = color.toHEXA().toString();
+            $('#{{ widget.attrs.id|function_friendly }}_picker .fas.fa-square').css('color', hexColour);
+            $('#id_{{ widget.attrs.id }}').val(hexColour.substring(1));
+            pickr.hide();
+        })
     }
 
+    function {{ widget.attrs.id|function_friendly }}_get_random_colour_field(field) {
+            let letters = '0123456789ABCDEF';
+            let color = '';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            field.val(color);
+            field.trigger('change');
+            pickr.setColor('#' + color);
+            $('#{{ widget.attrs.id|function_friendly }}_picker .fas.fa-square').css('color', '#' + color);
+            return false;
+        }
+
     $(document).ready(function () {
-         $('#id_{{ widget.attrs.id }}').parent().colorpicker({
-                'hexNumberSignPrefix': '','useHashPrefix': false, 'useAlpha': false
-            });
+        setup_{{ widget.attrs.id|function_friendly }}();
+
     });
 
 </script>
