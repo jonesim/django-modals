@@ -274,5 +274,11 @@ class TagsCompanyFormAddValues(ModelFormModal):
 class CompanyColourModal(ModelFormModal):
     model = CompanyColour
     form_fields = ['company', 'colour']
-    widgets = {'company': Select2,
-               'colour': ColourPickerWidget}
+    widgets = {'company': Select2}
+
+    def form_setup(self, form, *_args, **_kwargs):
+        swatches = ['#00ff00',
+                    '#ff0000']
+
+        form.fields['colour'].widget = ColourPickerWidget(opacity=True, swatches=swatches)
+

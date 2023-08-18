@@ -18,6 +18,13 @@ class ColourPickerWidget(TextInput):
                      'input_size': 'input-group-sm'}
     crispy_field_class = ColourPickerFieldEx
 
+    def __init__(self, opacity=False, swatches=None, *args, **kwargs):
+        self.opacity = opacity
+        self.swatches = swatches
+        super().__init__(*args, **kwargs)
+
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
+        context['opacity'] = self.opacity
+        context['swatches'] = self.swatches
         return context
