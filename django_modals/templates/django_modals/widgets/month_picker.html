@@ -1,0 +1,14 @@
+<input id="id_{{ widget.name }}" autocomplete="off" type="{{ widget.type }}" name="{{ widget.name }}"
+        {% if widget.value != None %}
+       value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+<script>
+    $(function () {
+        $(".input-group-append", $('#id_{{ widget.name }}').parent()).on('click', function(){$('#id_{{ widget.name }}').focus()});
+        $('#id_{{ widget.name }}').MonthPicker({
+            Button: false,
+            MonthFormat:{% if 'month_format' in widget.attrs %}'{{ widget.attrs.month_format }}'{% else %}'mm/yy'{% endif %},
+            {% if 'min_month' in widget.attrs %}MinMonth:{{ widget.attrs.min_month }},{% endif %}
+            {% if 'max_month' in widget.attrs %}MaxMonth:{{ widget.attrs.max_month }},{% endif %}
+        });
+    })
+</script>
