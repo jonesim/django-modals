@@ -89,11 +89,14 @@ class FormsetCompanyMultiModal(ModelFormModalFormSet):
                          'price': CurrencyWidget2,
                          'colour': ColourPickerWidget}
 
+    formset_title_1 = 'Notes'
+
     formset_model_2 = CompanyColour
     formset_fields_2 = ['colour',
                         ]
 
     formset_widgets_2 = {'colour': ColourPickerWidget}
+    formset_title_2 = 'Company Colours'
 
     def get_form_set_query_1(self):
         return self.object.note_set.all()

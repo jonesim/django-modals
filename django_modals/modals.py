@@ -532,8 +532,11 @@ class ModelFormModalFormSet(ModelFormModal):
 
     def get_formset_layout(self, formset, formset_number):
         html = formset.render()
+        return [self.formset_label(formset_number=formset_number), HTML(html)]
+
+    def formset_label(self, formset_number):
         variable_prefix = self.get_variable_prefix(formset_number=formset_number)
-        return [Fieldset(getattr(self, f'formset_title{variable_prefix}', self.default_formset_title), HTML(html))]
+        return Fieldset(getattr(self, f'formset_title{variable_prefix}', self.default_formset_title))
 
     def formset_field_callback(self, f, **kwargs):
         return self.formfield_callback(f, **kwargs)
