@@ -5,7 +5,7 @@
         {% include "django/forms/widgets/attrs.html" %}>
 
 <script>
-    var pickr = null;
+    var pickr_{{ widget.attrs.id|function_friendly }} = null;
     function setup_{{ widget.attrs.id|function_friendly }}() {
         var defaultHexColour = '{{ widget.value }}';
         if(defaultHexColour === 'None' || defaultHexColour === '') {
@@ -13,7 +13,7 @@
         }
         $('#{{ widget.attrs.id|function_friendly }}_picker .fas.fa-square').css('color','#' + defaultHexColour);
 
-        pickr = Pickr.create({
+        pickr_{{ widget.attrs.id|function_friendly }} = Pickr.create({
             el: '#{{ widget.attrs.id|function_friendly }}_picker',
             theme: 'classic', // or 'monolith', or 'nano'
             container: $('#id_{{ widget.attrs.id }}').closest('.modal-content')[0],
@@ -41,26 +41,25 @@
             }
         });
 
-        pickr.on('save', (color, instance) => {
+        pickr_{{ widget.attrs.id|function_friendly }}.on('save', (color, instance) => {
             var hexColour = color.toHEXA().toString();
             $('#{{ widget.attrs.id|function_friendly }}_picker .fas.fa-square').css('color', hexColour);
             $('#id_{{ widget.attrs.id }}').val(hexColour.substring(1));
-            pickr.hide();
+            pickr_{{ widget.attrs.id|function_friendly }}.hide();
         })
-    }
 
-    function {{ widget.attrs.id|function_friendly }}_get_random_colour_field(field) {
+        $('#{{ widget.attrs.id }}_random').click(function() {
             let letters = '0123456789ABCDEF';
             let color = '';
             for (let i = 0; i < 6; i++) {
                 color += letters[Math.floor(Math.random() * 16)];
             }
-            field.val(color);
-            field.trigger('change');
-            pickr.setColor('#' + color);
+            pickr_{{ widget.attrs.id|function_friendly }}.setColor('#' + color);
             $('#{{ widget.attrs.id|function_friendly }}_picker .fas.fa-square').css('color', '#' + color);
             return false;
-        }
+        });
+
+    }
 
     $(document).ready(function () {
         setup_{{ widget.attrs.id|function_friendly }}();
