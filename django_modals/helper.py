@@ -165,6 +165,6 @@ def ajax_modal_replace(request, modal_name=None, modal_class=None, slug='-', aja
     if modal_class:
         view_class = modal_class
     else:
-        request.path = reverse_modal(modal_name, slug)
+        request.path = reverse_modal(modal_name, slug, base64=kwargs.get('base64'))
         view_class = resolve(request.path).func.view_class
     return {'function': ajax_function, 'html': view_class.as_view()(request, slug=slug, **kwargs).rendered_content}
