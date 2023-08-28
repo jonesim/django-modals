@@ -259,7 +259,7 @@ class BaseInlineCrispyFormSet(CrispyFormMixin, forms.BaseInlineFormSet):
             # noinspection PyUnresolvedReferences
             self.helper[:].wrap_together(Div, css_class=self.helper.fields_wrap_class)
 
-    def render(self):
+    def render(self, *args, **kwargs):
         for form in self.forms:
             form.helper = self.helper
             form.mode = self.mode

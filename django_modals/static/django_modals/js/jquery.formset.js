@@ -32,9 +32,26 @@
             updateElementIndex = function(elem, prefix, ndx) {
                 var idRegex = new RegExp(prefix + '-(\\d+|__prefix__)-'),
                     replacement = prefix + '-' + ndx + '-';
+
+                var idRegex2 = new RegExp(prefix + '_(\\d+|__prefix__)_'),
+                    replacement2 = prefix + '_' + ndx + '_';
+
                 if (elem.attr("for")) elem.attr("for", elem.attr("for").replace(idRegex, replacement));
-                if (elem.attr('id')) elem.attr('id', elem.attr('id').replace(idRegex, replacement));
+                if (elem.attr('id')) {
+                    elem.attr('id', elem.attr('id').replace(idRegex, replacement));
+                    elem.attr('id', elem.attr('id').replace(idRegex2, replacement2));
+
+                }
                 if (elem.attr('name')) elem.attr('name', elem.attr('name').replace(idRegex, replacement));
+                if (elem.attr('onclick')) {
+                    elem.attr('onclick', elem.attr('onclick').replace(idRegex, replacement));
+                    elem.attr('onclick', elem.attr('onclick').replace(idRegex2, replacement2));
+                }
+
+                elem.children().each(function() {
+                    updateElementIndex($(this), prefix, ndx, );
+                });
+
             },
 
             hasChildElements = function(row) {
@@ -216,7 +233,8 @@
 
                 row.find('script').each(function () {
                     var scriptCode = $(this).text();
-                    var modifiedCode = scriptCode.replace(new RegExp(options.prefix + '-\\d+-', 'g'), options.prefix + '-' + formCount + '-');
+                    var modifiedCode = scriptCode.replace(new RegExp(options.prefix + '-(\\d+|__prefix__)-', 'g'), options.prefix + '-' + formCount + '-');
+                    modifiedCode = modifiedCode.replace(new RegExp(options.prefix + '_(\\d+|__prefix__)_', 'g'), options.prefix + '_' + formCount + '_');
                     $(this).text(modifiedCode);
                 });
 

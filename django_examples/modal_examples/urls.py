@@ -131,6 +131,8 @@ urlpatterns = [
     path('formset', formset.FormsetView.as_view(), name='formset'),
     path('formset/<slug:slug>/', formset.FormsetCompanyModal.as_view(), name='formset_modal'),
 
+    path('formset-multi/<slug:slug>/', formset.FormsetCompanyMultiModal.as_view(), name='formset_multi_modal'),
+
     path('nomodal/<slug:slug>', no_modal.NoModal.as_view(), name='no_modal'),
     path('', RedirectView.as_view(url='Basic')),
 ]

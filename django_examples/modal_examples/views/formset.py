@@ -1,6 +1,6 @@
 from django.forms import TextInput
 from django_datatables.datatables import DatatableView
-from modal_examples.models import Company, Note
+from modal_examples.models import Company, Note, CompanyColour
 
 from django_modals.widgets.colour_picker import ColourPickerWidget
 from .views import MainMenu
@@ -20,6 +20,7 @@ class FormsetView(MainMenu, DatatableView):
         super().setup_menu()
         self.add_menu('modals', 'buttons', ).add_items(
             ('formset_modal,-', 'Add'),
+            ('formset_multi_modal,-', 'Add Multi'),
 
         )
 
@@ -29,7 +30,8 @@ class FormsetView(MainMenu, DatatableView):
                           'name',
                           'active',
                           DeleteColumn('company_modal'),
-                          EditColumn('formset_modal')
+                          EditColumn('formset_modal'),
+                          EditColumn('formset_multi_modal', button_text='Multi edit')
                           )
 
         table.ajax_data = False
@@ -68,6 +70,39 @@ class FormsetCompanyModal(ModelFormModalFormSet):
 
     def get_form_set_query(self):
         return self.object.note_set.all()
+
+
+class FormsetCompanyMultiModal(ModelFormModalFormSet):
+    number_of_formsets = 2
+    formset_model_1 = Note
+    model = Company
+    form_fields = ['name', 'active', 'importance']
+    widgets = {'active': Toggle}
+    formset_fields_1 = ['notes',
+                        ('date', {'wrapper_class': 'col-2'}),
+                        'completed',
+                        ('price', {'wrapper_class': 'col-2'}),
+                        'colour']
+
+    formset_widgets_1 = {'completed': Toggle,
+                         'notes': SmallInputWidget,
+                         'price': CurrencyWidget2,
+                         'colour': ColourPickerWidget}
+
+    formset_title_1 = 'Notes'
+
+    formset_model_2 = CompanyColour
+    formset_fields_2 = ['colour',
+                        ]
+
+    formset_widgets_2 = {'colour': ColourPickerWidget}
+    formset_title_2 = 'Company Colours'
+
+    def get_form_set_query_1(self):
+        return self.object.note_set.all()
+
+    def get_form_set_query_2(self):
+        return self.object.companycolour_set.all()
 
 
 urlpatterns = get_urls(__name__)

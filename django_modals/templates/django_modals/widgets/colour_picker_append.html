@@ -37,10 +37,7 @@
                 {% if crispy_appended_text %}
                     <span class="input-group-append">
                         <span class="input-group-text" id="{{ field.auto_id|function_friendly }}_picker"><i class="fas fa-square" style="font-size: 1.5em;"></i></span>
-                        <span class="input-group-text">
-                            <a href="#"
-                               onclick="return {{ field.auto_id|function_friendly }}_get_random_colour_field($(this).closest('div').find('input'));"><i
-                                    class="fas fa-random"></i></a></span>
+                        <span class="input-group-text" id="{{ field.auto_id }}_random" style="cursor: pointer; color: blue;"><i class="fas fa-random"></i></span>
                      </span>
                 {% endif %}
                 {% if error_text_inline %}
