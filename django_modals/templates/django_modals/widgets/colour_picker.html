@@ -1,10 +1,11 @@
 {% load modal_tags %}
 
-<input id="id_{{ widget.attrs.id }}" autocomplete="off" type="text" {% if widget.value != None %}
+<input id="{{ widget.attrs.id }}" autocomplete="off" type="text" {% if widget.value != None %}
        value="{{ widget.value|stringformat:'s' }}"{% endif %}onkeydown="return false" name="{{ widget.name }}"
         {% include "django/forms/widgets/attrs.html" %}>
 
 <script>
+    (function () {
     var pickr_{{ widget.attrs.id|function_friendly }} = null;
     function setup_{{ widget.attrs.id|function_friendly }}() {
         var defaultHexColour = '{{ widget.value }}';
@@ -16,7 +17,7 @@
         pickr_{{ widget.attrs.id|function_friendly }} = Pickr.create({
             el: '#{{ widget.attrs.id|function_friendly }}_picker',
             theme: 'classic', // or 'monolith', or 'nano'
-            container: $('#id_{{ widget.attrs.id }}').closest('.modal-content')[0],
+            container: $('#{{ widget.attrs.id }}').closest('.modal-content')[0],
             default: '#' + defaultHexColour,
             useAsButton: true,
         {% if swatches %}
@@ -44,7 +45,7 @@
         pickr_{{ widget.attrs.id|function_friendly }}.on('save', (color, instance) => {
             var hexColour = color.toHEXA().toString();
             $('#{{ widget.attrs.id|function_friendly }}_picker .fas.fa-square').css('color', hexColour);
-            $('#id_{{ widget.attrs.id }}').val(hexColour.substring(1));
+            $('#{{ widget.attrs.id }}').val(hexColour.substring(1));
             pickr_{{ widget.attrs.id|function_friendly }}.hide();
         })
 
@@ -63,7 +64,6 @@
 
     $(document).ready(function () {
         setup_{{ widget.attrs.id|function_friendly }}();
-
     });
-
+})();
 </script>
