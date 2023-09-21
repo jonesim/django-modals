@@ -725,6 +725,7 @@ class MultiFormModal(BaseModal):
             'header_title': self.modal_title
         }
         context = super().get_context_data(**kwargs)
+        context['focus'] = getattr(self, 'focus', True)
         return context
 
     def refresh_form(self, forms):
