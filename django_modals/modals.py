@@ -268,6 +268,7 @@ class FormModalMixin(BaseModalMixin):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['request_user'] = self.request.user
+        kwargs['page_commands'] = self.page_commands
         kwargs['no_buttons'] = self.request.GET.get('no_buttons')
         if hasattr(self, 'form_setup') and callable(self.form_setup):
             kwargs['form_setup'] = self.form_setup

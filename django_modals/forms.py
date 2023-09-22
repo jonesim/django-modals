@@ -1,4 +1,6 @@
 import json
+
+from ajax_helpers.utils import ajax_command
 from django import forms
 from django.apps import apps
 from django.template import Context
@@ -28,7 +30,8 @@ class CrispyFormMixin:
 
     def __init__(self, *args, pk=None, no_buttons=None, modal_title=None, form_setup=None, slug=None,
                  request_user=None, form_id=None, process=None, layout_field_params=None, layout_field_classes=None,
-                 helper_class=HorizontalHelper, progress_bar=None, header_html=None, clean=None, **kwargs):
+                 helper_class=HorizontalHelper, progress_bar=None,
+                 header_html=None, clean=None, page_commands=None, **kwargs):
         self.supplied_kwargs = locals()
         self.no_buttons = self.get_defaults('no_buttons')
         self.modal_title = self.get_defaults('modal_title')
@@ -53,6 +56,7 @@ class CrispyFormMixin:
         self.header_html = [HTML(header_html)] if header_html else []
         self._clean_method = clean
         self.html_above_buttons = ''
+        self.page_commands = page_commands
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
@@ -208,16 +212,30 @@ class CrispyFormMixin:
         return cleaned_data
 
     def __str__(self):
+        modal_post_load_script = ''
         if self.triggers:
             for f, triggers in self.trigger_fields.items():
                 for t in triggers:
                     self.helper[f].update_attributes(**{t: 'django_modal.alter_form(this, arguments[0])'})
-            self.helper.layout.append(HTML(f'''<script>
-                $(document).off("modalPostLoad");
-                $(document).on("modalPostLoad",function(){{
+
+            modal_post_load_script = f'''
                 django_modal.modal_triggers.{self.form_id}={json.dumps(self.triggers)};
-                django_modal.reset_triggers(\'{self.form_id}\')}})
-                </script>'''))
+                django_modal.reset_triggers(\'{self.form_id}\');
+                '''
+
+        if self.page_commands:
+            command = ajax_command('onload', commands=self.page_commands)
+            modal_post_load_script += mark_safe(
+                f'ajax_helpers.process_commands([{json.dumps(command)}])'
+            )
+
+        if modal_post_load_script != '':
+            self.helper.layout.append(HTML(f'''<script>
+                 $(document).off("modalPostLoad");
+                 $(document).on("modalPostLoad",function(){{
+                    {modal_post_load_script}
+                 }})
+                 </script>'''))
         return mark_safe(render_crispy_form(self))
 
 
