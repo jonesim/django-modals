@@ -685,9 +685,12 @@ class MultiFormModal(BaseModal):
                     form_data[f] = DictGetList(**form_data[f])
         else:
             form_data = {}
+        first = True
         for f in self.forms:
             f.make_form_id(used_ids)
             kwargs = f.get_kwargs()
+            if first:
+                kwargs['page_commands'] = self.page_commands
             if self.request.method in ('POST', 'PUT'):
                 kwargs.update({
                     'data': form_data[f.form_id],
@@ -704,6 +707,7 @@ class MultiFormModal(BaseModal):
             elif hasattr(self, 'form_setup') and callable(self.form_setup):
                 kwargs['form_setup'] = self.form_setup
             all_kwargs.append(kwargs)
+            first = False
         all_kwargs[-1]['no_buttons'] = False
         return all_kwargs
 
