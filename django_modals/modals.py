@@ -4,7 +4,7 @@ import json
 
 import binascii
 from ajax_helpers.mixins import AjaxHelpers
-from ajax_helpers.utils import is_ajax
+from ajax_helpers.utils import is_ajax, ajax_command
 from crispy_forms.layout import Fieldset, HTML
 from django.forms import all_valid
 from django.forms.fields import Field
@@ -165,7 +165,18 @@ class Modal(BaseModal):
             modal_content = self.modal_content()
             if not self.buttons:
                 self.buttons = self.get_modal_buttons()
-            self._extra_content = {'form': mark_safe(modal_content + self.button_group())}
+
+            page_command_script = ''
+            if self.page_commands:
+                command = ajax_command('onload', commands=self.page_commands)
+                page_command_script = mark_safe(f'''<script>
+                                 $(document).off("modalPostLoad");
+                                 $(document).on("modalPostLoad",function(){{
+                                    ajax_helpers.process_commands([{json.dumps(command)}]);
+                                 }})
+                                 </script>''')
+
+            self._extra_content = {'form': mark_safe(modal_content + self.button_group() + page_command_script)}
         return self._extra_content
 
     def __init__(self):
