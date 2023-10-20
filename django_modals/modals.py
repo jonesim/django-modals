@@ -173,6 +173,7 @@ class Modal(BaseModal):
                                  $(document).off("modalPostLoad");
                                  $(document).on("modalPostLoad",function(){{
                                     ajax_helpers.process_commands([{json.dumps(command)}]);
+                                    $(document).off("modalPostLoad");
                                  }})
                                  </script>''')
 

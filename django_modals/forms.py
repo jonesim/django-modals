@@ -234,6 +234,7 @@ class CrispyFormMixin:
                  $(document).off("modalPostLoad");
                  $(document).on("modalPostLoad",function(){{
                     {modal_post_load_script}
+                    $(document).off("modalPostLoad");
                  }})
                  </script>'''))
         return mark_safe(render_crispy_form(self))
