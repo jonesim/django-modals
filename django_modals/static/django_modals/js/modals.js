@@ -231,11 +231,12 @@ if (typeof django_modal == 'undefined') {
         }
 
         function send_inputs(button_name, options) {
+            options = (options === undefined) ? {} :  options;
+            options['sync'] = true;
             var timeout = django_modal.timeout;
             if (typeof (options) != 'undefined' && typeof (options["post_timeout"])  != 'undefined') {
                 timeout = options["post_timeout"];
             }
-
             var params
             var property
             if (typeof (button_name) == 'object') {
