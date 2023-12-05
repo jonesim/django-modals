@@ -5,7 +5,9 @@
     if (django_modal.active_modal_container_id != 'modal-0'){
         modal_selector = '#' + django_modal.active_modal_container_id() + ' '
     }
-    tinymce.remove(modal_selector + '[name={{ widget.name }}]');
+    $( modal_selector + '[name={{ widget.name }}]').on('remove',function() {
+            tinymce.remove(modal_selector + '[name={{ widget.name }}]');
+    })
     tinymce.init({
         selector: modal_selector + '[name={{ widget.name }}]',
         menubar: false,
