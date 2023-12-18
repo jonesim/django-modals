@@ -1,10 +1,10 @@
 from django_menus.menu import AjaxButtonMenuItem
-
-from django_modals.decorators import ConfirmAjaxMethod
-from django_modals.url_helper import get_urls
-from django_modals.helper import modal_button, modal_button_method, ajax_modal_redirect
-from .views import MainMenuTemplateView
 from show_src_code.modals import Modal, TemplateModal
+
+from django_modals.decorators import ConfirmAjaxMethod, ConfirmYesNoCancelAjaxMethod
+from django_modals.helper import modal_button, modal_button_method, ajax_modal_redirect
+from django_modals.url_helper import get_urls
+from .views import MainMenuTemplateView
 
 
 class Basic(MainMenuTemplateView):
@@ -27,12 +27,21 @@ class Basic(MainMenuTemplateView):
 
         self.add_menu('confirm', 'buttons', ).add_items(
             AjaxButtonMenuItem(button_name='confirm',
-                               menu_display='Confirm ajax method')
+                               menu_display='Confirm ajax method'),
+            AjaxButtonMenuItem(button_name='yes_or_no',
+                               menu_display='Yes or No ajax method')
         )
 
     @ConfirmAjaxMethod(message="Would you like to confirm?")
     def button_confirm(self, **_kwargs):
         return self.command_response('message', text='confirmed')
+
+    @ConfirmYesNoCancelAjaxMethod(message="Press yes or no?")
+    def button_yes_or_no(self, **_kwargs):
+        if _kwargs['confirm']:
+            return self.command_response('message', text='yes')
+        else:
+            return self.command_response('message', text='no')
 
 
 class ModalConfirm(Modal):
