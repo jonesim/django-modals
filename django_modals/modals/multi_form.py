@@ -1,4 +1,5 @@
 import json
+from functools import cached_property
 
 from django.forms.models import modelform_factory
 
@@ -76,9 +77,8 @@ class MultiFormModal(BaseModal):
         super().__init__(*args, **kwargs)
         self.form_setup_args = []
 
-    def get_form_kwargs(self):
-        all_kwargs = []
-        used_ids = []
+    @cached_property
+    def form_data(self):
         if self.request.method in ('POST', 'PUT'):
             form_data = json.loads(self.request.body)
             for f in form_data:
@@ -86,6 +86,11 @@ class MultiFormModal(BaseModal):
                     form_data[f] = DictGetList(**form_data[f])
         else:
             form_data = {}
+        return form_data
+
+    def get_form_kwargs(self):
+        all_kwargs = []
+        used_ids = []
         first = True
         for f in self.forms:
             f.make_form_id(used_ids)
@@ -94,7 +99,7 @@ class MultiFormModal(BaseModal):
                 kwargs['page_commands'] = self.page_commands
             if self.request.method in ('POST', 'PUT'):
                 kwargs.update({
-                    'data': form_data[f.form_id],
+                    'data': self.form_data[f.form_id],
                     # 'files': self.request.FILES,
                 })
             if hasattr(f, 'clean') and callable(f.clean):
