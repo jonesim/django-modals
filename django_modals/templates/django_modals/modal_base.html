@@ -13,18 +13,7 @@
                                 {{ header_title }}
                             {% endblock %}
                         </div>
-                        <div>
-                        {% if not no_header_x %}
-                            <button type="button" data-dismiss="modal">
-                                <i class="fas fa-times pt-1"></i>
-                            </button>
-                        {% endif %}
-                        {% if scratchpad %}
-                            <button type="button" onclick="ajax_helpers.post_json({url:django_modal.modal_div().attr('data-url'), data:{button:'scratchpad', scratchpad:$('#scratchpad').length}})" title="Scratch Pad">
-                                <i class="far fa-sticky-note pt-1"></i>
-                            </button>
-                        {% endif %}
-                        </div>
+                        {{ header_menu.render }}
                     </div>
                 {% endif %}
             {% endblock %}

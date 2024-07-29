@@ -14,6 +14,46 @@ from .processes import PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_VIEW_EDIT, PRO
 from .fields import FieldEx
 
 
+class ProcessFormFields:
+    def __init__(self, form_fields, widgets=None, field_classes=None, labels=None, help_texts=None,
+                 error_messages=None):
+        self.fields = []
+        self.widgets = widgets if widgets else {}
+        self.labels = labels if labels else {}
+        self.help_texts = help_texts if help_texts else {}
+        self.error_messages = error_messages if error_messages else {}
+        self.field_classes = field_classes if field_classes else {}
+        self.layout_field_classes = {}
+        self.layout_field_params = {}
+
+        for f in form_fields:
+            if type(f) == tuple:
+                self.fields.append(f[0])
+                param_dict = dict(f[1])
+                for k in f[1]:
+                    if k == 'widget':
+                        self.widgets[f[0]] = param_dict.pop(k)
+                    if k == 'label':
+                        self.labels[f[0]] = param_dict.pop(k)
+                    if k == 'help_text':
+                        self.help_texts[f[0]] = param_dict.pop(k)
+                    if k == 'error_messages':
+                        self.error_messages[f[0]] = param_dict.pop(k)
+                    if k == 'layout_field_class':
+                        self.layout_field_classes[f[0]] = param_dict.pop(k)
+                if param_dict:
+                    self.layout_field_params[f[0]] = param_dict
+            else:
+                self.fields.append(f)
+
+    def form_init_kwargs(self):
+        return {f: getattr(self, f) for f in ['layout_field_classes', 'layout_field_params'] if getattr(self, f, None)}
+
+    def extra_kwargs(self):
+        return {f: getattr(self, f) for f in ['widgets', 'field_classes', 'labels', 'help_texts',
+                                              'error_messages'] if getattr(self, f, None)}
+
+
 class CrispyFormMixin:
     Meta: object
     fields: dict
