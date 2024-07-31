@@ -98,7 +98,7 @@ class MultiFormModal(BaseModal):
             kwargs = f.get_kwargs()
             if first:
                 kwargs['page_commands'] = self.page_commands
-            if self.request.method in ('POST', 'PUT'):
+            if f.form_id in self.form_data:
                 kwargs.update({
                     'data': self.form_data[f.form_id],
                     # 'files': self.request.FILES,
@@ -159,3 +159,9 @@ class MultiFormModal(BaseModal):
             if not f.is_valid():
                 return self.refresh_form(forms)
         return self.forms_valid({f.helper.form_id: f for f in forms})
+
+    def resend_forms(self):
+        all_forms = self.get_forms()
+        for f in all_forms:
+            f.clear_errors()
+        return self.refresh_form(all_forms)
