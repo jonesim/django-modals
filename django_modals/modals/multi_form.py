@@ -33,6 +33,7 @@ class MultiForm:
         self.initial = initial if initial else {}
         self.widgets = widgets if widgets else {}
         self.field_classes = field_classes if field_classes else {}
+        self.help_texts = help_texts if help_texts else {}
         self.labels = labels if labels else {}
         self.pk = pk
         self.form_class = form_class if form_class else ModelCrispyForm
@@ -66,7 +67,7 @@ class MultiFormModal(BaseModal):
     def get_form_classes(self):
         for f in self.forms:
             processed_form_fields = ProcessFormFields(f.fields, widgets=f.widgets, field_classes=f.field_classes,
-                                                      labels=f.labels)
+                                                      help_texts=f.help_texts, labels=f.labels)
             self.form_setup_args.append({
                 'form_class': modelform_factory(f.model, form=f.form_class, fields=processed_form_fields.fields,
                                                 **processed_form_fields.extra_kwargs()),
