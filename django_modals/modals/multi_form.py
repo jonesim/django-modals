@@ -60,7 +60,6 @@ class MultiForm:
 class MultiFormModal(BaseModal):
     template_name = 'django_modals/multi_form.html'
     modal_title = ''
-    base_form = ModelCrispyForm
     forms = []
     menu_config = {'href_format': "javascript:django_modal.show_modal('{}')"}
 
