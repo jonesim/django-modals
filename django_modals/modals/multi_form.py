@@ -109,6 +109,8 @@ class MultiFormModal(BaseModal):
                 kwargs['clean'] = self.clean
             if hasattr(self, 'get_instances') and callable(self.get_instances):
                 kwargs['instance'] = self.get_instances(f.form_id)
+            if hasattr(self, f'{f.form_id}_get_initial'):
+                kwargs['initial'] = getattr(self, f'{f.form_id}_get_initial')()
             if hasattr(f, 'form_setup') and callable(f.form_setup):
                 kwargs['form_setup'] = f.form_setup
             elif hasattr(self, 'form_setup') and callable(self.form_setup):
