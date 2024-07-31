@@ -25,7 +25,7 @@ class DictGetList(dict):
 class MultiForm:
 
     def __init__(self, model, fields, form_id=None, initial=None, widgets=None, pk=None, field_classes=None,
-                 labels=None, **kwargs):
+                 labels=None, form_class=None, help_texts=None, **kwargs):
         self.model = model
         self.fields = fields
         self.kwargs = kwargs
@@ -35,6 +35,7 @@ class MultiForm:
         self.field_classes = field_classes if field_classes else {}
         self.labels = labels if labels else {}
         self.pk = pk
+        self.form_class = form_class if form_class else ModelCrispyForm
 
     def make_form_id(self, used_ids):
         if not self.form_id:
@@ -67,7 +68,7 @@ class MultiFormModal(BaseModal):
             processed_form_fields = ProcessFormFields(f.fields, widgets=f.widgets, field_classes=f.field_classes,
                                                       labels=f.labels)
             self.form_setup_args.append({
-                'form_class': modelform_factory(f.model, form=self.base_form, fields=processed_form_fields.fields,
+                'form_class': modelform_factory(f.model, form=f.form_class, fields=processed_form_fields.fields,
                                                 **processed_form_fields.extra_kwargs()),
                 'processed_form_fields': processed_form_fields
             })
