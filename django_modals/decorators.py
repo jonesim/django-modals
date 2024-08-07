@@ -1,3 +1,6 @@
+import base64
+import json
+
 from django.http import JsonResponse
 
 from django_modals.helper import modal_button
@@ -8,9 +11,10 @@ class ConfirmAjaxMethod:
     title = 'Warning'
     icon_type = 'warning'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, use_json=False, **kwargs):
         if args:
             raise Exception('Decorator class ConfirmAjaxMethod must be an instance and have ()')
+        self.use_json = use_json
         self.kwargs = kwargs
 
     @staticmethod
@@ -40,12 +44,15 @@ class ConfirmAjaxMethod:
             if kwargs.get('confirm'):
                 kwargs['confirm'] = kwargs.get('confirm').lower() == 'true'
                 view.add_command('close')
+                if self.use_json:
+                    kwargs = json.loads(base64.urlsafe_b64decode(kwargs['json_data']))
                 return _func(view, **kwargs)
             view.request.method = 'GET'
 
             message = self.proc_message(self.kwargs.get('message', 'Are you sure?'), **kwargs)
             title = self.kwargs.get('title', self.title)
-
+            if self.use_json:
+                kwargs = {'json_data': base64.urlsafe_b64encode(json.dumps(kwargs).encode('utf8')).decode('utf-8')}
             buttons = self.buttons(view, _func, **kwargs)
             return JsonResponse([{
                 'function': 'modal_html',
