@@ -103,6 +103,12 @@ class CrispyFormMixin:
         super().__init__(*args, **kwargs)
         self.setup_modal(*args, **kwargs)
 
+    def first(self):
+        return hasattr(self, 'formset') and self.formset.forms[0] == self
+
+    def last(self):
+        return hasattr(self, 'formset') and self.formset.forms[-2] == self
+
     @property
     def form_id(self):
         if self._form_id:
