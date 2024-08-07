@@ -78,7 +78,7 @@ class MultiFormFormSet:
         if self.through_model:
             through_fk = _get_foreign_key(through_link.__class__, self.through_model).attname
             child_fk = _get_foreign_key(self.model, self.through_model).attname
-        for f in self.forms:
+        for f in self.forms[:-1]:
             if self.fk:
                 setattr(f.instance, self.fk, owner.id)
             f.instance.save()
