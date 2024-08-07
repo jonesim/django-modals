@@ -8,4 +8,11 @@
             {% if 'min_date' in widget.attrs %}minDate:{{ widget.attrs.min_date }},{% endif %}
         });
     })
+    $.extend($.datepicker, {
+        _checkOffset: function(inst, offset, isFixed) {
+            offset.top = $("#" + inst.id).offset().top - $(window).scrollTop() + $("#" + inst.id)[0].getBoundingClientRect().height;
+            offset.left = $("#" + inst.id).offset().left - $(window).scrollLeft()
+            return offset;
+        }
+    });
 </script>
