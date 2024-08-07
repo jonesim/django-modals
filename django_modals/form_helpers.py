@@ -15,6 +15,11 @@ class WrapperHelper(FormHelper):
             self.attrs = self.form_attrs
 
 
+class InlineFormset(WrapperHelper):
+    template = 'django_modals/multi_form/table_formset.html'
+    disable_csrf = True
+
+
 class TwoColumnHelper(WrapperHelper):
 
     flex_label_class = 'col-form-label col-form-label-sm mx-1'
