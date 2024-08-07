@@ -112,13 +112,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# This is required for date formats
+LANGUAGE_CODE = 'en-GB'
 
 TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 
-USE_L10N = False
+# This is obsolete
+# USE_L10N = False
 
 USE_TZ = False
 
@@ -139,8 +141,9 @@ OTP_TOTP_ISSUER = 'TEST 2FA'
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 
-DATE_FORMAT = 'd/m/Y'
-DATE_INPUT_FORMATS = ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y')
+# These are not used and dictated by LANGUAGE_CODE
+# DATE_FORMAT = 'd/m/Y'
+# DATE_INPUT_FORMATS = ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_ROOT = '/media/'
