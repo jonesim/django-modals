@@ -1,17 +1,16 @@
 import json
 
 from ajax_helpers.utils import ajax_command
+from crispy_forms.bootstrap import StrictButton
+from crispy_forms.layout import HTML, Layout, Div
+from crispy_forms.utils import render_crispy_form
 from django import forms
 from django.apps import apps
-from django.template import Context
 from django.utils.safestring import mark_safe
 
-from crispy_forms.layout import HTML, Layout, Div, Field
-from crispy_forms.bootstrap import StrictButton
-from crispy_forms.utils import render_crispy_form
+from .fields import FieldEx
 from .form_helpers import HorizontalHelper
 from .processes import PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_VIEW_EDIT, PROCESS_DELETE, process_data
-from .fields import FieldEx
 
 
 class ProcessFormFields:
@@ -43,11 +42,14 @@ class ProcessFormFields:
                         self.layout_field_classes[f[0]] = param_dict.pop(k)
                 if param_dict:
                     self.layout_field_params[f[0]] = param_dict
-            else:
+            elif type(f) == str:
                 self.fields.append(f)
+            else:
+                self.layout = form_fields
 
     def form_init_kwargs(self):
-        return {f: getattr(self, f) for f in ['layout_field_classes', 'layout_field_params'] if getattr(self, f, None)}
+        return {f: getattr(self, f) for f in ['layout_field_classes', 'layout_field_params', 'layout']
+                if getattr(self, f, None)}
 
     def extra_kwargs(self):
         return {f: getattr(self, f) for f in ['widgets', 'field_classes', 'labels', 'help_texts',
@@ -71,7 +73,8 @@ class CrispyFormMixin:
     def __init__(self, *args, pk=None, no_buttons=None, modal_title=None, form_setup=None, slug=None,
                  request_user=None, form_id=None, process=None, layout_field_params=None, layout_field_classes=None,
                  helper_class=HorizontalHelper, progress_bar=None,
-                 header_html=None, clean=None, page_commands=None, **kwargs):
+                 header_html=None, clean=None, page_commands=None, layout=None, **kwargs):
+        self.layout = layout
         self.supplied_kwargs = locals()
         self.no_buttons = self.get_defaults('no_buttons')
         self.modal_title = self.get_defaults('modal_title')
@@ -209,6 +212,8 @@ class CrispyFormMixin:
                 self.format_layout_fields(*layout)
             else:
                 self.helper.layout = Layout(layout)
+        elif self.layout:
+            self.format_layout_fields(*self.layout)
         else:
             self.format_layout_fields(*self.fields.keys())
         if getattr(self.helper, 'fields_wrap_class', None):
