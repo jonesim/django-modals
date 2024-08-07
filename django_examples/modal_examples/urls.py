@@ -20,6 +20,7 @@ import modal_examples.views.base64_examples as base64_examples
 import modal_examples.views.formset as formset
 from django_modals.task_modals import TaskModal
 from .tasks import DemoTask
+from .views.demo_mf_formset import MultiFormFormsetView, MultiFormFormsetCompanyModal
 
 urlpatterns = [
     path('modal-redirect/', RedirectView.as_view(pattern_name='basic'), name='django-nested-modals'),
@@ -130,6 +131,9 @@ urlpatterns = [
     path('base64', base64_examples.B64.as_view(), name='base64'),
     path('formset', formset.FormsetView.as_view(), name='formset'),
     path('formset/<slug:slug>/', formset.FormsetCompanyModal.as_view(), name='formset_modal'),
+
+    path('mf-formset/<slug:slug>/', MultiFormFormsetCompanyModal.as_view(), name='mf_formset_modal'),
+    path('mf-formset', MultiFormFormsetView.as_view(), name='mf_formset'),
 
     path('formset-multi/<slug:slug>/', formset.FormsetCompanyMultiModal.as_view(), name='formset_multi_modal'),
 
