@@ -105,6 +105,8 @@ class MultiFormModal(BaseModal):
                 })
             if hasattr(f, 'clean') and callable(f.clean):
                 kwargs['clean'] = f.clean
+            if hasattr(f, 'layout'):
+                kwargs['layout'] = f.layout
             elif hasattr(self, 'clean') and callable(self.clean):
                 kwargs['clean'] = self.clean
             if hasattr(self, 'get_instances') and callable(self.get_instances):
