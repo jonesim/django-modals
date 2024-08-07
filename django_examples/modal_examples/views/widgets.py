@@ -7,6 +7,7 @@ from django_datatables.datatables import DatatableView
 
 from django_modals.helper import show_modal
 from django_modals.widgets.colour_picker import ColourPickerWidget
+from django_modals.widgets.month_picker import MonthPicker
 from django_modals.widgets.select2 import Select2, Select2Multiple, MultipleChoiceFieldAddValues
 from django_modals.widgets.widgets import Toggle, TinyMCE
 from django_modals.widgets.jquery_datepicker import DatePicker
@@ -197,6 +198,9 @@ class NoteForm(ModelFormModal):
 
     form_fields = ['company', 'date', 'notes']
     widgets = {'company': Select2, 'date': DatePicker, 'notes': TinyMCE}
+
+    def form_setup(self, form, **kwargs):
+        form.fields['month'] = CharField(widget=MonthPicker())
 
 
 class ToggleForm(ModelFormModal):
