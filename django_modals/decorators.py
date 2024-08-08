@@ -4,7 +4,6 @@ import json
 from django.http import JsonResponse
 
 from django_modals.helper import modal_button
-from django_modals.messages import warning_modal, message_modal
 
 
 class ConfirmAjaxMethod:
@@ -29,6 +28,7 @@ class ConfirmAjaxMethod:
                 modal_button('Cancel', 'close', 'btn-secondary')]
 
     def get_html(self, message, request, title, buttons):
+        from django_modals.messages import warning_modal, message_modal
         icon_type = self.kwargs.get('icon_type', self.icon_type)
         if icon_type == 'warning':
             result = warning_modal(message, request, title=title, buttons=buttons)
