@@ -13,7 +13,8 @@ class MainMenu(DemoViewMixin, AjaxHelpers, MenuMixin):
         self.add_menu('main_menu').add_items(
             'basic', 'unbound', 'layout', ('crud', 'CRUD'), 'model',
             ('multi_form', 'Multi Form'), 'adaptive', 'users', 'permissions', 'widgets',
-            ('no_modal,-', 'No modal'), 'upload', 'ajax', 'validation', 'tasks', 'base64', 'formset', 'mf_formset')
+            ('no_modal,-', 'No modal'), 'upload', 'ajax', 'validation', 'tasks', 'base64', 'formset', 'mf_formset',
+            'datatables')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

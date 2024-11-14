@@ -1,3 +1,4 @@
+from cProfile import label
 from urllib import parse
 from django.core.exceptions import ValidationError
 from django.forms.fields import CharField, MultipleChoiceField, ChoiceField
@@ -284,5 +285,8 @@ class CompanyColourModal(ModelFormModal):
         swatches = ['#00ff00',
                     '#ff0000']
 
-        form.fields['colour'].widget = ColourPickerWidget(opacity=True, swatches=swatches)
+        form.fields['colour'].widget = ColourPickerWidget(opacity=True,
+                                                          swatches=swatches)
+
+        form.fields['colour'].help_text='This is some help text please press the color button'
 

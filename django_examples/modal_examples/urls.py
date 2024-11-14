@@ -18,9 +18,11 @@ import modal_examples.views.ajax as ajax
 import modal_examples.views.celery_tasks as celery_tasks
 import modal_examples.views.base64_examples as base64_examples
 import modal_examples.views.formset as formset
+import modal_examples.views.datatables as datatables
 from django_modals.task_modals import TaskModal
 from .tasks import DemoTask
 from .views.demo_mf_formset import MultiFormFormsetView, MultiFormFormsetCompanyModal
+
 
 urlpatterns = [
     path('modal-redirect/', RedirectView.as_view(pattern_name='basic'), name='django-nested-modals'),
@@ -130,6 +132,7 @@ urlpatterns = [
     path('Tasks', celery_tasks.TaskViews.as_view(), name='tasks'),
     path('base64', base64_examples.B64.as_view(), name='base64'),
     path('formset', formset.FormsetView.as_view(), name='formset'),
+
     path('formset/<slug:slug>/', formset.FormsetCompanyModal.as_view(), name='formset_modal'),
 
     path('mf-formset/<slug:slug>/', MultiFormFormsetCompanyModal.as_view(), name='mf_formset_modal'),
@@ -139,4 +142,10 @@ urlpatterns = [
 
     path('nomodal/<slug:slug>', no_modal.NoModal.as_view(), name='no_modal'),
     path('', RedirectView.as_view(url='Basic')),
+
+    path('datatables', datatables.DatatablesView.as_view(), name='datatables'),
+
+    path('datatables/display-company/modal/', datatables.DisplayCompanyModal.as_view(), name='datatable_company_modal'),
+    path('datatables/nested/modal/', datatables.DatatablesNestedModal.as_view(), name='datatables_nested_modal'),
 ]
+
