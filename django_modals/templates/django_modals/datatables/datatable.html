@@ -3,7 +3,6 @@
 
 {{ menus.modal_tabs.render }}
 
-<div class="card-body jms-datatable-list">
     {% if show_search_bar %}
     <div class="d-flex">
         <div class="p-2">{% no_of_results datatable %}</div>
@@ -13,4 +12,3 @@
     </div>
     {% endif %}
     {{ datatable.render|safe }}
-</div>

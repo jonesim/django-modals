@@ -1,4 +1,8 @@
-from django_modals.modals import TemplateModal
+from crispy_forms.layout import Div, HTML
+from django.urls import reverse
+
+from django_modals.helper import show_modal
+from django_modals.modals import TemplateModal, ModelFormModal
 from django_modals.modals.datatables import DatatableModal
 from modal_examples.models import Company
 from .views import MainMenu
@@ -22,15 +26,20 @@ class DatatablesView(MainMenu, DatatableView):
                           )
 
 
-class DatatablesNestedModal(TemplateModal):
+class DatatablesNestedModal(ModelFormModal):
 
-    modal_template = 'modal_examples/datatable_nested.html'
+    model = Company
+    form_fields = ['name', 'active']
 
-    def modal_context(self):
-        return {'view': 'From view'}
+    @staticmethod
+    def form_setup(form, *_args, **_kwargs):
+        companies_url = show_modal('datatable_company_modal', href=True)
+        datatables_nested_modal_url = show_modal('datatables_nested_modal', href=True)
 
-    def button_ajax_command(self, **_kwargs):
-        return self.command_response('message', text='Ajax button pressed')
+        return ['name',
+                'active',
+                Div(HTML(f'<a href="{companies_url}">Companies</a> '), css_class='text-center'),
+                Div(HTML(f'<a href="{datatables_nested_modal_url}">self</a> '), css_class='text-center')]
 
 
 class DisplayCompanyModal(DatatableModal):
