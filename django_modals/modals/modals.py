@@ -129,6 +129,7 @@ class BaseModal(BaseModalMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['focus'] = getattr(self, 'focus', True)
         context['header_title'] = kwargs.get('modal_title', getattr(self, 'modal_title', None))
         self.check_for_background_page(context)
         return context
