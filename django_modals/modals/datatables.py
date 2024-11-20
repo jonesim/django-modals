@@ -30,6 +30,7 @@ class DatatableModal(MenuMixin, TemplateModal):
         context['datatable'] = table
         context['menus'] = self.menus
         context['show_search_bar'] = self.show_search_bar
+        context['show_pivot_table'] = len(table.js_filter_list) > 0
         return context
 
     def setup_table(self, table):

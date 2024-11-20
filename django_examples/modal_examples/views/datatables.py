@@ -1,12 +1,11 @@
 from crispy_forms.layout import Div, HTML
-from django.urls import reverse
+from django_datatables.datatables import DatatableView
+from modal_examples.models import Company
 
 from django_modals.helper import show_modal
-from django_modals.modals import TemplateModal, ModelFormModal
+from django_modals.modals import ModelFormModal
 from django_modals.modals.datatables import DatatableModal
-from modal_examples.models import Company
 from .views import MainMenu
-from django_datatables.datatables import DatatableView
 
 
 class DatatablesView(MainMenu, DatatableView):
@@ -57,3 +56,4 @@ class DisplayCompanyModal(DatatableModal):
             'people',
         )
         table.table_options['language'] = {'emptyTable': 'No companies found'}
+        table.add_js_filters('pivot', 'active', filter_title='Active')

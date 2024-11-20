@@ -1,14 +1,24 @@
 {% load datatable_tags %}
 {% load ajax_helpers %}
-
 {{ menus.modal_tabs.render }}
-
-    {% if show_search_bar %}
-    <div class="d-flex">
-        <div class="p-2">{% no_of_results datatable %}</div>
-        <div class="p-2">{% no_of_rows datatable %}</div>
-        <div class="p-2">{% clear_table datatable %}</div>
-        <div class="ml-auto p-2">{% table_search datatable %}</div>
-    </div>
+<div class="row">
+    {% if show_pivot_table %}
+        <div class="col-12 col-sm-6 col-md-5 col-lg-4 col-xl-2 float-left">
+            {% filter_control datatable %}
+        </div>
     {% endif %}
-    {{ datatable.render|safe }}
+    <div class="
+            {{ show_pivot_table|yesno:"col-12 col-sm-6 col-md-7 col-lg-8 col-xl-10 float-right,col-12 float-left" }}"
+         id="div_{{ datatable.table_id }}">
+        {% if show_search_bar %}
+            <div class="d-flex">
+                <div class="p-2">{% no_of_results datatable %}</div>
+                <div class="p-2">{% no_of_rows datatable %}</div>
+                <div class="p-2">{% clear_table datatable %}</div>
+                <div class="ml-auto p-2">{% table_search datatable %}</div>
+            </div>
+        {% endif %}
+        {{ datatable.render|safe }}
+
+    </div>
+</div>
