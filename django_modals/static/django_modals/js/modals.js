@@ -111,7 +111,7 @@ if (typeof django_modal == 'undefined') {
         }
 
         function disable_enter_key(){
-            $('input', modal_div()).keydown(function (e) {
+            $('input:not(.select2-search__field)', modal_div()).keydown(function (e) {
                 if (e.keyCode === 13) {
                     e.preventDefault();
                     var form_no_enter = $('form', modal_div()).attr('no-enter')
@@ -155,6 +155,9 @@ if (typeof django_modal == 'undefined') {
                 }
             });
             modal_element.on('shown.bs.modal', function (event) {
+                if(open_modals > 1) {
+                    $(document).off('focusin.modal');
+                }
                 var modalDiv = modal_div()
                 var data_focus = modalDiv.attr('data-focus');
                 if(typeof (data_focus) == 'undefined' || data_focus === 'true') {
