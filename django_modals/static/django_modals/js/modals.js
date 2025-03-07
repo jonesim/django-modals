@@ -146,6 +146,7 @@ if (typeof django_modal == 'undefined') {
                 if (open_modals === 0){
                     $('.modal-backdrop').remove()
                 }
+                window.djangoModalCount = open_modals;
                 var closing_modal = modals.pop()
                 set_backdrop_z();
                 open_modals && $(document.body).addClass('modal-open');
@@ -164,6 +165,7 @@ if (typeof django_modal == 'undefined') {
                     $(this).find('input[type!="hidden"],select').first().focus();
                 }
                 ajax_helpers.set_ajax_busy(false, true);
+                window.djangoModalCount = open_modals;
             });
             disable_enter_key()
 
