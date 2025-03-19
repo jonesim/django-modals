@@ -160,7 +160,6 @@ class CrispyFormMixin:
             )
 
     def get_title(self):
-
         if self.modal_title is None:
             if hasattr(self, 'Meta') and hasattr(self.Meta, 'model'):
                 # noinspection PyProtectedMember
@@ -168,7 +167,9 @@ class CrispyFormMixin:
                 model_name = self.Meta.model._meta.verbose_name.title()
             else:
                 model_name = ''
-            return mark_safe(f'{process_data[self.process].modal_title} {model_name}')
+            if self.process in process_data:
+                return mark_safe(f'{process_data[self.process].modal_title} {model_name}')
+            raise NotImplementedError('Modal does not have a modal_title attribute')
         if isinstance(self.modal_title, list):
             if self.instance.pk is None:
                 return mark_safe(self.modal_title[0])
