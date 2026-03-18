@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django_datatables',
     'django_modals',
     'crispy_forms',
+    'crispy_bootstrap4',
     'modal_examples',
     'ajax_helpers',
     'django_menus',
@@ -58,6 +59,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'django_examples.urls'
+CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap4"]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 TEMPLATES = [

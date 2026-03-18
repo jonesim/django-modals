@@ -1,5 +1,6 @@
 Django==5.0.4
-django-crispy-forms==1.14.0
+django-crispy-forms==2.6
+crispy-bootstrap4==2026.2
 django-filtered-datatables==0.0.21
 django-ajax-helpers==0.0.22
 django-tab-menus==0.0.17
