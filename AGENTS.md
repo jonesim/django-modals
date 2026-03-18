@@ -29,7 +29,17 @@ To create a superuser: `python3 manage.py createsuperuser`
 
 ### Lint / Tests
 
-This repo has **no automated test suite** and **no lint configuration**. The closest equivalent is `python3 manage.py check` (Django system checks).
+Django system checks: `python3 manage.py check` (no separate lint config).
+
+**Playwright test suite** (86 tests in `tests/`):
+
+```bash
+# Start the dev server first (in background), then:
+cd /workspace
+python3 -m pytest tests/ --browser chromium -v
+```
+
+The tests require the Django dev server running on `localhost:8007`. Key test helpers are in `tests/helpers.py` — they handle the `ajax_helpers.ajax_busy` timing issue with Bootstrap modal animations.
 
 ### Optional services (Celery + Redis)
 
