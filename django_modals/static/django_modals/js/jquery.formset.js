@@ -229,7 +229,8 @@
 
             addButton.click(function () {
                 var formCount = parseInt(totalForms.val());
-                var row = options.formTemplate.clone(true).removeClass('formset-custom-template');
+                var row = options.formTemplate.clone(true).removeClass('formset-custom-template d-none empty-form');
+                console.log(formCount)
 
                 row.find('script').each(function () {
                     var scriptCode = $(this).text();

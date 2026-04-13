@@ -11,7 +11,10 @@
             {% for formset in form.formsets %}
                 console.log('{{ formset.form_id }}');
             $('#{{ formset.form_id }}_table tbody tr').formset({
-                prefix: '{{ formset.prefix }}'
+                prefix: '{{ formset.prefix }}',
+                {% if formset.add_text %}
+                addText: '{{ formset.add_text }}',
+                {% endif %}
             });
             {% endfor %}
         });
