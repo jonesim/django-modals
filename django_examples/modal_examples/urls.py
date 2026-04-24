@@ -9,6 +9,7 @@ import modal_examples.views.permissions as permissions
 import modal_examples.views.widgets as widgets
 import modal_examples.views.layout as layout
 import modal_examples.views.adaptive as adaptive
+import modal_examples.views.help as help_view
 import modal_examples.views.multi_form as multi_form
 import modal_examples.views.crud as crud
 import modal_examples.views.validation as validation
@@ -117,6 +118,7 @@ urlpatterns = [
 
     path('multi-form', multi_form.MultiFormExampleView.as_view(), name='multi_form'),
     path('adaptive', adaptive.AdaptiveView.as_view(), name='adaptive'),
+    path('help', help_view.HelpView.as_view(), name='help'),
 
     path('Basic', basic.Basic.as_view(), name='basic'),
     path('Model', model_modals.ModelExamples.as_view(), name='model'),
