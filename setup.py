@@ -19,5 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=['django-ajax-helpers>=0.0.22', 'django-crispy-forms', 'make-html'],
+    install_requires=['django-ajax-helpers>=0.0.22', 'django-crispy-forms>=2.5', 'crispy-bootstrap4>=2025.6', 'make-html'],
 )
