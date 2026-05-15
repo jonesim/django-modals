@@ -19,6 +19,7 @@ import modal_examples.views.celery_tasks as celery_tasks
 import modal_examples.views.base64_examples as base64_examples
 import modal_examples.views.formset as formset
 import modal_examples.views.datatables as datatables
+import modal_examples.views.lazy as lazy_views
 from django_modals.task_modals import TaskModal
 from .tasks import DemoTask
 from .views.demo_mf_formset import MultiFormFormsetView, MultiFormFormsetCompanyModal
@@ -144,6 +145,8 @@ urlpatterns = [
     path('', RedirectView.as_view(url='Basic')),
 
     path('datatables', datatables.DatatablesView.as_view(), name='datatables'),
+    path('lazy', lazy_views.LazyExamples.as_view(), name='lazy'),
+    path('modal/lazy/', include('modal_examples.views.lazy')),
 
     path('datatables/display-company/modal/', datatables.DisplayCompanyModal.as_view(), name='datatable_company_modal'),
     path('datatables/nested/modal/', datatables.DatatablesNestedModal.as_view(), name='datatables_nested_modal'),
