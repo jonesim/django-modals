@@ -17,15 +17,25 @@
                     </div>
                 {% endif %}
             {% endblock %}
-            <div class="modal-body">
-                {% block modal_content %}
-                    {{ contents }}
-                    {{ form }}
+            {% if lazy %}
+                <div id="lazy">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-secondary" role="status"></div>
+                            <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                {{ ajax_helpers_script }}
+            {% else %}
+                <div class="modal-body">
+                    {% block modal_content %}
+                        {{ contents }}
+                        {{ form }}
+                    {% endblock %}
+                </div>
+                {% block footer %}
+                    {{ footer }}
                 {% endblock %}
-            </div>
-            {% block footer %}
-                {{ footer }}
-            {% endblock %}
+            {%  endif %}
         </div>
     </div>
     {% block javascript %}

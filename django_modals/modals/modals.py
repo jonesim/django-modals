@@ -27,6 +27,7 @@ class BaseModalMixin(AjaxHelpers):
     kwargs: dict
     button_group_class = None
     button_container_class = None
+    lazy = False
     menu_config = {'href_format': "javascript:django_modal.show_modal('{}')"}
     ajax_commands = ['button', 'select2', 'ajax']
     button_group_css = None
@@ -45,6 +46,8 @@ class BaseModalMixin(AjaxHelpers):
 
     def get_context_data(self, **kwargs):
         # noinspection PyUnresolvedReferences
+        if self.lazy:
+            self.add_page_command('post_modal', button='lazy_load')
         context = super().get_context_data(**kwargs) if hasattr(super(), 'get_context_data') else {}
         context.update({'request': self.request, 'slug': self.slug})
         context['modal_url'] = kwargs.get('modal_url', self.request.get_full_path())
@@ -52,6 +55,7 @@ class BaseModalMixin(AjaxHelpers):
         context['size'] = kwargs.get('size', self.size)
         context['modal_type'] = self.kwargs.get('modal_type')
         context['header_menu'] = self.top_menu
+        context['lazy'] = self.lazy
         return context
 
     def split_slug(self, kwargs):
@@ -90,6 +94,15 @@ class BaseModalMixin(AjaxHelpers):
     def button_refresh_modal(self, **_kwargs):
         return self.command_response(ajax_modal_replace(self.request, modal_class=self.__class__,
                                                         slug=self.kwargs.get('slug', '-')))
+
+    def button_lazy_load(self, **_kwargs):
+        modal_id = self.request.POST.get('modal_id', '')
+        self.request.method = 'GET'
+        self.lazy = False
+        context = self.get_context_data()
+        body_html = render_to_string('django_modals/modal_lazy_body.html', context, request=self.request)
+        self.add_command('html', selector=f'#{modal_id} #lazy', html=body_html)
+        return self.command_response('modal_refresh_trigger', selector=f'#{modal_id}')
 
     def button_group(self):
         button_kwargs = {
@@ -159,6 +172,8 @@ class Modal(BaseModal):
 
     @property
     def extra_context(self):
+        if self.lazy:
+            return
         if not self._extra_content:
             modal_content = self.modal_content()
             if not self.buttons:

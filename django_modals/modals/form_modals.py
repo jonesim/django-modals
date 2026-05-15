@@ -82,7 +82,7 @@ class FormModalMixin(BaseModalMixin):
         kwargs['request_user'] = self.request.user
         kwargs['page_commands'] = self.page_commands
         kwargs['no_buttons'] = self.request.GET.get('no_buttons')
-        if hasattr(self, 'form_setup') and callable(self.form_setup):
+        if not self.lazy and hasattr(self, 'form_setup') and callable(self.form_setup):
             kwargs['form_setup'] = self.form_setup
         if hasattr(self, 'clean') and callable(self.clean):
             kwargs['clean'] = self.clean
