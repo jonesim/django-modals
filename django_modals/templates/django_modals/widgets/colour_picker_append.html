@@ -1,4 +1,4 @@
-{% load crispy_forms_field modal_tags %}
+{% load modal_forms modal_tags %}
 
 {% if field.is_hidden %}
     {{ field }}
@@ -18,38 +18,38 @@
 
         <div class="{{ field_class }}">
             <div class="input-group{% if input_size %} {{ input_size }}{% endif %}">
-                {% if crispy_prepended_text %}
+                {% if prepended_text %}
                     <div class="input-group-prepend{% if active %} active{% endif %}">
-                        <span class="input-group-text">{{ crispy_prepended_text|safe }}</span>
+                        <span class="input-group-text">{{ prepended_text|safe }}</span>
                     </div>
                 {% endif %}
                 {% if field|is_select and use_custom_control %}
                     {% if field.errors %}
-                        {% crispy_field field 'class' 'custom-select is-invalid' %}
+                        {% modal_field field 'class' 'custom-select is-invalid' %}
                     {% else %}
-                        {% crispy_field field 'class' 'custom-select' %}
+                        {% modal_field field 'class' 'custom-select' %}
                     {% endif %}
                 {% else %}
                     {% if field.errors %}
-                        {% crispy_field field 'class' 'form-control is-invalid' %}
+                        {% modal_field field 'class' 'form-control is-invalid' %}
                     {% else %}
-                        {% crispy_field field 'class' 'form-control' %}
+                        {% modal_field field 'class' 'form-control' %}
                     {% endif %}
                 {% endif %}
-                {% if crispy_appended_text %}
+                {% if appended_text %}
                     <span class="input-group-append">
                         <span class="input-group-text" id="{{ field_id|function_friendly }}_picker"><i class="fas fa-square" style="font-size: 1.5em;"></i></span>
                         <span class="input-group-text" id="{{ field_id }}_random" style="cursor: pointer; color: blue;"><i class="fas fa-random"></i></span>
                      </span>
                 {% endif %}
                 {% if error_text_inline %}
-                    {% include 'bootstrap4/layout/field_errors.html' %}
+                    {% include 'django_modals/forms/bootstrap4/field_errors.html' %}
                 {% else %}
-                    {% include 'bootstrap4/layout/field_errors_block.html' %}
+                    {% include 'django_modals/forms/bootstrap4/field_errors_block.html' %}
                 {% endif %}
             </div>
             {% if not help_text_inline %}
-                {% include 'bootstrap4/layout/help_text.html' %}
+                {% include 'django_modals/forms/bootstrap4/help_text.html' %}
             {% endif %}
         </div>
 

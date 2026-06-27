@@ -1,0 +1,13 @@
+{% if help_text_inline and not error_text_inline %}
+    {% include 'django_modals/forms/bootstrap4/help_text.html' %}
+{% endif %}
+
+{% if error_text_inline %}
+    {% include 'django_modals/forms/bootstrap4/field_errors.html' %}
+{% else %}
+    {% include 'django_modals/forms/bootstrap4/field_errors_block.html' %}
+{% endif %}
+
+{% if not help_text_inline %}
+    {% include 'django_modals/forms/bootstrap4/help_text.html' %}
+{% endif %}

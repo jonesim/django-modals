@@ -2,7 +2,7 @@ from django.forms import TextInput
 from django.forms.fields import CharField, DateField
 from django.forms.widgets import Textarea
 
-from crispy_forms.layout import HTML
+from django_modals.layout import HTML
 from show_src_code.modals import FormModal
 
 from django_modals.forms import CrispyForm

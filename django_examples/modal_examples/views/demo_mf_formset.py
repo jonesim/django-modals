@@ -1,4 +1,4 @@
-from crispy_forms.layout import HTML
+from django_modals.layout import HTML
 from django_datatables.datatables import DatatableView
 
 from django_modals.datatables import EditColumn

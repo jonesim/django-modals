@@ -17,7 +17,6 @@ classifiers = [
 ]
 dependencies = [
     "django-ajax-helpers>=0.0.22",
-    "django-crispy-forms",
     "make-html",
 ]
 

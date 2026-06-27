@@ -1,25 +1,21 @@
-{% load crispy_forms_tags %}
-{% load crispy_forms_utils %}
-{% load crispy_forms_field %}
-
-{% specialspaceless %}
-    {% if form.first %}
-        <table>
-        <tr>
-            {% for field in form %}
-                <th>{{ field.label }}</th>
-            {% endfor %}
-        </tr>
-    {% endif %}
+{% load modal_forms %}
+{% if form.first %}
+    <table>
+    <tr>
+        {% for field in form %}
+            <th>{{ field.label }}</th>
+        {% endfor %}
+    </tr>
+{% endif %}
 
 {% if form_show_errors and not form.is_extra %}
-    {% include "bootstrap4/errors.html" %}
+    {% include "django_modals/forms/bootstrap4/errors.html" %}
 {% endif %}
 
 <tr>
     <form id="{{ form.form_id }}">
         {% for field in form %}
-            {% include 'bootstrap4/field.html' with tag="td" form_show_labels=False %}
+            {% include 'django_modals/forms/bootstrap4/field.html' with tag="td" form_show_labels=False %}
         {% endfor %}
     </form>
 </tr>
@@ -27,4 +23,3 @@
 {% if form.last %}
     </table>
 {% endif %}
-{% endspecialspaceless %}

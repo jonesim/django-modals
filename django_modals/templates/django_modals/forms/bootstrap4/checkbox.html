@@ -1,4 +1,4 @@
-{% load crispy_forms_field %}
+{% load modal_forms %}
 {% if field.is_hidden %}
     {{ field }}
 {% else %}
@@ -10,21 +10,21 @@
         {% endif %}
 
         {% if field|is_checkboxselectmultiple %}
-            {% include 'bootstrap4/layout/checkboxselectmultiple.html' %}
+            {% include 'django_modals/forms/bootstrap4/checkboxselectmultiple.html' %}
         {% endif %}
 
         {% if field|is_radioselect %}
-            {% include 'bootstrap4/layout/radioselect.html' %}
+            {% include 'django_modals/forms/bootstrap4/radioselect.html' %}
         {% endif %}
 
         {% if not field|is_checkboxselectmultiple and not field|is_radioselect %}
                 <div class="{{ field_class }}">
                     {% if field|is_select and use_custom_control %}
-                         {% crispy_field field 'class' 'custom-select' %}
+                         {% modal_field field 'class' 'custom-select' %}
                     {% else %}
-                        {% crispy_field field %}
+                        {% modal_field field %}
                     {% endif %}
-                    {% include 'bootstrap4/layout/help_text_and_errors.html' %}
+                    {% include 'django_modals/forms/bootstrap4/help_text_and_errors.html' %}
                 </div>
             {% endif %}
 

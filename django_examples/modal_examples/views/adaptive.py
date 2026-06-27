@@ -3,7 +3,7 @@ from django.forms.fields import CharField, ChoiceField, BooleanField
 from django_modals.forms import CrispyForm
 from django_modals.fields import FieldEx
 
-from crispy_forms.layout import HTML
+from django_modals.layout import HTML
 from show_src_code.modals import ModelFormModal
 
 from django_modals.widgets.select2 import Select2

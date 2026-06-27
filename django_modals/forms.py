@@ -1,16 +1,22 @@
 import json
 
 from ajax_helpers.utils import ajax_command
-from crispy_forms.bootstrap import StrictButton
-from crispy_forms.layout import HTML, Layout, Div
-from crispy_forms.utils import render_crispy_form
 from django import forms
 from django.apps import apps
+from django.forms.utils import flatatt
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
 from .fields import FieldEx
 from .form_helpers import HorizontalHelper
+from .helper import modal_button
+from .layout import HTML, Layout, Div, get_helper_context
 from .processes import PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_VIEW_EDIT, PROCESS_DELETE, process_data
+
+
+class ModalButton(HTML):
+    """Marker node for a rendered modal button so existing buttons can be
+    detected in a layout."""
 
 
 class ProcessFormFields:
@@ -54,6 +60,22 @@ class ProcessFormFields:
     def extra_kwargs(self):
         return {f: getattr(self, f) for f in ['widgets', 'field_classes', 'labels', 'help_texts',
                                               'error_messages'] if getattr(self, f, None)}
+
+
+def widget_field_kwargs(widget):
+    """Field-layout kwargs declared on a widget. Reads the new ``modal_kwargs``
+    attribute, falling back to the legacy ``crispy_kwargs`` for backward
+    compatibility with downstream widgets."""
+    return getattr(widget, 'modal_kwargs', None) or getattr(widget, 'crispy_kwargs', None) or {}
+
+
+def widget_field_class(widget):
+    """Layout field class declared on a widget (new ``modal_field_class`` name,
+    legacy ``crispy_field_class`` fallback)."""
+    field_class = getattr(widget, 'modal_field_class', None)
+    if field_class is None:
+        field_class = getattr(widget, 'crispy_field_class', None)
+    return field_class if field_class is not None else FieldEx
 
 
 class CrispyFormMixin:
@@ -144,20 +166,7 @@ class CrispyFormMixin:
     def button(self, title, commands, css_class, font_awesome=None, **kwargs):
         if self.no_buttons:
             return HTML('')
-        else:
-            if font_awesome:
-                title = f'<i class="{font_awesome}"></i> {title}'
-            if type(commands) == str:
-                params = [{'function': commands}]
-            elif type(commands) == dict:
-                params = [commands]
-            else:
-                params = commands
-            return StrictButton(
-                title,
-                onclick=mark_safe('django_modal.process_commands_lock(' + json.dumps(params).replace('"', "'") + ')'),
-                css_class=css_class, **kwargs
-            )
+        return ModalButton(modal_button(title, commands, css_class=css_class, font_awesome=font_awesome, **kwargs))
 
     def get_title(self):
         if self.modal_title is None:
@@ -199,9 +208,9 @@ class CrispyFormMixin:
                 field_args = {}
                 if self.layout_field_params and f in self.layout_field_params:
                     field_args.update(self.layout_field_params[f])
-                field_args.update(getattr(self.fields[f].widget, 'crispy_kwargs', {}))
+                field_args.update(widget_field_kwargs(self.fields[f].widget))
                 # Class can be set in widget otherwise use FieldEx
-                fields.append(getattr(self.fields[f].widget, 'crispy_field_class', FieldEx)(f, **field_args))
+                fields.append(widget_field_class(self.fields[f].widget)(f, **field_args))
             else:
                 fields.append(f)
         self.helper.layout = Layout(*self.header_html, *fields)
@@ -224,9 +233,8 @@ class CrispyFormMixin:
         else:
             self.format_layout_fields(*self.fields.keys())
         if getattr(self.helper, 'fields_wrap_class', None):
-            # noinspection PyUnresolvedReferences
-            self.helper[:].wrap_together(Div, css_class=self.helper.fields_wrap_class)
-        existing_buttons = [b.content for b in self.helper.layout.fields if isinstance(b, StrictButton)]
+            self.helper.layout = Layout(Div(*self.helper.layout.fields, css_class=self.helper.fields_wrap_class))
+        existing_buttons = [b for b in self.helper.layout.fields if isinstance(b, ModalButton)]
         if not existing_buttons and not self.no_buttons and not self.buttons:
             if self.process not in [PROCESS_VIEW, PROCESS_VIEW_EDIT]:
                 self.buttons.append(self.submit_button())
@@ -239,7 +247,8 @@ class CrispyFormMixin:
         if self.buttons:
             self.append_buttons(self.buttons)
         if self.process in [PROCESS_VIEW, PROCESS_VIEW_EDIT]:
-            self.helper[:].update_attributes(disabled=True)
+            for field in self.fields.values():
+                field.widget.attrs['disabled'] = True
 
     def append_buttons(self, buttons):
         self.helper.layout.append(Div(Div(*buttons, css_class='btn-group'), css_class='form-buttons'))
@@ -263,33 +272,56 @@ class CrispyFormMixin:
             self._clean_method(self, cleaned_data)
         return cleaned_data
 
-    def __str__(self):
+    def post_load_script(self):
         modal_post_load_script = ''
         if self.triggers:
             for f, triggers in self.trigger_fields.items():
                 for t in triggers:
-                    self.helper[f].update_attributes(**{t: 'django_modal.alter_form(this, arguments[0])'})
-
+                    self.fields[f].widget.attrs[t] = 'django_modal.alter_form(this, arguments[0])'
             modal_post_load_script = f'''
                 django_modal.modal_triggers.{self.form_id}={json.dumps(self.triggers)};
                 django_modal.reset_triggers(\'{self.form_id}\');
                 '''
-
         if self.page_commands:
             command = ajax_command('onload', commands=self.page_commands)
             modal_post_load_script += mark_safe(
                 f'ajax_helpers.process_commands([{json.dumps(command)}])'
             )
+        if modal_post_load_script == '':
+            return ''
+        return f'''<script>
+             $(document).off("modalPostLoad");
+             $(document).on("modalPostLoad",function(){{
+                {modal_post_load_script}
+                $(document).off("modalPostLoad");
+             }})
+             </script>'''
 
-        if modal_post_load_script != '':
-            self.helper.layout.append(HTML(f'''<script>
-                 $(document).off("modalPostLoad");
-                 $(document).on("modalPostLoad",function(){{
-                    {modal_post_load_script}
-                    $(document).off("modalPostLoad");
-                 }})
-                 </script>'''))
-        return mark_safe(render_crispy_form(self))
+    def form_wrapper(self, content):
+        helper = self.helper
+        attrs = dict(getattr(helper, 'attrs', {}) or {})
+        if getattr(helper, 'form_class', ''):
+            attrs['class'] = helper.form_class
+        if getattr(helper, 'form_id', None):
+            attrs['id'] = helper.form_id
+        method = getattr(helper, 'form_method', 'post')
+        return f'<form{flatatt(attrs)} method="{method}">{content}</form>'
+
+    def render(self):
+        context = get_helper_context(self)
+        if getattr(self.helper, 'template', None):
+            context['form'] = self
+            return mark_safe(render_to_string(self.helper.template, context))
+        script = self.post_load_script()
+        if script:
+            self.helper.layout.append(HTML(script))
+        content = self.helper.layout.render(self, context)
+        if getattr(self.helper, 'form_tag', True):
+            content = self.form_wrapper(content)
+        return mark_safe(content)
+
+    def __str__(self):
+        return self.render()
 
 
 class ModelCrispyForm(CrispyFormMixin, forms.ModelForm):
@@ -327,14 +359,22 @@ class BaseInlineCrispyFormSet(CrispyFormMixin, forms.BaseInlineFormSet):
         else:
             self.format_layout_fields(*self.fields.keys())
         if getattr(self.helper, 'fields_wrap_class', None):
-            # noinspection PyUnresolvedReferences
-            self.helper[:].wrap_together(Div, css_class=self.helper.fields_wrap_class)
+            self.helper.layout = Layout(Div(*self.helper.layout.fields, css_class=self.helper.fields_wrap_class))
 
     def render(self, *args, **kwargs):
+        for form in [self.empty_form, *self.forms]:
+            for field in form.fields.values():
+                widget = field.widget
+                if not getattr(widget, 'modal_kwargs', None) and getattr(widget, 'crispy_kwargs', None):
+                    # honour the legacy widget attribute in the formset template path
+                    widget.modal_kwargs = widget.crispy_kwargs
         for form in self.forms:
             form.helper = self.helper
             form.mode = self.mode
             for field_name, layout_field_param in self.layout_field_params.items():
                 if field_name in form.fields and 'wrapper_class' in layout_field_param:
                     form.fields[field_name].wrapper_class = layout_field_param['wrapper_class']
-        return render_crispy_form(self)
+        context = get_helper_context(self)
+        context['formset'] = self
+        context['form_id'] = self.form_id
+        return mark_safe(render_to_string(self.helper.template, context))

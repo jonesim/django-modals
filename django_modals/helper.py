@@ -3,7 +3,6 @@ from base64 import urlsafe_b64encode
 from ajax_helpers.templatetags.ajax_helpers import button_javascript
 from django.urls import reverse, resolve, NoReverseMatch
 from django.template.loader import render_to_string
-from crispy_forms.layout import HTML, Div
 from django.utils.safestring import mark_safe
 
 
@@ -102,6 +101,7 @@ def css_classes(classes):
 
 
 def crispy_modal_link(modal_name, text, div=False, div_classes='', button_classes=''):
+    from .layout import HTML, Div
     link = HTML(show_modal(modal_name, button=text, button_classes=button_classes))
     if div:
         link = Div(link, css_class=div_classes)

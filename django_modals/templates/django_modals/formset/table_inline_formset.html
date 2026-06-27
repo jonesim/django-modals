@@ -1,56 +1,48 @@
-{% load crispy_forms_tags %}
-{% load crispy_forms_utils %}
-{% load crispy_forms_field %}
-
-{% specialspaceless %}
-    <div>
-        {{ formset.management_form|crispy }}
-    </div>
-    <table{% if form_id %} id="{{ form_id }}_table"{% endif%} class="table table-striped table-sm">
-        <thead>
-            {% if formset.readonly and not formset.queryset.exists %}
-            {% else %}
-                <tr>
-                    {% for field in formset.empty_form %}
-                        {% if field.label and not field.is_hidden %}
-                            <th for="{{ field.auto_id }}" class="col-form-label {% if field.field.required %}requiredField{% endif %}">
-                                {{ field.label|safe }}{% if field.field.required and not field|is_checkbox %}<span class="asteriskField">*</span>{% endif %}
-                            </th>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            {% endif %}
-        </thead>
-
-        <tbody>
-            <tr class="d-none empty-form">
+{% load modal_forms %}
+<div>
+    {% for field in formset.management_form %}{{ field }}{% endfor %}
+</div>
+<table{% if form_id %} id="{{ form_id }}_table"{% endif%} class="table table-striped table-sm">
+    <thead>
+        {% if formset.readonly and not formset.queryset.exists %}
+        {% else %}
+            <tr>
                 {% for field in formset.empty_form %}
-                    {% include 'bootstrap4/field.html' with tag="td" form_show_labels=False %}
+                    {% if field.label and not field.is_hidden %}
+                        <th for="{{ field.auto_id }}" class="col-form-label {% if field.field.required %}requiredField{% endif %}">
+                            {{ field.label|safe }}{% if field.field.required and not field|is_checkbox %}<span class="asteriskField">*</span>{% endif %}
+                        </th>
+                    {% endif %}
                 {% endfor %}
             </tr>
+        {% endif %}
+    </thead>
 
-            {% for form in formset %}
-                {% if form_show_errors and not form.is_extra %}
-                    {% include "bootstrap4/errors.html" %}
-                {% endif %}
-
-                <tr>
-                    {% for field in form %}
-                        {% with field.field.wrapper_class as wrapper_class %}
-                         {% if field.field.widget.formset_field_template %}
-                             {% include field.field.widget.formset_field_template with tag="td" form_show_labels=False crispy_prepended_text=field.field.widget.crispy_kwargs.prepended_text crispy_appended_text=field.field.widget.crispy_kwargs.appended_text input_size=field.field.widget.crispy_kwargs.input_size %}
-                        {% elif field.field.widget.crispy_kwargs.prepended_text or field.field.widget.crispy_kwargs.appended_text %}
-                            {% include 'django_modals/formset/prepended_appended_text.html' with tag="td" form_show_labels=False crispy_prepended_text=field.field.widget.crispy_kwargs.prepended_text crispy_appended_text=field.field.widget.crispy_kwargs.appended_text input_size=field.field.widget.crispy_kwargs.input_size %}
-                        {% else %}
-                            {% include 'bootstrap4/field.html' with tag="td" form_show_labels=False %}
-                        {% endif %}
-                        {% endwith %}
-                    {% endfor %}
-                </tr>
+    <tbody>
+        <tr class="d-none empty-form">
+            {% for field in formset.empty_form %}
+                {% include 'django_modals/forms/bootstrap4/field.html' with tag="td" form_show_labels=False %}
             {% endfor %}
-        </tbody>
-    </table>
+        </tr>
 
-    {% include "bootstrap4/inputs.html" %}
+        {% for form in formset %}
+            {% if form_show_errors and not form.is_extra %}
+                {% include "django_modals/forms/bootstrap4/errors.html" %}
+            {% endif %}
 
-{% endspecialspaceless %}
+            <tr>
+                {% for field in form %}
+                    {% with field.field.wrapper_class as wrapper_class %}
+                     {% if field.field.widget.formset_field_template %}
+                         {% include field.field.widget.formset_field_template with tag="td" form_show_labels=False prepended_text=field.field.widget.modal_kwargs.prepended_text appended_text=field.field.widget.modal_kwargs.appended_text input_size=field.field.widget.modal_kwargs.input_size %}
+                    {% elif field.field.widget.modal_kwargs.prepended_text or field.field.widget.modal_kwargs.appended_text %}
+                        {% include 'django_modals/forms/bootstrap4/prepended_appended_text.html' with tag="td" form_show_labels=False prepended_text=field.field.widget.modal_kwargs.prepended_text appended_text=field.field.widget.modal_kwargs.appended_text input_size=field.field.widget.modal_kwargs.input_size %}
+                    {% else %}
+                        {% include 'django_modals/forms/bootstrap4/field.html' with tag="td" form_show_labels=False %}
+                    {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

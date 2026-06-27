@@ -1,9 +1,9 @@
-from crispy_forms.layout import Fieldset, HTML
 from django.forms import all_valid
 from django.forms.models import inlineformset_factory
 
 from django_modals.form_helpers import RegularHelper
 from django_modals.forms import BaseInlineCrispyFormSet, ProcessFormFields
+from django_modals.layout import Fieldset, HTML
 from django_modals.modals import ModelFormModal
 
 

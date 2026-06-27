@@ -3,7 +3,8 @@ from django.urls import reverse
 from django.forms.fields import CharField
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
-from crispy_forms.layout import Field, HTML
+from django_modals.fields import FieldEx
+from django_modals.layout import HTML
 
 from django_datatables.datatables import DatatableView
 import django_modals.modals as modals
@@ -131,7 +132,7 @@ class ModalCompanyFormPeople(ModelFormModal):
         if self.object.id:
             form.modal_title = (f'Edit Company  <a href="{reverse("company", args=(self.object.id,))}">'
                                 f'{self.object.name}</a>')
-        return Field(*form.Meta.fields), HTML(render_to_string('modal_examples/people.html', {'company': form.instance}))
+        return FieldEx(*form.Meta.fields), HTML(render_to_string('modal_examples/people.html', {'company': form.instance}))
 
     def form_valid(self, form):
         if not self.object.id:

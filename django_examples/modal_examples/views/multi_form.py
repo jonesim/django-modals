@@ -3,7 +3,7 @@ from django_modals.widgets.select2 import Select2
 from django_modals.modals import MultiForm
 
 from show_src_code.modals import MultiFormModal
-from crispy_forms.layout import HTML
+from django_modals.layout import HTML
 from .views import MainMenuTemplateView
 from modal_examples.models import Company, Person
 

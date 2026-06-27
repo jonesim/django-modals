@@ -1,18 +1,33 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.utils import TEMPLATE_PACK
+"""Form layout helpers.
+
+Plain config objects (formerly crispy ``FormHelper`` subclasses) carrying the
+grid/spacing class strings the renderer and field templates read.  Attribute
+names are unchanged so existing ``helper_class = SmallHelper`` style usage keeps
+working.
+"""
 
 
-class WrapperHelper(FormHelper):
-    def get_attributes(self, template_pack=TEMPLATE_PACK):
-        items = super().get_attributes(template_pack)
-        if hasattr(self, 'wrapper_class'):
-            items['wrapper_class'] = self.wrapper_class
-        return items
+class WrapperHelper:
+    use_custom_control = True
+    form_show_errors = True
+    form_show_labels = True
+    error_text_inline = True
+    help_text_inline = False
+    disable_csrf = False
+    form_tag = True
+    form_method = 'post'
+    form_class = ''
+    label_class = ''
+    field_class = ''
+    template = None
+    form_id = None
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, form=None):
+        self.form = form
         if hasattr(self, 'form_attrs'):
             self.attrs = self.form_attrs
+        else:
+            self.attrs = {}
 
 
 class InlineFormset(WrapperHelper):

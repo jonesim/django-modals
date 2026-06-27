@@ -1,4 +1,4 @@
-from crispy_forms.layout import Div, HTML
+from django_modals.layout import Div, HTML
 from django_datatables.datatables import DatatableView
 from modal_examples.models import Company
 

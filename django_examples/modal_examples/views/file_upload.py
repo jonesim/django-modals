@@ -1,6 +1,6 @@
 import os
 from django.forms.fields import FileField
-from crispy_forms.layout import HTML
+from django_modals.layout import HTML
 
 from django_modals.modal_upload import ModalAjaxFileMixin
 from django_modals.forms import CrispyForm

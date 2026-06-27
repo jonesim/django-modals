@@ -1,5 +1,4 @@
 from ajax_helpers.utils import ajax_command
-from crispy_forms.layout import HTML
 from django import forms
 from django.forms.models import _get_foreign_key
 from django_menus.menu import MenuItem
@@ -7,6 +6,7 @@ from html_classes.html import HtmlDiv
 
 from django_modals.form_helpers import InlineFormset
 from django_modals.forms import ModelCrispyForm, CrispyForm
+from django_modals.layout import HTML
 from django_modals.modals import MultiForm
 
 
