@@ -28,5 +28,17 @@ services:
    ports:
     - 80
 
+ db_modals:
+    image: postgres:13.6
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - postgres.env
+    environment:
+      - ALLOW_IP_RANGE=0.0.0.0/0
+    ports:
+      - "5434:5432"
+
 volumes:
   shared_temp: {}
+  postgres_data: { }

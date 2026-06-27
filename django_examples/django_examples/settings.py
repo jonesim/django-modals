@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'ajax_helpers',
     'django_menus',
     'show_src_code',
-    'datatable_examples',
+    #'datatable_examples',
 ]
 
 MIDDLEWARE = [
@@ -82,13 +82,24 @@ WSGI_APPLICATION = 'django_examples.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': str(BASE_DIR.joinpath('db.sqlite3')),
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR.joinpath('db.sqlite3')),
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'modal',
+        'USER': 'user',
+        'PASSWORD': 'password',
+        'HOST': 'db_modals',
+        'PORT': '5432'
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

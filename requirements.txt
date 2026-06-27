@@ -9,3 +9,4 @@ make-html==0.0.2
 django-show-source-code==0.0.8
 datatable-examples @ git+https://github.com/jonesim/django-datatables@e0535792137acef57160447e235fc0c45c8500b3#subdirectory=django
 ajax-examples @ git+https://github.com/jonesim/ajax-helpers@e80a69d09374195269df467142ae0e1a289cba8f#subdirectory=django_examples
+psycopg2==2.9.3
