@@ -38,6 +38,9 @@ if (typeof django_modal == 'undefined') {
     var open_modals = 0;
     var modals = [];
     var process_lock = false;
+    // Modals whose content is on screen but whose show transition has not finished (see
+    // process_commands_lock).
+    var modals_appearing = 0;
     var post_load_event = new CustomEvent('modalPostLoad');
     var target;
 
@@ -121,6 +124,7 @@ if (typeof django_modal == 'undefined') {
     function create_modal(modal_html) {
       var modal_container;
       open_modals += 1;
+      modals_appearing += 1;
       modals.push({
         id: active_modal_container_id()
       });
@@ -194,6 +198,7 @@ if (typeof django_modal == 'undefined') {
         left: left_pos
       });
       modal_element.on('hidden.bs.modal', function (event) {
+        modals_appearing = Math.max(0, modals_appearing - 1);
         $(this).parent().remove();
         open_modals -= 1;
 
@@ -211,6 +216,7 @@ if (typeof django_modal == 'undefined') {
         }
       });
       modal_element.on('shown.bs.modal', function (event) {
+        modals_appearing = Math.max(0, modals_appearing - 1);
         ajax_helpers.set_ajax_busy(false, true);
       });
       disable_enter_key(); // modalPostLoad used toconfigure datepicker/select2 etc
@@ -236,12 +242,25 @@ if (typeof django_modal == 'undefined') {
       return params;
     }
 
-    function process_commands_lock(commands) {
-      if (!process_lock && !ajax_helpers.ajax_busy) {
-        process_lock = true;
-        ajax_helpers.process_commands(commands);
-        process_lock = false;
+    function process_commands_lock(commands, attempt) {
+      if (process_lock) return;
+      if (ajax_helpers.ajax_busy) {
+        // See modals.js: wait only while a modal is appearing (the user can already see what they
+        // clicked); every other busy state still drops, which is what stops a double-click on a
+        // submit button posting twice.
+        if (modals_appearing > 0) {
+          attempt = (attempt || 0) + 1;
+          if (attempt <= 100) {
+            window.setTimeout(function () {
+              process_commands_lock(commands, attempt);
+            }, 100);
+          }
+        }
+        return;
       }
+      process_lock = true;
+      ajax_helpers.process_commands(commands);
+      process_lock = false;
     }
 
     function active_modal_container_id(index) {

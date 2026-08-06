@@ -15,6 +15,10 @@ if (typeof django_modal == 'undefined') {
         var open_modals = 0;
         var modals = []
         var process_lock = false;
+        // Modals whose content is on screen but whose show transition has not finished.
+        // Only in that window can a dropped command be a click on something the user could
+        // already see and aim at.
+        var modals_appearing = 0;
         var post_load_event = new CustomEvent('modalPostLoad');
         var target;
 
@@ -86,6 +90,7 @@ if (typeof django_modal == 'undefined') {
         function create_modal(modal_html) {
             var modal_container
             open_modals += 1;
+            modals_appearing += 1;
             modals.push({id: active_modal_container_id()})
             if (modal_html !== "") {
                 modal_container = $('<div>', {id: active_modal_container_id()}).appendTo('body');
@@ -141,6 +146,8 @@ if (typeof django_modal == 'undefined') {
             }
             modal_dialog.css({top: open_modals*10 - 10, left: left_pos});
             modal_element.on('hidden.bs.modal', function (event) {
+                // Closed before it ever finished showing -- keep the counter from leaking.
+                modals_appearing = Math.max(0, modals_appearing - 1);
                 $(this).parent().remove();
                 open_modals -= 1;
                 if (open_modals === 0){
@@ -156,6 +163,7 @@ if (typeof django_modal == 'undefined') {
                 }
             });
             modal_element.on('shown.bs.modal', function (event) {
+                modals_appearing = Math.max(0, modals_appearing - 1);
                 if(open_modals > 1) {
                     $(document).off('focusin.modal');
                 }
@@ -190,12 +198,31 @@ if (typeof django_modal == 'undefined') {
             return params;
         }
 
-        function process_commands_lock(commands) {
-            if (!process_lock && !ajax_helpers.ajax_busy) {
-                process_lock = true;
-                ajax_helpers.process_commands(commands);
-                process_lock = false
+        function process_commands_lock(commands, attempt) {
+            if (process_lock) return;
+            if (ajax_helpers.ajax_busy) {
+                // Busy while a modal is APPEARING is the one case worth waiting for: ajax_busy is only
+                // cleared by shown.bs.modal, which fires after the modal's content (and any datatable
+                // in it) has rendered, so the user can see and click a control whose commands would
+                // otherwise be discarded with no feedback -- a datatable row_href in a modal that has
+                // just opened is the reproducible case. Retry for that, giving up after ~10s so a
+                // stuck flag cannot leave a timer running forever.
+                //
+                // Any other busy state still drops the commands, deliberately: that is what stops a
+                // second click on a submit button posting the form twice.
+                if (modals_appearing > 0) {
+                    attempt = (attempt || 0) + 1;
+                    if (attempt <= 100) {
+                        window.setTimeout(function () {
+                            process_commands_lock(commands, attempt)
+                        }, 100);
+                    }
+                }
+                return;
             }
+            process_lock = true;
+            ajax_helpers.process_commands(commands);
+            process_lock = false
         }
 
         function active_modal_container_id(index) {
