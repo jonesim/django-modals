@@ -40,7 +40,29 @@ def add_width(style):
     return style
 
 
-class Select2(SelectGroupMixin, Select):
+class ClearableMixin:
+    """Tell the template whether this select may be cleared.
+
+    Select2's clear control is a cross on the widget, titled "Remove all items" -- its own wording,
+    written for a multiple select. On a REQUIRED single select it offers something that cannot be
+    done: clearing empties the field, the form will not validate, and the only way out is to pick a
+    value again. It was on unconditionally.
+
+    `is_required` is set on every widget by `Field.__init__`, so this is the field's own answer
+    rather than a guess. It is NOT the same as the `required` attribute in the html: `Select`
+    renders that only where the first option is empty, so a required field with a default -- which
+    has no blank option -- carries no `required` attribute at all, and reading the attribute back
+    would say "optional" for exactly the fields that most need the cross gone.
+    """
+
+    def get_context(self, name, value, attrs):
+        # noinspection PyUnresolvedReferences
+        context = super().get_context(name, value, attrs)
+        context['widget']['allow_clear'] = not self.is_required
+        return context
+
+
+class Select2(ClearableMixin, SelectGroupMixin, Select):
     template_name = 'django_modals/widgets/select2.html'
 
     def get_context(self, name, value, attrs):
@@ -55,7 +77,7 @@ class TypedSelect2(SelectGroupMixin, TypedChoiceField):
     template_name = 'django_modals/widgets/select2.html'
 
 
-class Select2Multiple(SelectGroupMixin, SelectMultiple):
+class Select2Multiple(ClearableMixin, SelectGroupMixin, SelectMultiple):
     template_name = 'django_modals/widgets/select2.html'
     new_marker = 'new:'
 
