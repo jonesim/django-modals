@@ -21,7 +21,7 @@
                 {% if widget.attrs.selected_ajax == True %}true{% else %}"{{ widget.attrs.selected_ajax|default:"false" }}"{% endif %},
                 {% if widget.attrs.cleared_ajax == True %}true{% else %}"{{ widget.attrs.cleared_ajax|default:"false" }}"{% endif %},
                 {% if widget.attrs.keyboard_open == False %}false{% else %}true{% endif %},
-                {{ widget.allow_clear|yesno:"true,false,true" }}
+                {% if widget.allow_clear == False %}false{% else %}true{% endif %}
             )
         })()
         {% comment %}

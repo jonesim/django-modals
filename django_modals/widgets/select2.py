@@ -53,6 +53,11 @@ class ClearableMixin:
     renders that only where the first option is empty, so a required field with a default -- which
     has no blank option -- carries no `required` attribute at all, and reading the attribute back
     would say "optional" for exactly the fields that most need the cross gone.
+
+    It is a snapshot, though: `Field.__init__` copies `required` onto the widget once, where
+    Django's own `required` attribute is read from `field.required` at render time. A form that
+    flips `self.fields[x].required` after construction is not reflected here, so a field made
+    optional at runtime keeps the cross off, and one made required keeps it on.
     """
 
     def get_context(self, name, value, attrs):
