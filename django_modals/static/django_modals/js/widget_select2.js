@@ -1,6 +1,6 @@
 var select2_widget = function () {
 
-    function initselect2(select_id, ajax, tags, data, placeholder, html_template, html_result_template, selected_ajax, cleared_ajax, keyboard_open) {
+    function initselect2(select_id, ajax, tags, data, placeholder, html_template, html_result_template, selected_ajax, cleared_ajax, keyboard_open, allow_clear) {
         function strip_id(org_id) {
             if (org_id.substring(0, 3) === 'id_') {
                 return org_id.substring(3);
@@ -59,7 +59,11 @@ var select2_widget = function () {
         var select2_params = {
             theme: "bootstrap4",
             dropdownParent: modal_container,
-            allowClear: true,
+            // The clear cross, off on a required field: clearing one leaves a form that cannot be
+            // submitted, and the control is titled "Remove all items" whatever it sits on. The
+            // widget passes the field's own `required`; a caller that says nothing keeps the old
+            // behaviour.
+            allowClear: allow_clear === undefined ? true : allow_clear,
             placeholder: placeholder
         };
 
