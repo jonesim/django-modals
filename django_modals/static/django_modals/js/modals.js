@@ -33,6 +33,13 @@ if (typeof django_modal == 'undefined') {
         }
 
         ajax_helpers.command_functions.close = function (command) {
+            // A response may send more closes than there are modals open: a view that deletes an
+            // object closes both the confirm and the form behind it, and the same view can be
+            // reached with only the confirm on screen. Without this guard the extra close threw on
+            // an empty stack, and every command after it in the response was dropped.
+            if (modals.length === 0) {
+                return
+            }
             if (command !== undefined && command.no_refresh === true){
                 modals[modals.length-1].no_refresh = true
             }
