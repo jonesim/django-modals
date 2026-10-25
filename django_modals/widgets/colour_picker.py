@@ -1,6 +1,6 @@
 from django.forms.widgets import TextInput
 
-from django_modals.fields import FieldEx
+from django_modals.fields import FieldEx, LegacyWidgetAttributes
 
 
 class ColourPickerFieldEx(FieldEx):
@@ -8,7 +8,7 @@ class ColourPickerFieldEx(FieldEx):
         return "django_modals/widgets/colour_picker_append.html"
 
 
-class ColourPickerWidget(TextInput):
+class ColourPickerWidget(LegacyWidgetAttributes, TextInput):
     template_name = 'django_modals/widgets/colour_picker.html'
     formset_field_template = "django_modals/widgets/colour_picker_append.html"
 

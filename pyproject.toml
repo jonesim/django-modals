@@ -16,8 +16,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "django-ajax-helpers>=0.0.22",
-    "make-html",
+    "django-ajax-helpers>=0.0.22,!=1.0.0",
+    "make-html>=1.0.0",
 ]
 
 [project.urls]

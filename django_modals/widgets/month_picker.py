@@ -1,8 +1,8 @@
 from django.forms.widgets import TextInput
-from ..fields import FieldEx
+from ..fields import FieldEx, LegacyWidgetAttributes
 
 
-class MonthPicker(TextInput):
+class MonthPicker(LegacyWidgetAttributes, TextInput):
     template_name = 'django_modals/widgets/month_picker.html'
     modal_field_class = FieldEx
     modal_kwargs = {'appended_text': '<i class="fas fa-calendar-alt fa-fw"></i>', 'input_size': 'input-group-sm'}

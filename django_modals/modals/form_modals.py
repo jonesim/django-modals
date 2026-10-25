@@ -1,6 +1,7 @@
 import base64
 import inspect
 
+from django.db.models import ProtectedError, RestrictedError
 from django.forms.fields import Field
 from django.forms.models import modelform_factory, fields_for_model
 from django.http import HttpResponse, JsonResponse, HttpRequest
@@ -104,6 +105,10 @@ class ModelFormModal(SingleObjectMixin, FormModal):
     base_form = ModelCrispyForm
     delete_message = 'Are you sure you want to delete?'
     delete_title = 'Warning'
+    delete_protected_title = 'Unable to delete'
+    delete_protected_message = ('This record cannot be deleted because the following still '
+                                'depend on it: {blockers}.')
+    delete_protected_limit = 5
     field_classes = None
     permission_delete = processes.PERMISSION_DISABLE
     permission_edit = processes.PERMISSION_OFF
@@ -153,9 +158,26 @@ class ModelFormModal(SingleObjectMixin, FormModal):
     def object_delete(self):
         pass
 
+    @staticmethod
+    def get_blocking_objects(error):
+        if isinstance(error, RestrictedError):
+            return error.restricted_objects
+        return error.protected_objects
+
+    def delete_blocked(self, error):
+        items = list(self.get_blocking_objects(error))
+        shown = ', '.join(str(o) for o in items[:self.delete_protected_limit])
+        if len(items) > self.delete_protected_limit:
+            shown += f' and {len(items) - self.delete_protected_limit} more'
+        return self.message(self.delete_protected_message.format(blockers=shown),
+                            title=self.delete_protected_title)
+
     def button_confirm_delete(self, **kwargs):
         if self.process in [processes.PROCESS_DELETE, processes.PROCESS_EDIT_DELETE]:
-            self.object.delete()
+            try:
+                self.object.delete()
+            except (ProtectedError, RestrictedError) as e:
+                return self.delete_blocked(e)
         self.object_delete()
         if not self.response_commands:
             if 'modal_querystring' in kwargs and 'on_delete=' in kwargs['modal_querystring']:

@@ -7,7 +7,7 @@ from django.forms.utils import flatatt
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
-from .fields import FieldEx
+from .fields import FieldEx, LegacyWidgetAttributes
 from .form_helpers import HorizontalHelper
 from .helper import modal_button
 from .layout import HTML, Layout, Div, get_helper_context
@@ -62,20 +62,35 @@ class ProcessFormFields:
                                               'error_messages'] if getattr(self, f, None)}
 
 
+def _widget_attribute(widget, name, legacy_name):
+    """Read a widget attribute that may be declared under its new ``modal_*`` name
+    or its legacy ``crispy_*`` name.
+
+    Whichever is declared closest to the widget wins (instance first, then the
+    MRO), so a downstream subclass setting ``crispy_kwargs`` on a package widget
+    that declares ``modal_kwargs`` still overrides it.  ``LegacyWidgetAttributes``
+    is skipped: its aliases only mirror the new names.
+    """
+    for attribute in (name, legacy_name):
+        if attribute in getattr(widget, '__dict__', {}):
+            return getattr(widget, attribute)
+    for cls in type(widget).__mro__:
+        if cls is LegacyWidgetAttributes:
+            continue
+        for attribute in (name, legacy_name):
+            if attribute in cls.__dict__:
+                return getattr(widget, attribute)
+    return None
+
+
 def widget_field_kwargs(widget):
-    """Field-layout kwargs declared on a widget. Reads the new ``modal_kwargs``
-    attribute, falling back to the legacy ``crispy_kwargs`` for backward
-    compatibility with downstream widgets."""
-    return getattr(widget, 'modal_kwargs', None) or getattr(widget, 'crispy_kwargs', None) or {}
+    """Field-layout kwargs declared on a widget (``modal_kwargs``, or legacy ``crispy_kwargs``)."""
+    return _widget_attribute(widget, 'modal_kwargs', 'crispy_kwargs') or {}
 
 
 def widget_field_class(widget):
-    """Layout field class declared on a widget (new ``modal_field_class`` name,
-    legacy ``crispy_field_class`` fallback)."""
-    field_class = getattr(widget, 'modal_field_class', None)
-    if field_class is None:
-        field_class = getattr(widget, 'crispy_field_class', None)
-    return field_class if field_class is not None else FieldEx
+    """Layout field class declared on a widget (``modal_field_class``, or legacy ``crispy_field_class``)."""
+    return _widget_attribute(widget, 'modal_field_class', 'crispy_field_class') or FieldEx
 
 
 class CrispyFormMixin:
@@ -316,6 +331,9 @@ class CrispyFormMixin:
         if script:
             self.helper.layout.append(HTML(script))
         content = self.helper.layout.render(self, context)
+        if context['form_show_errors']:
+            # non-field errors (clean(), unique_together) head the form, as crispy rendered them
+            content = render_to_string('django_modals/forms/bootstrap4/errors.html', {'form': self}) + content
         if getattr(self.helper, 'form_tag', True):
             content = self.form_wrapper(content)
         return mark_safe(content)
@@ -364,10 +382,8 @@ class BaseInlineCrispyFormSet(CrispyFormMixin, forms.BaseInlineFormSet):
     def render(self, *args, **kwargs):
         for form in [self.empty_form, *self.forms]:
             for field in form.fields.values():
-                widget = field.widget
-                if not getattr(widget, 'modal_kwargs', None) and getattr(widget, 'crispy_kwargs', None):
-                    # honour the legacy widget attribute in the formset template path
-                    widget.modal_kwargs = widget.crispy_kwargs
+                # the formset template reads widget.modal_kwargs, so resolve the legacy name onto it
+                field.widget.modal_kwargs = widget_field_kwargs(field.widget)
         for form in self.forms:
             form.helper = self.helper
             form.mode = self.mode

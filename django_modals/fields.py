@@ -7,6 +7,28 @@ from .layout import Div, render_field
 EXTRA_CLASS_KEYS = ['label_class', 'field_class', 'form_class', 'form_show_labels', 'wrapper_class']
 
 
+class LegacyWidgetAttributes:
+    """Exposes a widget's ``modal_kwargs`` / ``modal_field_class`` under their old
+    ``crispy_kwargs`` / ``crispy_field_class`` names, for downstream code that still
+    reads them off the package widgets.  Deprecated with those names."""
+
+    @property
+    def crispy_kwargs(self):
+        return getattr(self, 'modal_kwargs', None) or {}
+
+    @crispy_kwargs.setter
+    def crispy_kwargs(self, value):
+        self.modal_kwargs = value
+
+    @property
+    def crispy_field_class(self):
+        return getattr(self, 'modal_field_class', None)
+
+    @crispy_field_class.setter
+    def crispy_field_class(self, value):
+        self.modal_field_class = value
+
+
 class MultiFieldRow(Div):
 
     def __init__(self, label, *fields, form_show_labels=False, form_class='', wrapper_class='d-flex mr-2',

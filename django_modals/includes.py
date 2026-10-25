@@ -32,6 +32,18 @@ class Select2Widget(SourceBase):
     js_filename = 'widget_select2.js'
 
 
+class TomSelect(SourceBase):
+    static_path = 'django_modals/'
+    cdn_path = 'cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/'
+    js_filename = 'tom-select.complete.min.js'      # -> js/tom-select.complete.min.js
+    css_filename = 'tom-select.bootstrap4.min.css'  # -> css/tom-select.bootstrap4.min.css
+
+
+class TomSelectWidget(SourceBase):
+    static_path = 'django_modals/'
+    js_filename = 'widget_tom_select.js'
+
+
 class JQueryUI(SourceBase):
     static_path = 'django_modals/jquery_ui_limited/'
     filename = 'jquery-ui.min'
@@ -61,4 +73,5 @@ class JFormset(SourceBase):
 
 packages = {
     'select2': [Select2, Select2Widget],
+    'tom_select': [TomSelect, TomSelectWidget],
 }

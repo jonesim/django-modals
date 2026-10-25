@@ -14,6 +14,8 @@ from django.template.loader import render_to_string
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 
+from . import field_render
+
 DEFAULT_FIELD_TEMPLATE = 'django_modals/forms/bootstrap4/field.html'
 
 
@@ -57,7 +59,13 @@ def render_field(field, form, context, template=None, attrs=None, extra_context=
     ctx['flat_attrs'] = flatatt(attrs) if attrs else ''
     if extra_context:
         ctx.update(extra_context)
-    return render_to_string(template or DEFAULT_FIELD_TEMPLATE, ctx)
+    template = template or DEFAULT_FIELD_TEMPLATE
+    # html_classes renderer — used when explicitly enabled or for a non-Bootstrap-4
+    # framework; only for the default field template (custom/prepended-appended
+    # templates always go through Django).
+    if template == DEFAULT_FIELD_TEMPLATE and field_render.use_renderer():
+        return field_render.render_field_html(bound_field, ctx)
+    return render_to_string(template, ctx)
 
 
 class HTML:

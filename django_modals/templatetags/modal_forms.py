@@ -56,6 +56,50 @@ def _pairwise(iterable):
     return zip(a, a)
 
 
+def apply_widget_classes(field, attrs):
+    """Inject the widget's converter class name plus ``attrs`` onto the bound
+    field's widget(s) and return the rendered field HTML — the core of crispy's
+    ``CrispyFieldNode``.
+
+    ``attrs`` is a dict (applied to every widget) or a list of dicts (one per
+    widget) of already-resolved ``name -> value`` strings.  Shared by the
+    ``modal_field`` template tag and the html_classes field renderer
+    (:mod:`django_modals.field_render`).
+    """
+    widgets = getattr(field.field.widget, 'widgets', [getattr(field.field.widget, 'widget', field.field.widget)])
+
+    if isinstance(attrs, dict):
+        attrs = [attrs] * len(widgets)
+
+    converters = {
+        'textinput': 'textinput textInput',
+        'fileinput': 'fileinput fileUpload',
+        'passwordinput': 'textinput textInput',
+    }
+    converters.update(getattr(settings, 'CRISPY_CLASS_CONVERTERS', {}))
+
+    for widget, attr in zip(widgets, attrs):
+        class_name = widget.__class__.__name__.lower()
+        class_name = converters.get(class_name, class_name)
+        css_class = widget.attrs.get('class', '')
+        if css_class:
+            if css_class.find(class_name) == -1:
+                css_class += ' %s' % class_name
+        else:
+            css_class = class_name
+        widget.attrs['class'] = css_class
+
+        for attribute_name, attribute in attr.items():
+            if attribute_name in widget.attrs:
+                for a in attribute.split():
+                    if a not in widget.attrs[attribute_name].split():
+                        widget.attrs[attribute_name] += ' ' + a
+            else:
+                widget.attrs[attribute_name] = attribute
+
+    return str(field)
+
+
 class ModalFieldNode(template.Node):
     """Render a bound field, injecting the converter class name and any extra
     attributes, exactly as crispy_forms' ``CrispyFieldNode`` did."""
@@ -71,41 +115,9 @@ class ModalFieldNode(template.Node):
 
         field, attrs = context.render_context[self]
         field = field.resolve(context)
-
-        widgets = getattr(field.field.widget, 'widgets', [getattr(field.field.widget, 'widget', field.field.widget)])
-
-        if isinstance(attrs, dict):
-            attrs = [attrs] * len(widgets)
-
-        converters = {
-            'textinput': 'textinput textInput',
-            'fileinput': 'fileinput fileUpload',
-            'passwordinput': 'textinput textInput',
-        }
-        converters.update(getattr(settings, 'CRISPY_CLASS_CONVERTERS', {}))
-
-        for widget, attr in zip(widgets, attrs):
-            class_name = widget.__class__.__name__.lower()
-            class_name = converters.get(class_name, class_name)
-            css_class = widget.attrs.get('class', '')
-            if css_class:
-                if css_class.find(class_name) == -1:
-                    css_class += ' %s' % class_name
-            else:
-                css_class = class_name
-            widget.attrs['class'] = css_class
-
-            for attribute_name, attribute in attr.items():
-                attribute_name = template.Variable(attribute_name).resolve(context)
-                attributes = template.Variable(attribute).resolve(context)
-                if attribute_name in widget.attrs:
-                    for a in attributes.split():
-                        if a not in widget.attrs[attribute_name].split():
-                            widget.attrs[attribute_name] += ' ' + a
-                else:
-                    widget.attrs[attribute_name] = attributes
-
-        return str(field)
+        resolved = {template.Variable(name).resolve(context): template.Variable(value).resolve(context)
+                    for name, value in attrs.items()}
+        return apply_widget_classes(field, resolved)
 
 
 @register.tag(name='modal_field')

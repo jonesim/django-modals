@@ -4,23 +4,17 @@ from ajax_helpers.templatetags.ajax_helpers import button_javascript
 from django.urls import reverse, resolve, NoReverseMatch
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from html_classes.font_awesome import font_awesome as fa_icon
+from html_classes.html import HtmlA, HtmlButton, HtmlDiv
 
 
 DUMMY_SLUG = 'DUMMY-SLUG'
 
 modal_buttons = {
-    'edit': '<i class="fas fa-edit"></i>',
-    'add':  '<i class="fas fa-plus-circle p-1"></i>',
-    'delete': '<i class="fas fa-trash"></i>',
+    'edit': fa_icon('fas fa-edit'),
+    'add':  fa_icon('fas fa-plus-circle p-1'),
+    'delete': fa_icon('fas fa-trash'),
 }
-
-progress_bar_html = '''
-    <div class="progress" style="margin-top: 5px;">
-        <div id='file_progress_bar{}' class="progress-bar{}" role="progressbar" aria-valuenow="0" 
-            aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-        </div>
-    </div>
-'''
 
 
 def base64_json(slug_dict):
@@ -28,13 +22,11 @@ def base64_json(slug_dict):
 
 
 def progress_bar(progress_id=None, css=''):
-    if progress_id is not None:
-        progress_id = '_' + str(progress_id)
-    else:
-        progress_id = ''
-    if css:
-        css = ' ' + css
-    return progress_bar_html.format(progress_id, css)
+    progress_id = '_' + str(progress_id) if progress_id is not None else ''
+    bar = HtmlDiv(css_classes=f'progress-bar{" " + css if css else ""}', id=f'file_progress_bar{progress_id}',
+                  role='progressbar', aria_valuenow='0', aria_valuemin='0', aria_valuemax='100',
+                  raw_attributes={'style': 'width: 0%'})
+    return HtmlDiv(bar, css_classes='progress', raw_attributes={'style': 'margin-top: 5px;'}).render()
 
 
 def make_slug(*args, make_pk=False):
@@ -77,11 +69,9 @@ def show_modal(modal_name, *args, base64=False, datatable=False, href=False, but
     if button is not None:
         button_text = modal_buttons.get(button, button)
         attributes = attr(attributes, tooltip)
-        text_attributes = ' ' + ' '.join([f'{k}="{v}"' for k, v in attributes.items()]) if attributes else ''
-        if font_awesome:
-            button_text = f'<i class="{font_awesome}"></i> {button_text}'
-        javascript = (f'<a {css_classes(button_classes)}{text_attributes} '
-                      f'href="javascript:{javascript}">{button_text}</a>')
+        contents = f'{fa_icon(font_awesome)} {button_text}' if font_awesome else button_text
+        javascript = HtmlA(contents, css_classes=button_classes or None,
+                           href=f'javascript:{javascript}', **attributes).render()
     if not slug:
         slug = '-'
     return javascript.replace(DUMMY_SLUG, slug)
@@ -117,10 +107,11 @@ def modal_button(title, commands, css_class='btn-primary', font_awesome=None, to
         params = commands
 
     if font_awesome:
-        title = f'<i class="{font_awesome}"></i> {title}'
-    tooltip_html = f' data-tooltip="tooltip" title="{tooltip}"' if tooltip else ''
-    return mark_safe(f'''<button onclick='django_modal.process_commands_lock({json.dumps(params)})' 
-            class="btn {css_class}" type="button"{tooltip_html}>{title}</button>''')
+        title = f'{fa_icon(font_awesome)} {title}'
+    attributes = {'onclick': f'django_modal.process_commands_lock({json.dumps(params)})', 'type': 'button'}
+    if tooltip:
+        attributes.update({'data-tooltip': 'tooltip', 'title': tooltip})
+    return HtmlButton(title, css_classes=f'btn {css_class}', single_quote=True, **attributes).render()
 
 
 def modal_button_method(title, method_name, css_class='btn-primary', font_awesome=None, **kwargs):
@@ -132,11 +123,12 @@ def modal_button_group(buttons=None, button_container_class=None, button_group_c
 
     group_class = f'form-buttons{" " + button_container_class if button_container_class else ""}'
     if type(buttons) == str:
-        return f'<div class="{group_class}"><div class="{button_group_class}">{buttons}</div></div>'
-    if buttons:
-        return (f'<div class="{group_class}">'
-                f'<div class="{button_group_class}">{"".join(buttons)}</div></div>')
-    return ''
+        inner = buttons
+    elif buttons:
+        inner = ''.join(str(b) for b in buttons)
+    else:
+        return ''
+    return HtmlDiv(HtmlDiv(inner, css_classes=button_group_class), css_classes=group_class).render()
 
 
 def modal_delete_javascript(url_name, pk):

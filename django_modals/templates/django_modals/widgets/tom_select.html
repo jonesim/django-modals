@@ -1,0 +1,40 @@
+{% spaceless %}
+    <select name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+        {{ options_str|safe }}
+    </select>
+
+    <script>
+        (function () {
+            var data {% if widget.select_data %}= JSON.parse(`{{ widget.select_data }}`)
+                for (f of data) {
+                    f.text = decodeURI(f.text);
+                }
+            {% endif %}
+            tom_select_widget.inittomselect(
+                "{{ widget.attrs.id }}",
+                {{ widget.attrs.ajax|yesno:"true,false" }},
+                {enabled: {{widget.attrs.tags|yesno:"true,false" }}, new_marker: "{{ widget.attrs.new_marker}}"},
+                data,
+                "{{ widget.attrs.placeholder|default:'-' }}",
+                {{ widget.attrs.html_template|safe|default:"undefined" }},
+                {{ widget.attrs.html_result_template|safe|default:"undefined" }},
+                {% if widget.attrs.selected_ajax == True %}true{% else %}"{{ widget.attrs.selected_ajax|default:"false" }}"{% endif %},
+                {% if widget.attrs.cleared_ajax == True %}true{% else %}"{{ widget.attrs.cleared_ajax|default:"false" }}"{% endif %}
+            )
+        })()
+    </script>
+    {% if widget.attrs.height or widget.attrs.dropdown_height %}
+        <style>
+        {% if widget.attrs.height %}
+            #{{ widget.attrs.id }}-ts-control {
+                height: {{ widget.attrs.height }}!important;
+            }
+        {% endif %}
+        {% if widget.attrs.dropdown_height %}
+            #{{ widget.attrs.id }}-ts-dropdown .ts-dropdown-content {
+                max-height: {{ widget.attrs.dropdown_height }}!important;
+            }
+        {% endif %}
+    </style>
+    {% endif %}
+{% endspaceless %}
