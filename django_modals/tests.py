@@ -8,7 +8,7 @@ from django.test import SimpleTestCase, override_settings
 
 from django_modals.fields import FieldEx
 from django_modals.forms import CrispyForm, widget_field_class, widget_field_kwargs
-from django_modals.layout import Fieldset
+from django_modals.layout import Fieldset, StrictButton
 from django_modals.processes import PROCESS_VIEW
 from django_modals.widgets.colour_picker import ColourPickerFieldEx, ColourPickerWidget
 from django_modals.widgets.jquery_datepicker import DatePicker
@@ -105,6 +105,14 @@ class FormRenderTests(SimpleTestCase):
 
 
 class LayoutTests(SimpleTestCase):
+
+    def test_strict_button(self):
+        html = str(RenderForm(form_setup=lambda form, *a, **k: [
+            'name', StrictButton('Go', css_id='go', css_class='btn-success', onclick='go()', data_x='1')]))
+        self.assertIn('<button onclick="go()" data-x="1" type="button" id="go" class="btn btn-success">Go</button>',
+                      html)
+        # a StrictButton in the layout replaces the default Submit/Cancel buttons, as under crispy
+        self.assertNotIn('Cancel', html)
 
     def test_fieldset_css_id_and_attrs(self):
         html = str(RenderForm(form_setup=lambda form, *a, **k: [

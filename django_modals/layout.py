@@ -116,6 +116,26 @@ class Fieldset:
                                                               content))
 
 
+class ModalButton(HTML):
+    """Marker node for a rendered modal button so existing buttons can be
+    detected in a layout."""
+
+
+class StrictButton(ModalButton):
+    """A ``<button>`` — drop-in for crispy's ``StrictButton`` (same arguments; ``content``
+    is not rendered as a template)."""
+
+    field_classes = 'btn'
+
+    def __init__(self, content, css_id=None, css_class=None, **kwargs):
+        self.content = content
+        kwargs.setdefault('type', 'button')
+        if css_id:
+            kwargs['id'] = css_id
+        kwargs['class'] = '%s %s' % (self.field_classes, css_class) if css_class else self.field_classes
+        super().__init__('<button%s>%s</button>' % (flatatt(kwargs), content))
+
+
 class Layout:
     """Ordered container of layout nodes."""
 

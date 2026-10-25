@@ -10,13 +10,8 @@ from django.utils.safestring import mark_safe
 from .fields import FieldEx, LegacyWidgetAttributes
 from .form_helpers import HorizontalHelper
 from .helper import modal_button
-from .layout import HTML, Layout, Div, get_helper_context
+from .layout import HTML, Layout, Div, ModalButton, get_helper_context
 from .processes import PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_VIEW_EDIT, PROCESS_DELETE, process_data
-
-
-class ModalButton(HTML):
-    """Marker node for a rendered modal button so existing buttons can be
-    detected in a layout."""
 
 
 class ProcessFormFields:
