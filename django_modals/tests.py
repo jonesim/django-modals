@@ -4,11 +4,12 @@ These assert that the structural Bootstrap classes the package produced under
 crispy-forms are still emitted by the native renderer.
 """
 from django import forms
+from django.core.exceptions import ImproperlyConfigured
 from django.test import SimpleTestCase, override_settings
 
 from django_modals.fields import FieldEx
 from django_modals.forms import CrispyForm, widget_field_class, widget_field_kwargs
-from django_modals.layout import Fieldset, StrictButton
+from django_modals.layout import Div, Fieldset, Layout, StrictButton
 from django_modals.processes import PROCESS_VIEW
 from django_modals.widgets.colour_picker import ColourPickerFieldEx, ColourPickerWidget
 from django_modals.widgets.jquery_datepicker import DatePicker
@@ -104,6 +105,20 @@ class FormRenderTests(SimpleTestCase):
         self.assertNotIn('alert-danger', str(RenderForm()))
 
 
+class FakeCrispyDiv:
+    """Stands in for crispy_forms.layout.Div without needing crispy installed."""
+    def render(self, form, form_style, context, template_pack=None, **kwargs):
+        return ''
+
+
+FakeCrispyDiv.__module__ = 'crispy_forms.layout'
+FakeCrispyDiv.__name__ = 'Div'
+
+
+class DivEx(FakeCrispyDiv):
+    pass
+
+
 class LayoutTests(SimpleTestCase):
 
     def test_strict_button(self):
@@ -118,6 +133,25 @@ class LayoutTests(SimpleTestCase):
         html = str(RenderForm(form_setup=lambda form, *a, **k: [
             Fieldset('Legend', 'name', css_id='fs', css_class='c', data_x='1')]))
         self.assertIn('<fieldset id="fs" class="c" data-x="1"><legend>Legend</legend>', html)
+
+    def test_crispy_object_raises_clear_error(self):
+        with self.assertRaisesMessage(ImproperlyConfigured, 'use django_modals.layout.Div'):
+            str(RenderForm(form_setup=lambda form, *a, **k: [Div('name', FakeCrispyDiv())]))
+
+    def test_crispy_subclass_raises_clear_error(self):
+        with self.assertRaisesMessage(ImproperlyConfigured, 'DivEx subclasses crispy crispy_forms.layout.Div'):
+            str(RenderForm(form_setup=lambda form, *a, **k: [DivEx()]))
+
+    def test_crispy_layout_assigned_to_helper_raises_clear_error(self):
+        form = RenderForm()
+        form.helper.layout = FakeCrispyDiv()
+        with self.assertRaises(ImproperlyConfigured):
+            str(form)
+
+    def test_native_layout_still_renders(self):
+        form = RenderForm()
+        form.helper.layout = Layout(Div('name', css_class='wrap'))
+        self.assertIn('<div class="wrap">', str(form))
 
 
 class LegacyCrispyDate(DatePicker):

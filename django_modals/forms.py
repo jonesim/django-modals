@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 from .fields import FieldEx, LegacyWidgetAttributes
 from .form_helpers import HorizontalHelper
 from .helper import modal_button
-from .layout import HTML, Layout, Div, ModalButton, get_helper_context
+from .layout import HTML, Layout, Div, ModalButton, check_not_crispy, get_helper_context
 from .processes import PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_VIEW_EDIT, PROCESS_DELETE, process_data
 
 
@@ -325,6 +325,7 @@ class CrispyFormMixin:
         script = self.post_load_script()
         if script:
             self.helper.layout.append(HTML(script))
+        check_not_crispy(self.helper.layout)
         content = self.helper.layout.render(self, context)
         if context['form_show_errors']:
             # non-field errors (clean(), unique_together) head the form, as crispy rendered them

@@ -10,6 +10,7 @@ the same variables crispy injected via ``FormHelper.get_attributes``.
 """
 import re
 
+from django.core.exceptions import ImproperlyConfigured
 from django.template.loader import render_to_string
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
@@ -33,6 +34,36 @@ def flatatt(attrs):
     return mark_safe(''.join(pairs))
 
 
+# where each crispy layout object now lives, for the error raised when one reaches a modal layout
+CRISPY_REPLACEMENTS = {
+    'Field': 'django_modals.fields.FieldEx',
+    'HTML': 'django_modals.layout.HTML',
+    'Div': 'django_modals.layout.Div',
+    'Layout': 'django_modals.layout.Layout',
+    'Fieldset': 'django_modals.layout.Fieldset',
+    'StrictButton': 'django_modals.layout.StrictButton',
+}
+
+
+def check_not_crispy(node):
+    """Raise a clear error for a crispy-forms layout object (or subclass of one) — its
+    ``render`` takes crispy's arguments, so it would otherwise fail with a bare TypeError."""
+    node_class = type(node)
+    crispy_class = next((c for c in node_class.__mro__ if c.__module__.startswith('crispy_forms')), None)
+    if crispy_class is None:
+        return
+    replacement = CRISPY_REPLACEMENTS.get(crispy_class.__name__)
+    crispy_name = f'{crispy_class.__module__}.{crispy_class.__name__}'
+    if crispy_class is node_class:
+        hint = f'use {replacement}' if replacement else 'django-modals has no equivalent'
+        message = f'{crispy_name} in a modal form layout; {hint}.'
+    else:
+        base = replacement or 'a django_modals.layout class'
+        message = (f'{node_class.__module__}.{node_class.__name__} subclasses crispy {crispy_name}; '
+                   f'subclass {base} instead and override render(self, form, context).')
+    raise ImproperlyConfigured(f'django-modals no longer uses crispy-forms: {message} See UPGRADING.md.')
+
+
 def render_fields(fields, form, context):
     return ''.join(render_field(f, form, context) for f in fields)
 
@@ -47,6 +78,7 @@ def render_field(field, form, context, template=None, attrs=None, extra_context=
     if field is None:
         return ''
     if hasattr(field, 'render'):
+        check_not_crispy(field)
         return field.render(form, context)
     try:
         bound_field = form[field]
