@@ -8,6 +8,7 @@ from django.test import SimpleTestCase, override_settings
 
 from django_modals.fields import FieldEx
 from django_modals.forms import CrispyForm, widget_field_class, widget_field_kwargs
+from django_modals.layout import Fieldset
 from django_modals.processes import PROCESS_VIEW
 from django_modals.widgets.colour_picker import ColourPickerFieldEx, ColourPickerWidget
 from django_modals.widgets.jquery_datepicker import DatePicker
@@ -101,6 +102,14 @@ class FormRenderTests(SimpleTestCase):
 
     def test_no_error_alert_without_errors(self):
         self.assertNotIn('alert-danger', str(RenderForm()))
+
+
+class LayoutTests(SimpleTestCase):
+
+    def test_fieldset_css_id_and_attrs(self):
+        html = str(RenderForm(form_setup=lambda form, *a, **k: [
+            Fieldset('Legend', 'name', css_id='fs', css_class='c', data_x='1')]))
+        self.assertIn('<fieldset id="fs" class="c" data-x="1"><legend>Legend</legend>', html)
 
 
 class LegacyCrispyDate(DatePicker):

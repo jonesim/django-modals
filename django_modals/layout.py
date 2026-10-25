@@ -100,16 +100,20 @@ class Div:
 class Fieldset:
     """Wraps its children in a ``<fieldset>`` with an optional ``<legend>``."""
 
-    def __init__(self, legend, *fields, css_class=None, **kwargs):
+    def __init__(self, legend, *fields, css_class=None, css_id=None, **kwargs):
         self.legend = legend
         self.fields = list(fields)
         self.css_class = css_class
+        self.css_id = css_id
+        self.attrs = kwargs
 
     def render(self, form, context):
         content = render_fields(self.fields, form, context)
         legend = '<legend>%s</legend>' % self.legend if self.legend else ''
+        id_attr = ' id="%s"' % self.css_id if self.css_id else ''
         class_attr = ' class="%s"' % self.css_class if self.css_class else ''
-        return mark_safe('<fieldset%s>%s%s</fieldset>' % (class_attr, legend, content))
+        return mark_safe('<fieldset%s%s%s>%s%s</fieldset>' % (id_attr, class_attr, flatatt(self.attrs), legend,
+                                                              content))
 
 
 class Layout:
