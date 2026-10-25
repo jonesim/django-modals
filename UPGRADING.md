@@ -1,12 +1,17 @@
-# Upgrading django-nested-modals — the crispy-forms removal release
+# Upgrading django-nested-modals to 0.1.0 — the crispy-forms removal release
 
 This release removes the hard dependency on **django-crispy-forms**. `django-modals` now
 renders its own form/field HTML natively. Output is **Bootstrap 4** and is visually equivalent
 to the previous crispy-rendered output, so most projects upgrade with only a few mechanical
 import changes.
 
-> **Bootstrap 5 is not yet supported.** This release delivers BS4 parity without crispy. A
-> `MODAL_BOOTSTRAP_VERSION` setting and a BS5 template pack are planned for a later release.
+> **Bootstrap 5 is not yet supported.** This release delivers BS4 parity without crispy. Leave
+> `CSS_FRAMEWORK` (the django-ajax-helpers setting) unset or `'bootstrap4'`: `'bootstrap5'` switches
+> the field renderer to BS5 markup, but the modal shell and `modals.js` still require jQuery and
+> Bootstrap 4, so modals will not work under it yet.
+
+**Dependencies:** `make-html>=1.0.0` is now required, and `django-tab-menus` is declared (it
+always was needed). `django-ajax-helpers` 1.0.0 is excluded — use 0.0.x or ≥1.0.1.
 
 ---
 
@@ -19,11 +24,16 @@ import changes.
       `from django_modals.layout import HTML, Div, Layout, Fieldset`.
 - [ ] Replace `from crispy_forms.layout import Field` with
       `from django_modals.fields import FieldEx` (and use `FieldEx` in place of `Field`).
+- [ ] Replace `from crispy_forms.bootstrap import StrictButton` with
+      `from django_modals.layout import StrictButton`.
+- [ ] Check any `HTML(...)` strings that relied on Django template syntax (see §2).
 - [ ] Rename widget attributes `crispy_kwargs` → `modal_kwargs` and
       `crispy_field_class` → `modal_field_class` (old names still work but are deprecated).
 - [ ] Update any custom field templates that used `{% load crispy_forms_field %}` /
       `{% crispy_field %}` (see below).
 - [ ] Update custom `FieldEx` / `Div` subclasses that overrode crispy render methods (see below).
+- [ ] Uninstall crispy if nothing else in the project needs it, so leftover imports fail at
+      start-up rather than when a modal opens (see §7).
 - [ ] Run your modals and check forms render correctly.
 
 Nothing in the **modal class API** changed: `ModelFormModal`, `form_fields`, `helper_class`,
@@ -79,6 +89,7 @@ the **same names and constructor signatures**, so usually it's just the import l
 | `crispy_forms.layout.Layout` | `django_modals.layout.Layout` |
 | `crispy_forms.layout.Fieldset` | `django_modals.layout.Fieldset` |
 | `crispy_forms.layout.Field` | `django_modals.fields.FieldEx` |
+| `crispy_forms.bootstrap.StrictButton` | `django_modals.layout.StrictButton` |
 
 Example:
 
@@ -90,6 +101,25 @@ Example:
 
 **Removed layout helpers:** `Flex` and `FieldNoLabel` were unused and have been deleted.
 `MultiFieldRow`, `MultiField`, and `Label` remain (import from `django_modals.fields`).
+
+A `StrictButton` placed in the layout (or in `form.buttons`) still replaces the default
+Submit/Cancel buttons, as before.
+
+**Behaviour differences** from the crispy objects:
+
+- **`HTML(...)` is not rendered as a Django template.** Crispy ran the string through the template
+  engine with the form context, so `{{ form.instance.name }}` or `{% url %}` inside it worked. The
+  string is now output as-is. Build it in Python (an f-string or `render_to_string`) instead. This
+  also means `{{`/`{%` in user data inside an `HTML(f'...')` is no longer executed.
+- `StrictButton` content is likewise output as-is, not rendered as a template.
+- `Div(template=...)` and other unknown keyword arguments become HTML attributes; custom
+  per-object templates are not supported.
+- Widget `Media` (`class Media` on a custom widget) is not output with the form. Load the assets
+  in the page template.
+
+**If a crispy object is left in a modal layout** — with crispy still installed — rendering the
+modal raises `ImproperlyConfigured` naming the class and its replacement, e.g.
+`crispy_forms.bootstrap.StrictButton in a modal form layout; use django_modals.layout.StrictButton`.
 
 ---
 
@@ -199,7 +229,18 @@ css_class=..., style=...)` — and adds `update_attributes(**attrs)`.
 
 ## 7. Verifying your project after upgrade
 
-1. `pip uninstall django-crispy-forms` — your app should still import and run.
+Find leftovers (ripgrep):
+
+```bash
+rg -n "crispy_forms|crispy_kwargs|crispy_field_class|StrictButton" --type py
+rg -n "crispy_forms_field|crispy_field|bootstrap4/layout/" --glob "*.html"
+rg -n "HTML\(.*(\{\{|\{%)" --type py          # HTML() relying on template syntax
+rg -n "def render\(self, form, form_style" --type py   # crispy render signature
+```
+
+1. `pip uninstall django-crispy-forms` — your app should still import and run. If something else
+   in the project still needs crispy, keep it installed; any crispy object that reaches a modal
+   layout then raises a clear `ImproperlyConfigured` when that modal is opened.
 2. Open each modal type you use and confirm fields, labels, required markers, help text, input
    groups, checkboxes/radios, file inputs, custom widgets, and view/disabled mode all render.
 3. Submit a form with validation errors and confirm `is-invalid` / `invalid-feedback` still show.
