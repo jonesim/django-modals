@@ -39,6 +39,8 @@ urlpatterns = [
 
     path('modal/crud_source_code/<str:slug>/', crud.SourceCodeModal.as_view(), name='crud_source_code'),
 
+    path('modal/sector/<str:slug>/', crud.SectorModal.as_view(), name='sector_modal'),
+
     path('modal/crud1/<str:slug>/', crud.CrudRead.as_view(), name='crud_read'),
     path('modal/crud2/<str:slug>/', crud.CrudEdit.as_view(), name='crud_edit'),
     path('modal/crud3/<str:slug>/', crud.CrudEditDelete.as_view(), name='crud_edit_delete'),
@@ -74,6 +76,9 @@ urlpatterns = [
     path('modal/widgets9/<str:slug>/', widgets.DatatableWidgetReverseExample.as_view(), name='datatable_rev'),
     path('modal/widgets10/<str:slug>/', widgets.AjaxPersonCompanyForm.as_view(), name='people_ajax'),
     path('modal/widgets11/<str:slug>/', widgets.Select2PersonCompanyForm.as_view(), name='people_select2'),
+    path('modal/widgets11a/<str:slug>/', widgets.TomSelectPersonCompanyForm.as_view(), name='people_tom_select'),
+    path('modal/widgets11b/<str:slug>/', widgets.AjaxTomSelectCompanyForm.as_view(), name='people_tom_select_ajax'),
+    path('modal/widgets11c/<str:slug>/', widgets.AjaxTomSelectMultipleForm.as_view(), name='tags_tom_select_ajax'),
     path('modal/widgets13/<str:slug>/', widgets.AjaxTemplateForm.as_view(), name='ajax_html_template'),
     path('modal/colour/<str:slug>/', widgets.CompanyColourModal.as_view(), name='company_colour_modal'),
 

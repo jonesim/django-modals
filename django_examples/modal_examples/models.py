@@ -4,10 +4,18 @@ from django_datatables.model_def import DatatableModel
 from django_datatables.columns import ColumnLink, DatatableColumn, ChoiceColumn
 
 
+class Sector(models.Model):
+    name = models.CharField(max_length=80)
+
+    def __str__(self):
+        return self.name
+
+
 class Company(models.Model):
     name = models.CharField(max_length=80)
     active = models.BooleanField(default=False)
     importance = models.IntegerField(null=True)
+    sector = models.ForeignKey(Sector, null=True, blank=True, on_delete=models.PROTECT)
 
     class Datatable(DatatableModel):
         people = {'annotations': {'people': Count('person__id')}}

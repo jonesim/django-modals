@@ -10,6 +10,7 @@ from django_modals.helper import show_modal
 from django_modals.widgets.colour_picker import ColourPickerWidget
 from django_modals.widgets.month_picker import MonthPicker
 from django_modals.widgets.select2 import Select2, Select2Multiple, MultipleChoiceFieldAddValues
+from django_modals.widgets.tom_select import TomSelect, TomSelectMultiple
 from django_modals.widgets.widgets import Toggle, TinyMCE
 from django_modals.widgets.jquery_datepicker import DatePicker
 
@@ -56,6 +57,30 @@ class Select2PersonCompanyForm(ModelFormModal):
     model = Person
     form_fields = ['title', 'company', 'first_name']
     widgets = {'company': Select2, 'title': Select2}
+
+
+class TomSelectPersonCompanyForm(ModelFormModal):
+    model = Person
+    form_fields = ['title', 'company', 'first_name']
+    widgets = {'company': TomSelect, 'title': TomSelect}
+
+
+class AjaxTomSelectCompanyForm(ModelFormModal):
+    model = Person
+    form_fields = ['company', 'first_name']
+    widgets = {'company': TomSelect(attrs={'ajax': True})}
+
+    def select2_company(self, **kwargs):
+        return self.select2_ajax_search(filter_field='name', **kwargs)
+
+
+class AjaxTomSelectMultipleForm(ModelFormModal):
+    model = Tags
+    form_fields = ['tag', 'company']
+    widgets = {'company': TomSelectMultiple(attrs={'ajax': True})}
+
+    def select2_company(self, **kwargs):
+        return self.select2_ajax_search(filter_field='name', **kwargs)
 
 
 class DatatableWidgetExample(ModelFormModal):

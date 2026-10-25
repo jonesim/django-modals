@@ -37,6 +37,19 @@
             {% show_src_code 'crud_source_code' 'crud_template' %}
         </p>
     </div>
+    <hr>
+    <div class="m-4">
+        <h4>Protected delete (on_delete=PROTECT)</h4>
+        <p class="my-2">
+            The first company references the "In-Use Sector" via a <code>PROTECT</code> foreign key.
+            Deleting that sector is blocked, and the modal reports which records still depend on it
+            instead of raising a server error.
+        </p>
+        {{ menus.protected.render }}
+        <p class="my-2">
+            {% show_src_code 'crud_source_code' 'protected_delete_menu' %}
+        </p>
+    </div>
 {% endblock %}
 
 

@@ -1,0 +1,12 @@
+{% extends 'modal_examples/demo.html' %}
+
+{% block contents %}
+<div class="m-4">
+    <h4>Lazy Modal Loading</h4>
+    <p>
+        The modal shell opens immediately with a Bootstrap spinner, then fires a second AJAX request
+        to load the real content once it is visible. Set <code>lazy = True</code> on any modal class to opt in.
+    </p>
+    {{ menus.examples.render }}
+</div>
+{% endblock %}

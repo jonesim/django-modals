@@ -4,7 +4,7 @@ from show_src_code.modals import ModelFormModal, BaseSourceCodeModal
 from django_modals.helper import modal_delete_javascript
 from django_modals.processes import PERMISSION_OFF, PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_EDIT
 
-from modal_examples.models import Company
+from modal_examples.models import Company, Sector
 from .views import MainMenuTemplateView
 
 
@@ -28,11 +28,24 @@ class CrudExamples(MainMenuTemplateView):
             (f'crud_edit_delete,{self.company.id}', 'Edit/Delete'),
         )
 
+    def protected_delete_menu(self):
+        self.add_menu('protected', 'buttons', ).add_items(
+            ('sector_modal,-', 'Create Sector'),
+            (modal_delete_javascript('sector_modal', self.sector.id), 'Delete In-Use Sector', MenuItem.JAVASCRIPT),
+        )
+
     def setup_menu(self):
         super().setup_menu()
         self.company = Company.objects.first()
+        # Ensure the first company references a sector via on_delete=PROTECT so the
+        # delete is guaranteed to be blocked, demonstrating the error message.
+        self.sector, _ = Sector.objects.get_or_create(name='In-Use Sector')
+        if self.company.sector_id != self.sector.id:
+            self.company.sector = self.sector
+            self.company.save()
         self.crud_menu()
         self.different_views()
+        self.protected_delete_menu()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -73,8 +86,16 @@ class CrudEditDelete(ModelFormModal):
     permission_delete = PERMISSION_OFF
 
 
+class SectorModal(ModelFormModal):
+
+    model = Sector
+    form_fields = ['name']
+    permission_delete = PERMISSION_OFF
+
+
 class SourceCodeModal(BaseSourceCodeModal):
     code = {
         'crud_menu': CrudExamples.crud_menu,
         'crud_view_menu': CrudExamples.different_views,
+        'protected_delete_menu': CrudExamples.protected_delete_menu,
     }

@@ -9,6 +9,14 @@
         </div>
 
         <hr>
+        <h4>Tom Select examples</h4>
+        <div class="ml-4">
+            {% show_modal 'people_tom_select' button_classes='btn btn-primary' button='Person (static)' %}
+            {% show_modal 'people_tom_select_ajax' button_classes='btn btn-primary' button='Company (AJAX)' %}
+            {% show_modal 'tags_tom_select_ajax' button_classes='btn btn-primary' button='Companies (AJAX multiple)' %}
+        </div>
+
+        <hr>
         <h4>Select2 Many to Many field examples</h4>
         <div class="ml-4">
             {{ menus.select2.render }}
