@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-nested-modals"
-version = "0.0.25"
+version = "0.1.0"
 authors = [{name = "Ian Jones", email = "ian@cobi.co.uk"}]
 description = "Django app to implement Bootstrap nested modals"
 readme = "readme.md"
