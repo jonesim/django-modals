@@ -125,6 +125,8 @@ class MultiFormModal(BaseModal):
                 kwargs['form_setup'] = f.form_setup
             elif hasattr(self, 'form_setup') and callable(self.form_setup):
                 kwargs['form_setup'] = self.form_setup
+            # only the form showing the footer (no_buttons=False) calls it
+            kwargs['setup_buttons'] = self.setup_buttons
             all_kwargs.append(kwargs)
             first = False
         all_kwargs[-1]['no_buttons'] = False

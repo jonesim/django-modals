@@ -109,7 +109,9 @@ Submit/Cancel buttons, as before.
 
 - **`HTML(...)` is not rendered as a Django template.** Crispy ran the string through the template
   engine with the form context, so `{{ form.instance.name }}` or `{% url %}` inside it worked. The
-  string is now output as-is. Build it in Python (an f-string or `render_to_string`) instead. This
+  string is now output as-is. Build it in Python (an f-string or `render_to_string`) instead; to
+  render a bound field with its value and errors, use a small layout node whose
+  `render(self, form, context)` returns `str(form[name])` and `form[name].errors`. This
   also means `{{`/`{%` in user data inside an `HTML(f'...')` is no longer executed.
 - `StrictButton` content is likewise output as-is, not rendered as a template.
 - `Div(template=...)` and other unknown keyword arguments become HTML attributes; custom
@@ -234,7 +236,8 @@ Find leftovers (ripgrep):
 ```bash
 rg -n "crispy_forms|crispy_kwargs|crispy_field_class|StrictButton" --type py
 rg -n "crispy_forms_field|crispy_field|bootstrap4/layout/" --glob "*.html"
-rg -n "HTML\(.*(\{\{|\{%)" --type py          # HTML() relying on template syntax
+rg -n "\{\{|\{%" --type py                 # template syntax in Python strings, incl. f-string
+                                            # {{{{ form.x }}}} / {{% ... %}} built across lines
 rg -n "def render\(self, form, form_style" --type py   # crispy render signature
 ```
 

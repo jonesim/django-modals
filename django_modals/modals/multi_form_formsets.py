@@ -1,9 +1,9 @@
 from ajax_helpers.utils import ajax_command
 from django import forms
 from django.forms.models import _get_foreign_key
-from django_menus.menu import MenuItem
 from html_classes.html import HtmlDiv
 
+from django_modals.buttons import ModalButtonItem
 from django_modals.form_helpers import InlineFormset
 from django_modals.forms import ModelCrispyForm, CrispyForm
 from django_modals.layout import HTML
@@ -13,9 +13,9 @@ from django_modals.modals import MultiForm
 class FormSetItemForm(ModelCrispyForm):
 
     def ajax_button(self, text, function):
-        return MenuItem(ajax_command('post_modal', button={'button': function, 'form_id': self.form_id}), text,
-                              link_type=MenuItem.AJAX_COMMAND, css_classes='btn-sm btn-outline-secondary mr-2',
-                        font_awesome='fas fa-trash')
+        return ModalButtonItem(function, text,
+                               commands=ajax_command('post_modal', button={'button': function, 'form_id': self.form_id}),
+                               css_classes='btn-sm btn-outline-secondary mr-2', font_awesome='fas fa-trash')
 
     def post_init(self, *args, **kwargs):
         return [*self.fields, HTML(HtmlDiv(self.ajax_button('Delete', 'delete_form').render(),
@@ -30,8 +30,9 @@ class FormSetManagerForm(CrispyForm):
         super().__init__(*args,  **kwargs)
 
     def ajax_button(self, text, function):
-        return MenuItem(ajax_command('post_modal', button={'button': function, 'form_id': self.form_id}), text,
-                              link_type=MenuItem.AJAX_COMMAND, css_classes='btn-sm btn-outline-secondary mr-2')
+        return ModalButtonItem(function, text,
+                               commands=ajax_command('post_modal', button={'button': function, 'form_id': self.form_id}),
+                               css_classes='btn-sm btn-outline-secondary mr-2')
 
     def post_init(self, *args, **kwargs):
         self.fields['no_forms'] = forms.IntegerField(initial=self.length, widget=forms.HiddenInput)

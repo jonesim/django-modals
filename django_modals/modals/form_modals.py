@@ -87,6 +87,7 @@ class FormModalMixin(BaseModalMixin):
             kwargs['form_setup'] = self.form_setup
         if hasattr(self, 'clean') and callable(self.clean):
             kwargs['clean'] = self.clean
+        kwargs['setup_buttons'] = self.setup_buttons
         kwargs.update({k: getattr(self, k, None) for k in ['modal_title', 'slug']})
         if hasattr(self, 'helper_class'):
             kwargs['helper_class'] = self.helper_class

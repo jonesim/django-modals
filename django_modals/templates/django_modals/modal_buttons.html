@@ -1,0 +1,3 @@
+{% spaceless %}
+<div class="form-buttons{% if menu.button_container_class %} {{ menu.button_container_class }}{% endif %}"><div class="{{ menu.button_group_class }}">{% for value in menu.visible_items %}{{ value.render }}{% endfor %}</div></div>
+{% endspaceless %}

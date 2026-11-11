@@ -13,8 +13,8 @@ from django.views.generic.base import TemplateView
 from django_menus.menu import HtmlMenu, HtmlMenuItem
 from html_classes.font_awesome import font_awesome
 from html_classes.html import HtmlButton
-from django_modals.helper import (render_modal, modal_button, modal_button_group, ajax_modal_redirect,
-                                  modal_button_method, ajax_modal_replace)
+from django_modals.buttons import ModalButtonItem, ModalButtons
+from django_modals.helper import render_modal, ajax_modal_redirect, ajax_modal_replace
 
 
 class ModalException(Exception):
@@ -104,13 +104,17 @@ class BaseModalMixin(AjaxHelpers):
         self.add_command('html', selector=f'#{modal_id} #lazy', html=body_html)
         return self.command_response('modal_refresh_trigger', selector=f'#{modal_id}')
 
+    def setup_buttons(self, buttons, form=None):
+        """Customise the footer.  ``buttons`` is a ModalButtons menu already holding the
+        defaults; ``form`` is the form it belongs to (form modals only)."""
+
     def button_group(self):
-        button_kwargs = {
-            'button_group_class': self.kwargs.get('button_group_class', self.button_group_class),
-            'button_container_class': self.kwargs.get('button_container_class', self.button_container_class)
-        }
-        button_kwargs = {k: v for k, v in button_kwargs.items() if v}
-        return modal_button_group(self.buttons, **button_kwargs)
+        buttons = ModalButtons(self.buttons,
+                               button_group_class=self.kwargs.get('button_group_class', self.button_group_class),
+                               button_container_class=self.kwargs.get('button_container_class',
+                                                                      self.button_container_class))
+        self.setup_buttons(buttons)
+        return buttons.render()
 
     def check_for_background_page(self, context):
         if not is_ajax(self.request) and self.modal_mode:
@@ -157,18 +161,19 @@ class Modal(BaseModal):
         if 'buttons' in self.kwargs:
             return self.kwargs['buttons']
         button_group_type = self.kwargs.get('button_group_type')
+        button_function = self.kwargs.get('button_function', 'confirm')
         if button_group_type == 'confirm':
             return [
-                modal_button_method('Confirm', self.kwargs.get('button_function', 'confirm'), 'btn-success'),
-                modal_button('Cancel', 'close', 'btn-secondary')
+                ModalButtonItem('confirm', 'Confirm', method=button_function, css_classes='btn-success'),
+                ModalButtonItem('cancel', 'Cancel', commands='close', css_classes='btn-secondary')
             ]
         elif button_group_type == 'yes_cancel':
             return [
-                modal_button_method('Yes', self.kwargs.get('button_function', 'confirm'), 'btn-danger'),
-                modal_button('Cancel', 'close', 'btn-success')
+                ModalButtonItem('yes', 'Yes', method=button_function, css_classes='btn-danger'),
+                ModalButtonItem('cancel', 'Cancel', commands='close', css_classes='btn-success')
             ]
         else:
-            return [modal_button('OK', 'close', 'btn-success')]
+            return [ModalButtonItem('ok', 'OK', commands='close', css_classes='btn-success')]
 
     @property
     def extra_context(self):

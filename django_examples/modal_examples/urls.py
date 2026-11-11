@@ -40,6 +40,7 @@ urlpatterns = [
     path('modal/crud_source_code/<str:slug>/', crud.SourceCodeModal.as_view(), name='crud_source_code'),
 
     path('modal/sector/<str:slug>/', crud.SectorModal.as_view(), name='sector_modal'),
+    path('modal/company_buttons/<str:slug>/', crud.CompanyButtonsModal.as_view(), name='company_buttons_modal'),
 
     path('modal/crud1/<str:slug>/', crud.CrudRead.as_view(), name='crud_read'),
     path('modal/crud2/<str:slug>/', crud.CrudEdit.as_view(), name='crud_edit'),

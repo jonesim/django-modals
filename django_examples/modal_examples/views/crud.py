@@ -1,6 +1,7 @@
 from django_menus.menu import MenuItem
 from show_src_code.modals import ModelFormModal, BaseSourceCodeModal
 
+from django_modals.buttons import ModalButtonItem
 from django_modals.helper import modal_delete_javascript
 from django_modals.processes import PERMISSION_OFF, PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_EDIT
 
@@ -34,6 +35,12 @@ class CrudExamples(MainMenuTemplateView):
             (modal_delete_javascript('sector_modal', self.sector.id), 'Delete In-Use Sector', MenuItem.JAVASCRIPT),
         )
 
+    def custom_buttons_menu(self):
+        self.add_menu('custom_buttons', 'buttons', ).add_items(
+            ('company_buttons_modal,-', 'Create'),
+            (f'company_buttons_modal,pk-{self.company.id}', 'Edit'),
+        )
+
     def setup_menu(self):
         super().setup_menu()
         self.company = Company.objects.first()
@@ -46,6 +53,7 @@ class CrudExamples(MainMenuTemplateView):
         self.crud_menu()
         self.different_views()
         self.protected_delete_menu()
+        self.custom_buttons_menu()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -93,9 +101,28 @@ class SectorModal(ModelFormModal):
     permission_delete = PERMISSION_OFF
 
 
+class CompanyButtonsModal(ModelFormModal):
+
+    model = Company
+    form_fields = ['name', 'active']
+    modal_title = ['New Company', 'Edit Company']
+
+    def setup_buttons(self, buttons, form=None):
+        buttons['submit'].menu_display.text = 'Save'
+        buttons['submit'].menu_display.font_awesome = 'fas fa-save'
+        buttons.add_items(ModalButtonItem('uppercase', 'Uppercase name', css_classes='btn-info',
+                                          visible=form.instance.pk is not None), before='cancel')
+
+    def button_uppercase(self, **_kwargs):
+        self.object.name = self.object.name.upper()
+        self.object.save()
+        return self.command_response('reload')
+
+
 class SourceCodeModal(BaseSourceCodeModal):
     code = {
         'crud_menu': CrudExamples.crud_menu,
         'crud_view_menu': CrudExamples.different_views,
         'protected_delete_menu': CrudExamples.protected_delete_menu,
+        'custom_buttons': CompanyButtonsModal,
     }

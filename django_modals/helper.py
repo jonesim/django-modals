@@ -98,20 +98,25 @@ def crispy_modal_link(modal_name, text, div=False, div_classes='', button_classe
     return link
 
 
-def modal_button(title, commands, css_class='btn-primary', font_awesome=None, tooltip=None):
+def command_list(commands):
+    """Normalise a command name, a single command dict or a list of commands to a list."""
     if type(commands) == str:
-        params = [{'function': commands}]
+        return [{'function': commands}]
     elif type(commands) == dict:
-        params = [commands]
-    else:
-        params = commands
+        return [commands]
+    return commands
 
+
+def modal_button(title, commands, css_class='btn-primary', font_awesome=None, tooltip=None, attributes=None):
     if font_awesome:
         title = f'{fa_icon(font_awesome)} {title}'
-    attributes = {'onclick': f'django_modal.process_commands_lock({json.dumps(params)})', 'type': 'button'}
+    button_attributes = {'onclick': f'django_modal.process_commands_lock({json.dumps(command_list(commands))})',
+                         'type': 'button'}
     if tooltip:
-        attributes.update({'data-tooltip': 'tooltip', 'title': tooltip})
-    return HtmlButton(title, css_classes=f'btn {css_class}', single_quote=True, **attributes).render()
+        button_attributes.update({'data-tooltip': 'tooltip', 'title': tooltip})
+    if attributes:
+        button_attributes.update(attributes)
+    return HtmlButton(title, css_classes=f'btn {css_class}', single_quote=True, **button_attributes).render()
 
 
 def modal_button_method(title, method_name, css_class='btn-primary', font_awesome=None, **kwargs):
@@ -120,15 +125,9 @@ def modal_button_method(title, method_name, css_class='btn-primary', font_awesom
 
 
 def modal_button_group(buttons=None, button_container_class=None, button_group_class='btn-group'):
-
-    group_class = f'form-buttons{" " + button_container_class if button_container_class else ""}'
-    if type(buttons) == str:
-        inner = buttons
-    elif buttons:
-        inner = ''.join(str(b) for b in buttons)
-    else:
-        return ''
-    return HtmlDiv(HtmlDiv(inner, css_classes=button_group_class), css_classes=group_class).render()
+    from .buttons import ModalButtons
+    return ModalButtons(buttons, button_group_class=button_group_class,
+                        button_container_class=button_container_class).render()
 
 
 def modal_delete_javascript(url_name, pk):

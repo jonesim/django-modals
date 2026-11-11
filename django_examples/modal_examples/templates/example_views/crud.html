@@ -50,6 +50,18 @@
             {% show_src_code 'crud_source_code' 'protected_delete_menu' %}
         </p>
     </div>
+    <hr>
+    <div class="m-4">
+        <h4>Adding buttons with setup_buttons</h4>
+        <p class="my-2">
+            The footer is a menu of named buttons holding the defaults. <code>setup_buttons</code> relabels
+            Submit and adds an "Uppercase name" button before Cancel, shown only when editing.
+        </p>
+        {{ menus.custom_buttons.render }}
+        <p class="my-2">
+            {% show_src_code 'crud_source_code' 'custom_buttons' %}
+        </p>
+    </div>
 {% endblock %}
 
 

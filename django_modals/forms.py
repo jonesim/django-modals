@@ -5,11 +5,14 @@ from django import forms
 from django.apps import apps
 from django.forms.utils import flatatt
 from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
+from django.utils.text import slugify
+from django_menus.menu import BaseMenuItem
 
+from .buttons import ModalButtonItem, ModalButtons
 from .fields import FieldEx, LegacyWidgetAttributes
 from .form_helpers import HorizontalHelper
-from .helper import modal_button
 from .layout import HTML, Layout, Div, ModalButton, check_not_crispy, get_helper_context
 from .processes import PROCESS_VIEW, PROCESS_EDIT_DELETE, PROCESS_VIEW_EDIT, PROCESS_DELETE, process_data
 
@@ -55,6 +58,21 @@ class ProcessFormFields:
     def extra_kwargs(self):
         return {f: getattr(self, f) for f in ['widgets', 'field_classes', 'labels', 'help_texts',
                                               'error_messages'] if getattr(self, f, None)}
+
+
+class LayoutButtonItem(BaseMenuItem):
+    """A layout node (e.g. ``StrictButton``) set in ``form.buttons``, rendered in the footer menu."""
+
+    default_render = False
+
+    def __init__(self, node, form, **kwargs):
+        self.node = node
+        self.form = form
+        super().__init__(**kwargs)
+
+    def render(self):
+        check_not_crispy(self.node)
+        return mark_safe(self.node.render(self.form, get_helper_context(self.form)))
 
 
 def _widget_attribute(widget, name, legacy_name):
@@ -104,8 +122,8 @@ class CrispyFormMixin:
 
     def __init__(self, *args, pk=None, no_buttons=None, modal_title=None, form_setup=None, slug=None,
                  request_user=None, form_id=None, process=None, layout_field_params=None, layout_field_classes=None,
-                 helper_class=HorizontalHelper, progress_bar=None,
-                 header_html=None, clean=None, page_commands=None, layout=None, **kwargs):
+                 helper_class=HorizontalHelper, progress_bar=None, header_html=None, clean=None,
+                 page_commands=None, layout=None, setup_buttons=None, **kwargs):
         self.layout = layout
         self.supplied_kwargs = locals()
         self.no_buttons = self.get_defaults('no_buttons')
@@ -121,6 +139,8 @@ class CrispyFormMixin:
         self.instance = None
         self.helper = None
         self.buttons = []
+        self.button_menu = None
+        self._setup_buttons = setup_buttons
         self.helper_class = helper_class
         self.process = process
         self.layout_field_params = self.get_defaults('layout_field_params')
@@ -158,6 +178,7 @@ class CrispyFormMixin:
             options['progress'] = {'selector': f'#file_progress_bar'}
         if self.post_timeout is not None:
             options['post_timeout'] = self.post_timeout
+        kwargs.setdefault('button_name', 'submit')
         if len(options) > 0:
             return self.button('submit', {'function': 'post_modal', 'options': options}, css_class, **kwargs)
         else:
@@ -171,12 +192,40 @@ class CrispyFormMixin:
         return self.button('Cancel', 'close', css_class, **kwargs)
 
     def view_edit_button(self, css_class=edit_class, **kwargs):
+        kwargs.setdefault('button_name', 'edit')
         return self.button('Edit', {'function': 'post_modal', 'button': 'make_edit'}, css_class, **kwargs)
 
-    def button(self, title, commands, css_class, font_awesome=None, **kwargs):
+    # form.button() keywords that configure the ModalButtonItem; any other keyword is an HTML attribute
+    button_item_kwargs = {'method', 'method_kwargs', 'tooltip', 'attributes', 'disabled', 'visible', 'badge'}
+
+    def button(self, title, commands, css_class, font_awesome=None, button_name=None, **kwargs):
+        """A ModalButtonItem wrapped as a layout node, so it can go in a layout or ``self.buttons``.
+        ``button_name`` (default: the slugified title) names it in the footer menu.
+
+        Other keywords become HTML attributes on the ``<button>``, as crispy's ``StrictButton``
+        made them in 0.0.x: ``css_id`` is ``id``, ``data_value`` is ``data-value``, ``True``
+        gives a bare attribute and ``False``/``None`` leaves it out."""
         if self.no_buttons:
             return HTML('')
-        return ModalButton(modal_button(title, commands, css_class=css_class, font_awesome=font_awesome, **kwargs))
+        if button_name is None:
+            button_name = slugify(strip_tags(title)).replace('-', '_')
+        item_kwargs = {k: kwargs.pop(k) for k in list(kwargs) if k in self.button_item_kwargs}
+        attributes = dict(item_kwargs.pop('attributes', None) or {})
+        if 'css_id' in kwargs:
+            kwargs['id'] = kwargs.pop('css_id')
+        for name, value in kwargs.items():
+            if value is not False and value is not None:
+                attributes[name.replace('_', '-')] = None if value is True else value
+        return ModalButton(ModalButtonItem(button_name, title, commands=commands, css_classes=css_class,
+                                           font_awesome=font_awesome, attributes=attributes or None,
+                                           **item_kwargs))
+
+    def footer_item(self, button):
+        if isinstance(button, ModalButton) and isinstance(button.html, BaseMenuItem):
+            return button.html
+        if hasattr(button, 'render') and not isinstance(button, BaseMenuItem):
+            return LayoutButtonItem(button, self)
+        return button
 
     def get_title(self):
         if self.modal_title is None:
@@ -254,14 +303,17 @@ class CrispyFormMixin:
                 self.buttons.append(self.delete_button())
             self.buttons.append(self.cancel_button())
         self.helper.layout.append(HTML(self.html_above_buttons))
-        if self.buttons:
-            self.append_buttons(self.buttons)
+        self.button_menu = ModalButtons([self.footer_item(b) for b in self.buttons])
+        if self._setup_buttons and not self.no_buttons:
+            self._setup_buttons(self.button_menu, form=self)
+        self.append_buttons(self.button_menu)
         if self.process in [PROCESS_VIEW, PROCESS_VIEW_EDIT]:
             for field in self.fields.values():
                 field.widget.attrs['disabled'] = True
 
     def append_buttons(self, buttons):
-        self.helper.layout.append(Div(Div(*buttons, css_class='btn-group'), css_class='form-buttons'))
+        # rendered with the form, so the menu can still be changed after setup
+        self.helper.layout.append(HTML(buttons))
 
     def clear_errors(self):
         # noinspection PyAttributeOutsideInit

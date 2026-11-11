@@ -6,11 +6,15 @@ crispy-forms are still emitted by the native renderer.
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.test import SimpleTestCase, override_settings
+from django_menus.menu import MenuItem
 
+from django_modals.buttons import ModalButtonItem, ModalButtons
 from django_modals.fields import FieldEx
 from django_modals.forms import CrispyForm, widget_field_class, widget_field_kwargs
+from django_modals.helper import modal_button, modal_button_group
 from django_modals.layout import Div, Fieldset, Layout, StrictButton
-from django_modals.processes import PROCESS_VIEW
+from django_modals.modals import Modal
+from django_modals.processes import PROCESS_VIEW, PROCESS_VIEW_EDIT
 from django_modals.widgets.colour_picker import ColourPickerFieldEx, ColourPickerWidget
 from django_modals.widgets.jquery_datepicker import DatePicker
 from django_modals.widgets.tom_select import TomSelect, TomSelectMultiple
@@ -152,6 +156,111 @@ class LayoutTests(SimpleTestCase):
         form = RenderForm()
         form.helper.layout = Layout(Div('name', css_class='wrap'))
         self.assertIn('<div class="wrap">', str(form))
+
+
+class ButtonForm(CrispyForm):
+    name = forms.CharField()
+
+
+def button_order(html, *labels):
+    return [html.index(f'>{label}</button>') for label in labels]
+
+
+class ModalButtonsTests(SimpleTestCase):
+
+    def test_default_buttons_are_named(self):
+        buttons = ButtonForm().button_menu
+        self.assertEqual([i.button_name for i in buttons.menu_items], ['submit', 'cancel'])
+        self.assertEqual([i.button_name for i in ButtonForm(process=PROCESS_VIEW_EDIT).button_menu.menu_items],
+                         ['edit', 'cancel'])
+
+    def test_setup_buttons_adds_to_defaults(self):
+        def setup_buttons(buttons, form=None):
+            buttons['submit'].menu_display.text = 'Save'
+            buttons.add_items(ModalButtonItem('export', css_classes='btn-info'), before='cancel')
+
+        html = str(ButtonForm(setup_buttons=setup_buttons))
+        positions = button_order(html, 'Save', 'Export', 'Cancel')
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn('"button": {"button": "export"}', html)
+        self.assertIn("class='btn btn-info'", html)
+
+    def test_setup_buttons_receives_form(self):
+        received = []
+        form = ButtonForm(setup_buttons=lambda buttons, form=None: received.append(form))
+        self.assertEqual(received, [form])
+
+    def test_no_buttons_skips_setup_buttons(self):
+        received = []
+        html = str(ButtonForm(no_buttons=True, setup_buttons=lambda buttons, form=None: received.append(form)))
+        self.assertEqual(received, [])
+        self.assertNotIn('form-buttons', html)
+
+    def test_remove_replace_and_after(self):
+        def setup_buttons(buttons, form=None):
+            buttons.replace('submit', ModalButtonItem('submit', 'Go', commands='post_modal'))
+            buttons.add_items(ModalButtonItem('help'), after='submit')
+            buttons.remove('cancel')
+
+        html = str(ButtonForm(setup_buttons=setup_buttons))
+        positions = button_order(html, 'Go', 'Help')
+        self.assertEqual(positions, sorted(positions))
+        self.assertNotIn('Cancel', html)
+        self.assertNotIn('submit', ButtonForm(setup_buttons=lambda b, form=None: b.remove('submit')).button_menu)
+
+    def test_hidden_disabled_and_tooltip(self):
+        def setup_buttons(buttons, form=None):
+            buttons['cancel'].visible = False
+            buttons.add_items(ModalButtonItem('later', disabled=True, tooltip='Not yet'))
+
+        html = str(ButtonForm(setup_buttons=setup_buttons))
+        self.assertNotIn('Cancel', html)
+        self.assertIn("title='Not yet'", html)
+        self.assertRegex(html, r"<button [^>]* disabled>Later</button>")
+
+    def test_form_button_html_attributes(self):
+        # 0.0.x passed extra form.button() keywords to crispy's StrictButton as HTML attributes
+        def form_setup(form, *_args, **_kwargs):
+            form.buttons = [form.submit_button(button_text='Select', disabled=True, css_id='select-btn',
+                                               data_value='7'),
+                            form.button('Later', 'close', 'btn-secondary', disabled=False, aria_label='Not now')]
+
+        html = str(ButtonForm(form_setup=form_setup))
+        self.assertRegex(html, r'<button [^>]*disabled[^>]*>Select</button>')
+        self.assertRegex(html, r'''<button [^>]*id=['"]select-btn['"][^>]*>Select</button>''')
+        self.assertRegex(html, r'''<button [^>]*data-value=['"]7['"][^>]*>Select</button>''')
+        self.assertRegex(html, r'''<button [^>]*aria-label=['"]Not now['"][^>]*>Later</button>''')
+        self.assertNotRegex(html, r'<button [^>]*disabled[^>]*>Later</button>')
+
+    def test_legacy_form_buttons_still_render(self):
+        def form_setup(form, *_args, **_kwargs):
+            form.buttons = [form.submit_button(), StrictButton('Go', css_class='btn-info'), 'raw-html']
+
+        html = str(ButtonForm(form_setup=form_setup))
+        self.assertIn('>Submit</button>', html)
+        self.assertIn('<button type="button" class="btn btn-info">Go</button>', html)
+        self.assertIn('raw-html', html)
+        self.assertNotIn('Cancel', html)
+
+    def test_strings_and_menu_items_in_footer(self):
+        buttons = ModalButtons([modal_button('Old', 'close'), MenuItem('/somewhere/', 'Link',
+                                                                       link_type=MenuItem.HREF)])
+        html = buttons.render()
+        self.assertIn('>Old</button>', html)
+        self.assertIn('href="/somewhere/"', html)
+        self.assertEqual(modal_button_group([]), '')
+
+    def test_modal_setup_buttons(self):
+        class ExtraModal(Modal):
+            def setup_buttons(self, buttons, form=None):
+                buttons.add_items(ModalButtonItem('more', 'More'), before='ok')
+
+        modal = ExtraModal()
+        modal.kwargs = {}
+        modal.buttons = modal.get_modal_buttons()
+        html = modal.button_group()
+        positions = button_order(html, 'More', 'OK')
+        self.assertEqual(positions, sorted(positions))
 
 
 class LegacyCrispyDate(DatePicker):
